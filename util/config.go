@@ -2,12 +2,14 @@ package util
 
 import (
 	"gopkg.in/ini.v1"
+	"strconv"
 	"sync"
 )
 
 type Config struct {
-	lock *sync.RWMutex
-	cfg  *ini.File
+	lock     *sync.RWMutex
+	cfg      *ini.File
+	fileName string
 }
 
 func (cfg *Config) GetString(section, name string) string {
@@ -30,6 +32,40 @@ func (cfg *Config) GetStringOrDefault(section, name string, defaultValue string)
 		return v
 	}
 }
+func (cfg *Config) GetBooleanOrDefault(section, name string, defaultValue bool) bool {
+	key, err := cfg.getSectionKey(section, name)
+	if err != nil {
+		return defaultValue
+	} else {
+		v := key.Value()
+		if len(v) == 0 {
+			return defaultValue
+		}
+		return EqualsAnyIgnoreCase(v, "true")
+	}
+}
+
+func (cfg *Config) SetBoolean(section, key string, value bool) error {
+	return cfg.SetString(section, key, BoolToString(value))
+}
+func (cfg *Config) SetString(section, key string, value string) error {
+	sec := cfg.cfg.Section(section)
+	if sec.HasKey(key) {
+		preKey := sec.Key(key)
+		preKey.SetValue(value)
+		return nil
+	} else {
+		_, err := sec.NewKey(key, value)
+		return err
+	}
+}
+func (cfg *Config) SetInt(section, key string, value int) error {
+	return cfg.SetString(section, key, strconv.Itoa(value))
+}
+func (cfg *Config) Save() error {
+	return cfg.cfg.SaveTo(cfg.fileName)
+}
+
 func (cfg *Config) GetInt(section, name string) (int, error) {
 	key, err := cfg.getSectionKey(section, name)
 	if err != nil {
@@ -78,5 +114,5 @@ func LoadFile(fileName string) (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Config{lock: new(sync.RWMutex), cfg: cfg}, err
+	return &Config{lock: new(sync.RWMutex), cfg: cfg, fileName: fileName}, err
 }

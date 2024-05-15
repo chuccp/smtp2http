@@ -67,3 +67,10 @@ func EqualsAnyIgnoreCase(s string, strs ...string) bool {
 	}
 	return false
 }
+func BoolToString(b bool) string {
+	if b {
+		return "true"
+	} else {
+		return "false"
+	}
+}

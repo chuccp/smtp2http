@@ -16,6 +16,10 @@ type DB struct {
 	err error
 }
 
+func (d *DB) GetSTMPModel() *STMPModel {
+	return NewSTMPModel(d.db, "t_STMP")
+}
+
 func CreateDB() *DB {
 	return &DB{}
 }
