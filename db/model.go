@@ -39,7 +39,7 @@ func (a *Model[T]) DeleteTable(t T) error {
 
 func (a *Model[T]) Save(t T) error {
 	t.SetCreateTime(time.Now())
-	t.SetCreateTime(time.Now())
+	t.SetUpdateTime(time.Now())
 	tx := a.db.Table(a.tableName).Create(t)
 	return tx.Error
 }

@@ -8,8 +8,10 @@ import (
 
 type STMP struct {
 	Id         uint      `gorm:"primaryKey;autoIncrement;column:id" json:"id"`
-	SMTP       string    `gorm:"column:SMTP" json:"SMTP"`
+	Host       string    `gorm:"column:host" json:"host"`
+	Port       int       `gorm:"column:port" json:"port"`
 	Mail       string    `gorm:"column:mail" json:"mail"`
+	Username   string    `gorm:"column:username" json:"username"`
 	Password   string    `gorm:"column:password"  json:"password"`
 	CreateTime time.Time `gorm:"column:create_time" json:"createTime"`
 	UpdateTime time.Time `gorm:"column:update_time" json:"updateTime"`
