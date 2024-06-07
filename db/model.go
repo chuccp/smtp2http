@@ -45,13 +45,20 @@ func (a *Model[T]) Save(t T) error {
 }
 func (a *Model[T]) GetOne(id uint, t T) error {
 	t.SetId(id)
-	tx := a.db.Table(a.tableName).Where(t).First(&t)
+	tx := a.db.Table(a.tableName).First(&t)
 	if tx.Error == nil {
 		return nil
 	}
 	return tx.Error
 }
 
+func (a *Model[T]) GetByIds(id []uint, ts *[]T) error {
+	tx := a.db.Table(a.tableName).Where("`id` in (?) ", id).Find(ts)
+	if tx.Error == nil {
+		return nil
+	}
+	return tx.Error
+}
 func (a *Model[T]) DeleteOne(id uint, t T) error {
 	tx := a.db.Table(a.tableName).Where("`id` = ? ", id).Delete(t)
 	return tx.Error
@@ -59,7 +66,11 @@ func (a *Model[T]) DeleteOne(id uint, t T) error {
 
 func (a *Model[T]) Edit(t T) error {
 	t.SetUpdateTime(time.Now())
-	tx := a.db.Table(a.tableName).Where("`id` = ?", t.GetId()).Updates(t)
+	tx := a.db.Table(a.tableName).Updates(t)
+	return tx.Error
+}
+func (a *Model[T]) EditForMap(id uint, data map[string]interface{}) error {
+	tx := a.db.Table(a.tableName).Where("`id` = ? ", id).Updates(data)
 	return tx.Error
 }
 

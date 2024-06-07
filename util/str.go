@@ -4,6 +4,7 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -27,6 +28,19 @@ func SplitPath(path string) []string {
 		ps = append(ps, i2)
 	}
 	return ps
+}
+
+func StringToUintIds(ids string) []uint {
+	uIds := make([]uint, 0)
+	receiveEmailIds := strings.Split(ids, ",")
+	for _, i2 := range receiveEmailIds {
+		atoi, err := strconv.Atoi(i2)
+		if err != nil {
+			continue
+		}
+		uIds = append(uIds, uint(atoi))
+	}
+	return uIds
 }
 
 func IsMatchPath(path, math string) bool {

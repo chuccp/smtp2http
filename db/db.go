@@ -19,7 +19,12 @@ type DB struct {
 func (d *DB) GetSTMPModel() *STMPModel {
 	return NewSTMPModel(d.db, "t_STMP")
 }
-
+func (d *DB) GetMailModel() *MailModel {
+	return NewMailModel(d.db, "t_mail")
+}
+func (d *DB) GetTokenModel() *TokenModel {
+	return NewTokenModel(d.db, "t_token")
+}
 func CreateDB() *DB {
 	return &DB{}
 }

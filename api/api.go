@@ -26,5 +26,7 @@ func (s *Server) Init(context *core.Context) {
 	s.context = context
 	s.apis = make([]api, 0)
 	s.addApi(&Stmp{})
+	s.addApi(&Mail{})
 	s.addApi(&Set{})
+	s.addApi(&Token{})
 }

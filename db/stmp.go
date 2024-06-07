@@ -12,6 +12,7 @@ type STMP struct {
 	Port       int       `gorm:"column:port" json:"port"`
 	Mail       string    `gorm:"column:mail" json:"mail"`
 	Username   string    `gorm:"column:username" json:"username"`
+	Name       string    `json:"name"`
 	Password   string    `gorm:"column:password"  json:"password"`
 	CreateTime time.Time `gorm:"column:create_time" json:"createTime"`
 	UpdateTime time.Time `gorm:"column:update_time" json:"updateTime"`
@@ -56,7 +57,32 @@ func (a *STMPModel) GetOne(id uint) (*STMP, error) {
 	if err != nil {
 		return nil, err
 	}
+	stmp.Name = stmp.Username
 	return &stmp, nil
+}
+
+func (a *STMPModel) GetByIds(id []uint) ([]*STMP, error) {
+	var stmps []*STMP
+	err := a.Model.GetByIds(id, &stmps)
+	if err != nil {
+		return nil, err
+	}
+	for _, stmp := range stmps {
+		stmp.Name = stmp.Username
+	}
+	return stmps, nil
+}
+
+func (a *STMPModel) GetMapByIds(id []uint) (map[uint]*STMP, error) {
+	STMPs, err := a.GetByIds(id)
+	if err != nil {
+		return nil, err
+	}
+	var STMPMap = make(map[uint]*STMP)
+	for _, st := range STMPs {
+		STMPMap[st.Id] = st
+	}
+	return STMPMap, nil
 }
 
 func (a *STMPModel) DeleteOne(id uint) error {
@@ -75,6 +101,9 @@ func (a *STMPModel) Page(page *web.Page) (*Page[*STMP], error) {
 	num, err := a.Model.Page(page, &stmps)
 	if err != nil {
 		return nil, err
+	}
+	for _, stmp := range stmps {
+		stmp.Name = stmp.Username
 	}
 	return ToPage[*STMP](num, stmps), nil
 }
