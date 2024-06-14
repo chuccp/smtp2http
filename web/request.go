@@ -101,6 +101,9 @@ func (r *Request) GetPage() *Page {
 func (r *Request) GetRawRequest() *http.Request {
 	return r.context.Request
 }
+func (r *Request) GetHeader(key string) string {
+	return r.context.Request.Header.Get(key)
+}
 func (r *Request) GetResponseWriter() http.ResponseWriter {
 	return r.context.Writer
 }

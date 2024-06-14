@@ -1,4 +1,4 @@
-package api
+package manage
 
 import (
 	"github.com/chuccp/d-mail/core"
@@ -32,9 +32,9 @@ func (set *Set) defaultSet(req *web.Request) (any, error) {
 	return set.context.GetDefaultSetInfo(), nil
 }
 
-func (set *Set) Init(context *core.Context) {
+func (set *Set) Init(context *core.Context, server core.IHttpServer) {
 	set.context = context
-	context.GET("/set", set.getSet)
-	context.GET("/defaultSet", set.defaultSet)
-	context.PUT("/set", set.putSet)
+	server.GET("/set", set.getSet)
+	server.GET("/defaultSet", set.defaultSet)
+	server.PUT("/set", set.putSet)
 }

@@ -1,4 +1,4 @@
-package api
+package manage
 
 import (
 	"github.com/chuccp/d-mail/core"
@@ -71,11 +71,11 @@ func (stmp *Stmp) getPage(req *web.Request) (any, error) {
 	}
 	return p, nil
 }
-func (stmp *Stmp) Init(context *core.Context) {
+func (stmp *Stmp) Init(context *core.Context, server core.IHttpServer) {
 	stmp.context = context
-	context.GET("/stmp/:id", stmp.getOne)
-	context.DELETE("/stmp/:id", stmp.deleteOne)
-	context.GET("/stmp", stmp.getPage)
-	context.POST("/stmp", stmp.postOne)
-	context.PUT("/stmp", stmp.putOne)
+	server.GET("/stmp/:id", stmp.getOne)
+	server.DELETE("/stmp/:id", stmp.deleteOne)
+	server.GET("/stmp", stmp.getPage)
+	server.POST("/stmp", stmp.postOne)
+	server.PUT("/stmp", stmp.putOne)
 }

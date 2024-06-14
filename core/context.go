@@ -5,17 +5,16 @@ import (
 	"github.com/chuccp/d-mail/entity"
 	"github.com/chuccp/d-mail/util"
 	"github.com/chuccp/d-mail/web"
-	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"log"
 	"runtime/debug"
 )
 
 type Context struct {
-	db     *db.DB
-	config *util.Config
-	engine *gin.Engine
-	log    *zap.Logger
+	db         *db.DB
+	config     *util.Config
+	log        *zap.Logger
+	httpServer *util.HttpServer
 }
 
 func (c *Context) GetLog() *zap.Logger {
@@ -31,18 +30,18 @@ func (c *Context) IsInit() bool {
 	return c.config.GetBooleanOrDefault("core", "init", false)
 }
 
-func (c *Context) POST(relativePath string, handlers ...web.HandlerFunc) {
-	c.engine.POST(relativePath, web.ToGinHandlerFuncs(handlers)...)
+func (c *Context) post(relativePath string, handlers ...web.HandlerFunc) {
+	c.httpServer.POST(relativePath, handlers...)
 }
-func (c *Context) PUT(relativePath string, handlers ...web.HandlerFunc) {
-	c.engine.PUT(relativePath, web.ToGinHandlerFuncs(handlers)...)
+func (c *Context) put(relativePath string, handlers ...web.HandlerFunc) {
+	c.httpServer.PUT(relativePath, handlers...)
 }
-func (c *Context) DELETE(relativePath string, handlers ...web.HandlerFunc) {
-	c.engine.DELETE(relativePath, web.ToGinHandlerFuncs(handlers)...)
+func (c *Context) delete(relativePath string, handlers ...web.HandlerFunc) {
+	c.httpServer.DELETE(relativePath, handlers...)
 }
 
-func (c *Context) GET(relativePath string, handlers ...web.HandlerFunc) {
-	c.engine.GET(relativePath, web.ToGinHandlerFuncs(handlers)...)
+func (c *Context) get(relativePath string, handlers ...web.HandlerFunc) {
+	c.httpServer.GET(relativePath, handlers...)
 }
 
 func (c *Context) GetDefaultSetInfo() *entity.SetInfo {
@@ -115,4 +114,16 @@ func (c *Context) Go(handle func()) {
 		}()
 		handle()
 	}()
+}
+func (c *Context) GetCfgInt(section string, name string) int {
+	getInt, err := c.config.GetInt(section, name)
+	if err != nil {
+		return 0
+	} else {
+		return getInt
+	}
+}
+
+func (c *Context) GetCfgString(section string, name string) string {
+	return c.config.GetString(section, name)
 }

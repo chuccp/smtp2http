@@ -1,4 +1,4 @@
-package api
+package manage
 
 import (
 	"bytes"
@@ -121,11 +121,11 @@ func (token *Token) putOne(req *web.Request) (any, error) {
 	}
 	return "ok", nil
 }
-func (token *Token) Init(context *core.Context) {
+func (token *Token) Init(context *core.Context, server core.IHttpServer) {
 	token.context = context
-	context.GET("/token/:id", token.getOne)
-	context.DELETE("/token/:id", token.deleteOne)
-	context.GET("/token", token.getPage)
-	context.POST("/token", token.postOne)
-	context.PUT("/token", token.putOne)
+	server.GET("/token/:id", token.getOne)
+	server.DELETE("/token/:id", token.deleteOne)
+	server.GET("/token", token.getPage)
+	server.POST("/token", token.postOne)
+	server.PUT("/token", token.putOne)
 }

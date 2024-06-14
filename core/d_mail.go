@@ -2,30 +2,39 @@ package core
 
 import (
 	"github.com/chuccp/d-mail/util"
-	"github.com/gin-contrib/cors"
-	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"log"
-	"net/http"
-	"strconv"
 )
 
 type DMail struct {
-	context *Context
-	engine  *gin.Engine
-	log     *zap.Logger
-	config  *util.Config
-	servers []Server
+	context    *Context
+	httpServer *util.HttpServer
+	log        *zap.Logger
+	config     *util.Config
+	servers    []Server
 }
 
 func Create() *DMail {
-	return &DMail{servers: make([]Server, 0)}
+	return &DMail{servers: make([]Server, 0), httpServer: util.NewServer()}
 }
 func (m *DMail) AddServer(server Server) {
 	m.servers = append(m.servers, server)
 }
-func (m *DMail) Start() {
 
+func (m *DMail) startHttpServer() error {
+	port := m.context.GetCfgInt("manage", "port")
+	certFile := m.context.GetCfgString("manage", "certFile")
+	keyFile := m.context.GetCfgString("manage", "keyFile")
+	m.context.log.Info("startHttpServer", zap.String("name", "manage"), zap.Int("port", port))
+	err := m.httpServer.StartAutoTLS(port, certFile, keyFile)
+	if err != nil {
+		m.context.log.Error("服务启动失败", zap.String("name", "DMail"), zap.Int("port", port), zap.Error(err))
+		return err
+	}
+	return nil
+}
+
+func (m *DMail) Start() {
 	configure, err := util.LoadFile("config.ini")
 	if err != nil {
 		log.Panic(err)
@@ -38,19 +47,7 @@ func (m *DMail) Start() {
 		log.Panic(err)
 		return
 	}
-
-	m.engine = gin.Default()
-	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{"*"} // 允许的域名列表，可以使用 * 来允许所有域名
-	config.AllowHeaders = []string{"*"} // 允
-	m.engine.Use(cors.New(config))
-	port, err := configure.GetInt("core", "port")
-	if err != nil {
-		m.log.Panic("Start", zap.Error(err))
-		return
-	}
-	m.context = &Context{log: m.log, engine: m.engine, config: m.config}
-
+	m.context = &Context{log: m.log, httpServer: m.httpServer, config: m.config}
 	isInit := configure.GetBooleanOrDefault("core", "init", false)
 	if isInit {
 		err := m.context.initDb()
@@ -59,13 +56,23 @@ func (m *DMail) Start() {
 			return
 		}
 	}
-
 	for _, server := range m.servers {
+		if s, ok := server.(IHttpServer); ok {
+			s.init(m.context)
+		}
 		server.Init(m.context)
-		m.context.Go(server.Start)
+		if s, ok := server.(IHttpServer); ok {
+			if !s.useCorePort() {
+				go func() {
+					err := s.start()
+					if err != nil {
+						log.Panic(err)
+					}
+				}()
+			}
+		}
 	}
-	m.log.Info("server", zap.Int("port", port))
-	err = http.ListenAndServe("0.0.0.0:"+strconv.Itoa(port), m.engine)
+	err = m.startHttpServer()
 	if err != nil {
 		m.log.Panic("Start", zap.Error(err))
 		return

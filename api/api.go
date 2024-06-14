@@ -1,32 +1,30 @@
 package api
 
-import "github.com/chuccp/d-mail/core"
-
-type api interface {
-	Init(context *core.Context)
-}
+import (
+	"github.com/chuccp/d-mail/core"
+	"github.com/chuccp/d-mail/web"
+)
 
 type Server struct {
-	apis    []api
 	context *core.Context
+	core.IHttpServer
 }
 
+func NewServer() *Server {
+	server := &Server{}
+	httpServer := core.NewHttpServer(server.Name())
+	server.IHttpServer = httpServer
+	return server
+}
 func (s *Server) Name() string {
 	return "api"
 }
-func (s *Server) Start() {
-	for _, a := range s.apis {
-		a.Init(s.context)
-	}
-}
-func (s *Server) addApi(api api) {
-	s.apis = append(s.apis, api)
+
+func (s *Server) SendMail(req *web.Request) (any, error) {
+
+	return nil, nil
 }
 func (s *Server) Init(context *core.Context) {
 	s.context = context
-	s.apis = make([]api, 0)
-	s.addApi(&Stmp{})
-	s.addApi(&Mail{})
-	s.addApi(&Set{})
-	s.addApi(&Token{})
+	s.IHttpServer.POST("/SendMail", s.SendMail)
 }
