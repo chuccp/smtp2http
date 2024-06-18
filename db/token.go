@@ -9,6 +9,7 @@ import (
 type Token struct {
 	Id               uint      `gorm:"primaryKey;autoIncrement;column:id" json:"id"`
 	Token            string    `gorm:"unique;column:token" json:"token"`
+	Subject          string    `gorm:"column:subject" json:"subject"`
 	ReceiveEmailIds  string    `gorm:"column:receive_emails" json:"receiveEmailIds"`
 	ReceiveEmails    []*Mail   `gorm:"-" json:"receiveEmails"`
 	ReceiveEmailsStr string    `gorm:"-" json:"receiveEmailsStr"`
@@ -58,6 +59,15 @@ func (a *TokenModel) GetOne(id uint) (*Token, error) {
 	err := a.Model.GetOne(id, &token)
 	if err != nil {
 		return nil, err
+	}
+	return &token, nil
+}
+func (a *TokenModel) GetOneByToken(tokenStr string) (*Token, error) {
+	var token Token
+	token.Token = tokenStr
+	tx := a.Model.db.Table(a.tableName).Where(token).First(&token)
+	if tx.Error != nil {
+		return nil, tx.Error
 	}
 	return &token, nil
 }

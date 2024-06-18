@@ -4,6 +4,7 @@ import (
 	"github.com/chuccp/d-mail/core"
 	"github.com/chuccp/d-mail/db"
 	"github.com/chuccp/d-mail/web"
+	"net/mail"
 	"strconv"
 )
 
@@ -43,6 +44,12 @@ func (stmp *Stmp) postOne(req *web.Request) (any, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	_, err = mail.ParseAddress(st.Mail)
+	if err != nil {
+		return nil, err
+	}
+
 	err = stmp.context.GetDb().GetSTMPModel().Save(&st)
 	if err != nil {
 		return nil, err
@@ -53,6 +60,10 @@ func (stmp *Stmp) postOne(req *web.Request) (any, error) {
 func (stmp *Stmp) putOne(req *web.Request) (any, error) {
 	var st db.STMP
 	err := req.ShouldBindBodyWithJSON(&st)
+	if err != nil {
+		return nil, err
+	}
+	_, err = mail.ParseAddress(st.Mail)
 	if err != nil {
 		return nil, err
 	}

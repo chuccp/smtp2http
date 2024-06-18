@@ -12,7 +12,7 @@ type STMP struct {
 	Port       int       `gorm:"column:port" json:"port"`
 	Mail       string    `gorm:"column:mail" json:"mail"`
 	Username   string    `gorm:"column:username" json:"username"`
-	Name       string    `json:"name"`
+	Name       string    `gorm:"-"  json:"name"`
 	Password   string    `gorm:"column:password"  json:"password"`
 	CreateTime time.Time `gorm:"column:create_time" json:"createTime"`
 	UpdateTime time.Time `gorm:"column:update_time" json:"updateTime"`

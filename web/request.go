@@ -8,6 +8,8 @@ import (
 	"io"
 	"mime/multipart"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 )
@@ -123,6 +125,17 @@ func (r *Request) BodyJson(v any) ([]byte, error) {
 func (r *Request) FormFile(name string) (*multipart.FileHeader, error) {
 	return r.context.FormFile(name)
 }
+
+func (r *Request) MultipartForm() (*multipart.Form, error) {
+	return r.context.MultipartForm()
+}
+func (r *Request) IsForm() bool {
+	return strings.Contains(r.context.GetHeader("Content-Type"), "application/x-www-form-urlencoded")
+}
+func (r *Request) IsMultipartForm() bool {
+	return strings.Contains(r.context.GetHeader("Content-Type"), "multipart/form-data")
+}
+
 func (r *Request) Param(key string) string {
 	return r.context.Param(key)
 }
@@ -151,7 +164,9 @@ func ToGinHandlerFunc(handler HandlerFunc) gin.HandlerFunc {
 	handlerFunc := func(context *gin.Context) {
 		value, err := handler(NewRequest(context, nil))
 		if err != nil {
-			context.AbortWithError(500, err)
+			context.Status(500)
+			context.Writer.Write([]byte(err.Error()))
+			context.Abort()
 		} else {
 			if value != nil {
 				switch t := value.(type) {
@@ -166,4 +181,24 @@ func ToGinHandlerFunc(handler HandlerFunc) gin.HandlerFunc {
 		}
 	}
 	return handlerFunc
+}
+
+func SaveUploadedFile(file *multipart.FileHeader, dst string) error {
+	src, err := file.Open()
+	if err != nil {
+		return err
+	}
+	defer src.Close()
+
+	if err = os.MkdirAll(filepath.Dir(dst), 0750); err != nil {
+		return err
+	}
+
+	out, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+	_, err = io.Copy(out, src)
+	return err
 }

@@ -2,12 +2,15 @@ package api
 
 import (
 	"github.com/chuccp/d-mail/core"
+	"github.com/chuccp/d-mail/service"
 	"github.com/chuccp/d-mail/web"
+	"log"
 )
 
 type Server struct {
 	context *core.Context
 	core.IHttpServer
+	token *service.Token
 }
 
 func NewServer() *Server {
@@ -21,10 +24,31 @@ func (s *Server) Name() string {
 }
 
 func (s *Server) SendMail(req *web.Request) (any, error) {
+	token := req.FormValue("token")
+	content := req.FormValue("content")
+	log.Println(content)
+	if req.IsMultipartForm() {
+		form, err := req.MultipartForm()
+		if err != nil {
+			return nil, err
+		}
+		fileHeaders, ok := form.File["files"]
+		if ok {
+			for _, fileHeader := range fileHeaders {
+				web.SaveUploadedFile(fileHeader, fileHeader.Filename)
+			}
+		}
+	}
+	byToken, err := s.token.GetOneByToken(token)
+	if err != nil {
+		return nil, err
+	}
 
-	return nil, nil
+	return byToken, nil
 }
 func (s *Server) Init(context *core.Context) {
 	s.context = context
-	s.IHttpServer.POST("/SendMail", s.SendMail)
+	s.token = service.NewToken(context)
+	s.IHttpServer.POST("/sendMail", s.SendMail)
+	s.IHttpServer.GET("/sendMail", s.SendMail)
 }
