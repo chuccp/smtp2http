@@ -3,7 +3,7 @@ package manage
 import (
 	"github.com/chuccp/d-mail/core"
 	"github.com/chuccp/d-mail/db"
-	"github.com/chuccp/d-mail/util"
+	stmp2 "github.com/chuccp/d-mail/stmp"
 	"github.com/chuccp/d-mail/web"
 	"net/mail"
 	"strconv"
@@ -85,8 +85,7 @@ func (stmp *Stmp) test(req *web.Request) (any, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	err = util.SendTestMsg(&util.STMP{Username: st.Username, Mail: st.Mail, Password: st.Password, Host: st.Host, Port: st.Port})
+	err = stmp2.SendTestMsg(&st)
 	if err != nil {
 		return nil, err
 	}
@@ -107,8 +106,6 @@ func (stmp *Stmp) Init(context *core.Context, server core.IHttpServer) {
 	server.DELETE("/stmp/:id", stmp.deleteOne)
 	server.GET("/stmp", stmp.getPage)
 	server.POST("/stmp", stmp.postOne)
-
 	server.POST("/test", stmp.test)
-
 	server.PUT("/stmp", stmp.putOne)
 }

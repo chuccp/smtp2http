@@ -1,6 +1,8 @@
-package util
+package stmp
 
 import (
+	"errors"
+	"github.com/chuccp/d-mail/db"
 	"github.com/wneessen/go-mail"
 	"os"
 )
@@ -36,13 +38,26 @@ func (sendMsg *SendMsg) GetToMail() []string {
 	return datas
 }
 
-func SendTestMsg(STMP *STMP) error {
+func sendTestMsg(STMP *STMP) error {
 	var sendMsg SendMsg
 	sendMsg.SendMail = STMP
 	sendMsg.ReceiveEmails = []*Mail{{Name: STMP.Username, Mail: STMP.Mail}}
 	sendMsg.Subject = "mail test"
 	sendMsg.BodyString = " this is a test"
 	return SendMail(&sendMsg)
+}
+
+func SendTestMsg(st *db.STMP) error {
+	if len(st.Username) == 0 {
+		return errors.New("username cannot be empty")
+	}
+	if len(st.Password) == 0 {
+		return errors.New("password cannot be empty")
+	}
+	if len(st.Host) == 0 {
+		return errors.New("host cannot be empty")
+	}
+	return sendTestMsg(&STMP{Username: st.Username, Mail: st.Mail, Password: st.Password, Host: st.Host, Port: st.Port})
 }
 
 func SendMail(sendMsg *SendMsg) error {
