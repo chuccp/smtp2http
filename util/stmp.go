@@ -2,7 +2,6 @@ package util
 
 import (
 	"github.com/wneessen/go-mail"
-	"log"
 	"os"
 )
 
@@ -37,15 +36,24 @@ func (sendMsg *SendMsg) GetToMail() []string {
 	return datas
 }
 
-func SendMail(sendMsg *SendMsg) {
+func SendTestMsg(STMP *STMP) error {
+	var sendMsg SendMsg
+	sendMsg.SendMail = STMP
+	sendMsg.ReceiveEmails = []*Mail{{Name: STMP.Username, Mail: STMP.Mail}}
+	sendMsg.Subject = "mail test"
+	sendMsg.BodyString = " this is a test"
+	return SendMail(&sendMsg)
+}
+
+func SendMail(sendMsg *SendMsg) error {
 
 	msg := mail.NewMsg()
 
 	if err := msg.From(sendMsg.GetFromMail()); err != nil {
-		log.Fatalf("failed to set From address: %s", err)
+		return err
 	}
 	if err := msg.To(sendMsg.GetToMail()...); err != nil {
-		log.Fatalf("failed to set To address: %s", err)
+		return err
 	}
 
 	msg.Subject(sendMsg.Subject)
@@ -61,10 +69,10 @@ func SendMail(sendMsg *SendMsg) {
 	msg.SetAttachements(files)
 	c, err := mail.NewClient(sendMsg.SendMail.Host, mail.WithPort(sendMsg.SendMail.Port), mail.WithSMTPAuth(mail.SMTPAuthPlain), mail.WithUsername(sendMsg.SendMail.Username), mail.WithPassword(sendMsg.SendMail.Password))
 	if err != nil {
-		log.Fatalf("failed to create mail client: %s", err)
+		return err
 	}
 	if err := c.DialAndSend(msg); err != nil {
-		log.Fatalf("failed to send mail: %s", err)
+		return err
 	}
-
+	return nil
 }

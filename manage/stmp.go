@@ -3,6 +3,7 @@ package manage
 import (
 	"github.com/chuccp/d-mail/core"
 	"github.com/chuccp/d-mail/db"
+	"github.com/chuccp/d-mail/util"
 	"github.com/chuccp/d-mail/web"
 	"net/mail"
 	"strconv"
@@ -74,6 +75,24 @@ func (stmp *Stmp) putOne(req *web.Request) (any, error) {
 	return "ok", nil
 
 }
+func (stmp *Stmp) test(req *web.Request) (any, error) {
+	var st db.STMP
+	err := req.ShouldBindBodyWithJSON(&st)
+	if err != nil {
+		return nil, err
+	}
+	_, err = mail.ParseAddress(st.Mail)
+	if err != nil {
+		return nil, err
+	}
+
+	err = util.SendTestMsg(&util.STMP{Username: st.Username, Mail: st.Mail, Password: st.Password, Host: st.Host, Port: st.Port})
+	if err != nil {
+		return nil, err
+	}
+	return "ok", nil
+
+}
 func (stmp *Stmp) getPage(req *web.Request) (any, error) {
 	page := req.GetPage()
 	p, err := stmp.context.GetDb().GetSTMPModel().Page(page)
@@ -88,5 +107,8 @@ func (stmp *Stmp) Init(context *core.Context, server core.IHttpServer) {
 	server.DELETE("/stmp/:id", stmp.deleteOne)
 	server.GET("/stmp", stmp.getPage)
 	server.POST("/stmp", stmp.postOne)
+
+	server.POST("/test", stmp.test)
+
 	server.PUT("/stmp", stmp.putOne)
 }
