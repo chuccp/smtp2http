@@ -27,17 +27,6 @@ type SendMsg struct {
 	ff            []*os.File
 }
 
-func (sendMsg *SendMsg) GetFromMail() string {
-	return sendMsg.SendMail.Mail
-}
-func (sendMsg *SendMsg) GetToMail() []string {
-	datas := make([]string, 0)
-	for _, email := range sendMsg.ReceiveEmails {
-		datas = append(datas, email.Mail)
-	}
-	return datas
-}
-
 func sendTestMsg(STMP *STMP) error {
 	var sendMsg SendMsg
 	sendMsg.SendMail = STMP
@@ -59,18 +48,57 @@ func SendTestMsg(st *db.STMP) error {
 	}
 	return sendTestMsg(&STMP{Username: st.Username, Mail: st.Mail, Password: st.Password, Host: st.Host, Port: st.Port})
 }
+func SendContentMsg(stmp *db.STMP, mails []*db.Mail, subject, bodyString string) error {
+	STMP := &STMP{Username: stmp.Username, Mail: stmp.Mail, Password: stmp.Password, Host: stmp.Host, Port: stmp.Port}
+	receiveEmails := make([]*Mail, 0)
+	for _, d := range mails {
+		receiveEmails = append(receiveEmails, &Mail{Name: d.Name, Mail: d.Mail})
+	}
+	var sendMsg SendMsg
+	sendMsg.SendMail = STMP
+	sendMsg.ReceiveEmails = receiveEmails
+	sendMsg.Subject = subject
+	sendMsg.BodyString = bodyString
+	return SendMail(&sendMsg)
+}
+func SendFilesMsg(stmp *db.STMP, mails []*db.Mail, filePaths []string, subject, bodyString string) error {
+	STMP := &STMP{Username: stmp.Username, Mail: stmp.Mail, Password: stmp.Password, Host: stmp.Host, Port: stmp.Port}
+	receiveEmails := make([]*Mail, 0)
+	for _, d := range mails {
+		receiveEmails = append(receiveEmails, &Mail{Name: d.Name, Mail: d.Mail})
+	}
+	var sendMsg SendMsg
+	sendMsg.SendMail = STMP
+	sendMsg.ReceiveEmails = receiveEmails
+	sendMsg.Subject = subject
+	sendMsg.BodyString = bodyString
+	return SendMail(&sendMsg)
+}
 
 func SendMail(sendMsg *SendMsg) error {
 
 	msg := mail.NewMsg()
-
-	if err := msg.From(sendMsg.GetFromMail()); err != nil {
-		return err
+	if len(sendMsg.SendMail.Username) > 0 {
+		err := msg.FromFormat(sendMsg.SendMail.Username, sendMsg.SendMail.Mail)
+		if err != nil {
+			return err
+		}
+	} else {
+		if err := msg.From(sendMsg.SendMail.Mail); err != nil {
+			return err
+		}
 	}
-	if err := msg.To(sendMsg.GetToMail()...); err != nil {
-		return err
-	}
 
+	for _, email := range sendMsg.ReceiveEmails {
+		if len(email.Name) > 0 {
+			err := msg.AddToFormat(email.Name, email.Mail)
+			if err != nil {
+				continue
+			}
+		} else {
+			msg.AddTo(email.Mail)
+		}
+	}
 	msg.Subject(sendMsg.Subject)
 	msg.SetBodyString(mail.TypeTextPlain, sendMsg.BodyString)
 

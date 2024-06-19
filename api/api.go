@@ -3,8 +3,8 @@ package api
 import (
 	"github.com/chuccp/d-mail/core"
 	"github.com/chuccp/d-mail/service"
+	"github.com/chuccp/d-mail/stmp"
 	"github.com/chuccp/d-mail/web"
-	"log"
 )
 
 type Server struct {
@@ -26,7 +26,11 @@ func (s *Server) Name() string {
 func (s *Server) SendMail(req *web.Request) (any, error) {
 	token := req.FormValue("token")
 	content := req.FormValue("content")
-	log.Println(content)
+	subject := req.FormValue("subject")
+	byToken, err := s.token.GetOneByToken(token)
+	if err != nil {
+		return nil, err
+	}
 	if req.IsMultipartForm() {
 		form, err := req.MultipartForm()
 		if err != nil {
@@ -38,13 +42,16 @@ func (s *Server) SendMail(req *web.Request) (any, error) {
 				web.SaveUploadedFile(fileHeader, fileHeader.Filename)
 			}
 		}
+	} else {
+		if len(subject) == 0 {
+			subject = byToken.Subject
+		}
+		err := stmp.SendContentMsg(byToken.STMP, byToken.ReceiveEmails, subject, content)
+		if err != nil {
+			return nil, err
+		}
 	}
-	byToken, err := s.token.GetOneByToken(token)
-	if err != nil {
-		return nil, err
-	}
-
-	return byToken, nil
+	return "ok", nil
 }
 func (s *Server) Init(context *core.Context) {
 	s.context = context
