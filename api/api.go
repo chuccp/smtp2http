@@ -4,7 +4,9 @@ import (
 	"github.com/chuccp/d-mail/core"
 	"github.com/chuccp/d-mail/service"
 	"github.com/chuccp/d-mail/stmp"
+	"github.com/chuccp/d-mail/util"
 	"github.com/chuccp/d-mail/web"
+	"os"
 )
 
 type Server struct {
@@ -32,14 +34,31 @@ func (s *Server) SendMail(req *web.Request) (any, error) {
 		return nil, err
 	}
 	if req.IsMultipartForm() {
+		chachePath := s.context.GetConfig().GetStringOrDefault("core", "cache-path", "cache")
 		form, err := req.MultipartForm()
 		if err != nil {
 			return nil, err
 		}
 		fileHeaders, ok := form.File["files"]
 		if ok {
+			files := make([]*stmp.File, 0)
 			for _, fileHeader := range fileHeaders {
-				web.SaveUploadedFile(fileHeader, fileHeader.Filename)
+				filePath := util.GetCachePath(chachePath, fileHeader.Filename)
+				err := web.SaveUploadedFile(fileHeader, filePath)
+				if err != nil {
+					return nil, err
+				}
+				file, err := os.Open(filePath)
+				if err != nil {
+					return nil, err
+				}
+				files = append(files, &stmp.File{File: file, Name: fileHeader.Filename})
+			}
+			if len(files) > 0 {
+				err := stmp.SendFilesMsg(byToken.STMP, byToken.ReceiveEmails, files, subject, content)
+				if err != nil {
+					return nil, err
+				}
 			}
 		}
 	} else {

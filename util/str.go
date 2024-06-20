@@ -3,9 +3,12 @@ package util
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"github.com/google/uuid"
+	"path"
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func MD5(data []byte) string {
@@ -87,4 +90,13 @@ func BoolToString(b bool) string {
 	} else {
 		return "false"
 	}
+}
+func GetCachePath(rootPath, filename string) string {
+	id := uuid.New().String()
+	name := MD5([]byte(id))
+	ext := path.Ext(filename)
+	if len(ext) > 0 {
+		name = name + ext
+	}
+	return path.Join(rootPath, FormatDate(time.Now()), name)
 }

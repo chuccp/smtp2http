@@ -19,12 +19,17 @@ type STMP struct {
 	Port     int
 }
 
+type File struct {
+	File *os.File
+	Name string
+}
+
 type SendMsg struct {
 	Subject       string
 	BodyString    string
 	ReceiveEmails []*Mail
 	SendMail      *STMP
-	ff            []*os.File
+	ff            []*File
 }
 
 func sendTestMsg(STMP *STMP) error {
@@ -61,7 +66,7 @@ func SendContentMsg(stmp *db.STMP, mails []*db.Mail, subject, bodyString string)
 	sendMsg.BodyString = bodyString
 	return SendMail(&sendMsg)
 }
-func SendFilesMsg(stmp *db.STMP, mails []*db.Mail, filePaths []string, subject, bodyString string) error {
+func SendFilesMsg(stmp *db.STMP, mails []*db.Mail, files []*File, subject, bodyString string) error {
 	STMP := &STMP{Username: stmp.Username, Mail: stmp.Mail, Password: stmp.Password, Host: stmp.Host, Port: stmp.Port}
 	receiveEmails := make([]*Mail, 0)
 	for _, d := range mails {
@@ -72,6 +77,9 @@ func SendFilesMsg(stmp *db.STMP, mails []*db.Mail, filePaths []string, subject, 
 	sendMsg.ReceiveEmails = receiveEmails
 	sendMsg.Subject = subject
 	sendMsg.BodyString = bodyString
+	for _, file := range files {
+		sendMsg.ff = append(sendMsg.ff, file)
+	}
 	return SendMail(&sendMsg)
 }
 
@@ -101,15 +109,12 @@ func SendMail(sendMsg *SendMsg) error {
 	}
 	msg.Subject(sendMsg.Subject)
 	msg.SetBodyString(mail.TypeTextPlain, sendMsg.BodyString)
-
-	var files []*mail.File
 	for _, f := range sendMsg.ff {
-		err := msg.AttachReader(f.Name(), f, mail.WithFileName(f.Name()))
+		err := msg.AttachReader(f.Name, f.File, mail.WithFileName(f.Name))
 		if err != nil {
 			continue
 		}
 	}
-	msg.SetAttachements(files)
 	c, err := mail.NewClient(sendMsg.SendMail.Host, mail.WithPort(sendMsg.SendMail.Port), mail.WithSMTPAuth(mail.SMTPAuthPlain), mail.WithUsername(sendMsg.SendMail.Username), mail.WithPassword(sendMsg.SendMail.Password))
 	if err != nil {
 		return err
