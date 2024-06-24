@@ -22,6 +22,9 @@ func (d *DB) GetSTMPModel() *STMPModel {
 func (d *DB) GetMailModel() *MailModel {
 	return NewMailModel(d.db, "t_mail")
 }
+func (d *DB) GetLogModel() *LogModel {
+	return NewLogModel(d.db, "t_log")
+}
 func (d *DB) GetTokenModel() *TokenModel {
 	return NewTokenModel(d.db, "t_token")
 }

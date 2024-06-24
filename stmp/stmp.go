@@ -3,8 +3,10 @@ package stmp
 import (
 	"errors"
 	"github.com/chuccp/d-mail/db"
+	"github.com/chuccp/d-mail/util"
 	"github.com/wneessen/go-mail"
 	"os"
+	"strings"
 )
 
 type Mail struct {
@@ -83,7 +85,7 @@ func SendFilesMsg(stmp *db.STMP, mails []*db.Mail, files []*File, subject, bodyS
 	return SendMail(&sendMsg)
 }
 
-func SendMail(sendMsg *SendMsg) error {
+func SendMail(sendMsg *SendMsg, invalidMails ...string) error {
 
 	msg := mail.NewMsg()
 	if len(sendMsg.SendMail.Username) > 0 {
@@ -98,13 +100,15 @@ func SendMail(sendMsg *SendMsg) error {
 	}
 
 	for _, email := range sendMsg.ReceiveEmails {
-		if len(email.Name) > 0 {
-			err := msg.AddToFormat(email.Name, email.Mail)
-			if err != nil {
-				continue
+		if !util.EqualsAnyIgnoreCase(email.Mail, invalidMails...) {
+			if len(email.Name) > 0 {
+				err := msg.AddToFormat(email.Name, email.Mail)
+				if err != nil {
+					continue
+				}
+			} else {
+				msg.AddTo(email.Mail)
 			}
-		} else {
-			msg.AddTo(email.Mail)
 		}
 	}
 	msg.Subject(sendMsg.Subject)
@@ -120,6 +124,10 @@ func SendMail(sendMsg *SendMsg) error {
 		return err
 	}
 	if err := c.DialAndSend(msg); err != nil {
+		if strings.Contains(err.Error(), "User not found") {
+			mails := util.ExtractEmails(err.Error())
+			return SendMail(sendMsg, mails...)
+		}
 		return err
 	}
 	return nil

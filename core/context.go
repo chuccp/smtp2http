@@ -98,6 +98,7 @@ func (c *Context) initDb() error {
 		c.db.GetSTMPModel().CreateTable()
 		c.db.GetMailModel().CreateTable()
 		c.db.GetTokenModel().CreateTable()
+		c.db.GetLogModel().CreateTable()
 	}
 	return nil
 }

@@ -13,6 +13,7 @@ type Server struct {
 	context *core.Context
 	core.IHttpServer
 	token *service.Token
+	log   *service.Log
 }
 
 func NewServer() *Server {
@@ -39,7 +40,7 @@ func (s *Server) SendMail(req *web.Request) (any, error) {
 		if err != nil {
 			return nil, err
 		}
-		fileHeaders, ok := form.File["files"]
+		fileHeaders, ok := form.File["file"]
 		if ok {
 			files := make([]*stmp.File, 0)
 			for _, fileHeader := range fileHeaders {
@@ -67,14 +68,19 @@ func (s *Server) SendMail(req *web.Request) (any, error) {
 		}
 		err := stmp.SendContentMsg(byToken.STMP, byToken.ReceiveEmails, subject, content)
 		if err != nil {
+			s.log.ContentError(byToken.STMP, byToken.ReceiveEmails, subject, content, err)
 			return nil, err
+		} else {
+			s.log.ContentSuccess(byToken.STMP, byToken.ReceiveEmails, subject, content)
 		}
 	}
 	return "ok", nil
 }
+
 func (s *Server) Init(context *core.Context) {
 	s.context = context
 	s.token = service.NewToken(context)
+	s.log = service.NewLog(context)
 	s.IHttpServer.POST("/sendMail", s.SendMail)
 	s.IHttpServer.GET("/sendMail", s.SendMail)
 }
