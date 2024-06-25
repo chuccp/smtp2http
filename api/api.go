@@ -68,10 +68,10 @@ func (s *Server) SendMail(req *web.Request) (any, error) {
 		}
 		err := stmp.SendContentMsg(byToken.STMP, byToken.ReceiveEmails, subject, content)
 		if err != nil {
-			s.log.ContentError(byToken.STMP, byToken.ReceiveEmails, subject, content, err)
+			s.log.ContentError(byToken.STMP, byToken.ReceiveEmails, token, subject, content, err)
 			return nil, err
 		} else {
-			s.log.ContentSuccess(byToken.STMP, byToken.ReceiveEmails, subject, content)
+			s.log.ContentSuccess(byToken.STMP, byToken.ReceiveEmails, token, subject, content)
 		}
 	}
 	return "ok", nil

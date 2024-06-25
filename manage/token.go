@@ -4,6 +4,7 @@ import (
 	"github.com/chuccp/d-mail/core"
 	"github.com/chuccp/d-mail/db"
 	"github.com/chuccp/d-mail/service"
+	"github.com/chuccp/d-mail/util"
 	"github.com/chuccp/d-mail/web"
 	"strconv"
 )
@@ -57,6 +58,7 @@ func (token *Token) putOne(req *web.Request) (any, error) {
 	if err != nil {
 		return nil, err
 	}
+	st.ReceiveEmailIds = util.DeduplicateIds(st.ReceiveEmailIds)
 	err = token.context.GetDb().GetTokenModel().Edit(&st)
 	if err != nil {
 		return nil, err

@@ -124,9 +124,14 @@ func SendMail(sendMsg *SendMsg, invalidMails ...string) error {
 		return err
 	}
 	if err := c.DialAndSend(msg); err != nil {
-		if strings.Contains(err.Error(), "User not found") {
+		if strings.Contains(err.Error(), "User not found") && len(invalidMails) == 0 {
 			mails := util.ExtractEmails(err.Error())
-			return SendMail(sendMsg, mails...)
+			err := SendMail(sendMsg, mails...)
+			if err != nil {
+				return err
+			} else {
+				return ToUserNotFoundError(mails)
+			}
 		}
 		return err
 	}

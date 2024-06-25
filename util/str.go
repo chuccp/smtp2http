@@ -33,6 +33,26 @@ func SplitPath(path string) []string {
 	return ps
 }
 
+func DeduplicateIds(ids string) string {
+	vs := strings.Split(ids, ",")
+	vvs := RemoveDuplicates(vs)
+
+	return strings.Join(vvs, ",")
+
+}
+
+func RemoveDuplicates(nums []string) []string {
+	m := make(map[string]bool)
+	var result []string
+	for _, num := range nums {
+		if _, ok := m[num]; !ok {
+			m[num] = true
+			result = append(result, num)
+		}
+	}
+	return result
+}
+
 func StringToUintIds(ids string) []uint {
 	uIds := make([]uint, 0)
 	receiveEmailIds := strings.Split(ids, ",")

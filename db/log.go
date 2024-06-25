@@ -16,6 +16,7 @@ type Log struct {
 	Id         uint      `gorm:"primaryKey;autoIncrement;column:id" json:"id"`
 	Name       string    `gorm:"column:name" json:"name"`
 	Mail       string    `gorm:"column:mail" json:"mail"`
+	Token      string    `gorm:"column:token" json:"token"`
 	STMP       string    `gorm:"column:stmp" json:"stmp"`
 	Subject    string    `gorm:"column:subject" json:"subject"`
 	Content    string    `gorm:"column:content" json:"content"`
@@ -23,6 +24,7 @@ type Log struct {
 	CreateTime time.Time `gorm:"column:create_time" json:"createTime"`
 	UpdateTime time.Time `gorm:"column:update_time" json:"updateTime"`
 	Status     byte      `gorm:"column:status" json:"status"`
+	StatusStr  string    `gorm:"-" json:"statusStr"`
 	Result     string    `gorm:"column:result" json:"result"`
 }
 
@@ -62,6 +64,18 @@ func (a *LogModel) Page(page *web.Page) (*Page[*Log], error) {
 	if err != nil {
 		return nil, err
 	}
+	for _, log := range logs {
+		if log.Status == SUCCESS {
+			log.StatusStr = "success"
+		}
+		if log.Status == WARM {
+			log.StatusStr = "warm"
+		}
+		if log.Status == ERROR {
+			log.StatusStr = "error"
+		}
+	}
+
 	return ToPage[*Log](num, logs), nil
 }
 func (a *LogModel) Save(log *Log) error {
