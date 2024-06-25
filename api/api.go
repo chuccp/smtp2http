@@ -35,7 +35,7 @@ func (s *Server) SendMail(req *web.Request) (any, error) {
 		return nil, err
 	}
 	if req.IsMultipartForm() {
-		chachePath := s.context.GetConfig().GetStringOrDefault("core", "cache-path", "cache")
+		cachePath := s.context.GetConfig().GetStringOrDefault("core", "cache-path", "cache")
 		form, err := req.MultipartForm()
 		if err != nil {
 			return nil, err
@@ -44,7 +44,7 @@ func (s *Server) SendMail(req *web.Request) (any, error) {
 		if ok {
 			files := make([]*stmp.File, 0)
 			for _, fileHeader := range fileHeaders {
-				filePath := util.GetCachePath(chachePath, fileHeader.Filename)
+				filePath := util.GetCachePath(cachePath, fileHeader.Filename)
 				err := web.SaveUploadedFile(fileHeader, filePath)
 				if err != nil {
 					return nil, err
