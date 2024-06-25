@@ -53,12 +53,15 @@ func (s *Server) SendMail(req *web.Request) (any, error) {
 				if err != nil {
 					return nil, err
 				}
-				files = append(files, &stmp.File{File: file, Name: fileHeader.Filename})
+				files = append(files, &stmp.File{File: file, Name: fileHeader.Filename, FilePath: filePath})
 			}
 			if len(files) > 0 {
 				err := stmp.SendFilesMsg(byToken.STMP, byToken.ReceiveEmails, files, subject, content)
 				if err != nil {
+					s.log.FilesError(byToken.STMP, byToken.ReceiveEmails, files, token, subject, content, err)
 					return nil, err
+				} else {
+					s.log.FilesSuccess(byToken.STMP, byToken.ReceiveEmails, files, token, subject, content)
 				}
 			}
 		}

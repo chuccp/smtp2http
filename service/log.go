@@ -18,9 +18,9 @@ func NewLog(context *core.Context) *Log {
 }
 
 func (a *Log) ContentSuccess(stmp *db.STMP, mails []*db.Mail, token string, subject, bodyString string) error {
-	return a.log(stmp, mails, token, subject, bodyString, db.SUCCESS, nil)
+	return a.log(stmp, mails, token, subject, bodyString, nil, db.SUCCESS, nil)
 }
-func (a *Log) log(st *db.STMP, mails []*db.Mail, token string, subject, bodyString string, status byte, err error) error {
+func (a *Log) log(st *db.STMP, mails []*db.Mail, token string, subject, bodyString string, files []*stmp.File, status byte, err error) error {
 	var lg db.Log
 	lg.Token = token
 	lg.STMP = util.FormatMail(st.Username, st.Mail)
@@ -38,6 +38,9 @@ func (a *Log) log(st *db.STMP, mails []*db.Mail, token string, subject, bodyStri
 		lg.Result = "success"
 		lg.Status = status
 	}
+	if files != nil && len(files) > 0 {
+
+	}
 	var ee *stmp.UserNotFoundError
 	ok := errors.As(err, &ee)
 	if ok {
@@ -49,6 +52,13 @@ func (a *Log) log(st *db.STMP, mails []*db.Mail, token string, subject, bodyStri
 	}
 	return a.context.GetDb().GetLogModel().Save(&lg)
 }
-func (a *Log) ContentError(stmp *db.STMP, mails []*db.Mail, token string, subject, bodyString string, err error) error {
-	return a.log(stmp, mails, token, subject, bodyString, db.ERROR, err)
+func (a *Log) FilesError(stmp *db.STMP, mails []*db.Mail, files []*stmp.File, token string, subject, bodyString string, err error) error {
+	return a.log(stmp, mails, token, subject, bodyString, files, db.ERROR, err)
+}
+func (a *Log) FilesSuccess(stmp *db.STMP, mails []*db.Mail, files []*stmp.File, token string, subject, bodyString string) error {
+	return a.log(stmp, mails, token, subject, bodyString, files, db.SUCCESS, nil)
+}
+
+func (a *Log) ContentError(stmp *db.STMP, mails []*db.Mail, token string, subject string, bodyString string, err error) error {
+	return a.log(stmp, mails, token, subject, bodyString, nil, db.ERROR, err)
 }

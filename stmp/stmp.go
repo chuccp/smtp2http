@@ -22,8 +22,9 @@ type STMP struct {
 }
 
 type File struct {
-	File *os.File
-	Name string
+	File     *os.File `json:"-"`
+	Name     string   `json:"name"`
+	FilePath string   `json:"filePath"`
 }
 
 type SendMsg struct {
