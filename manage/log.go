@@ -23,10 +23,6 @@ func (log *Log) getOne(req *web.Request) (any, error) {
 	return one, nil
 }
 
-func (log *Log) deleteOne(req *web.Request) (any, error) {
-	return nil, nil
-}
-
 func (log *Log) getPage(req *web.Request) (any, error) {
 	page := req.GetPage()
 	p, err := log.context.GetDb().GetLogModel().Page(page)
@@ -39,6 +35,5 @@ func (log *Log) getPage(req *web.Request) (any, error) {
 func (log *Log) Init(context *core.Context, server core.IHttpServer) {
 	log.context = context
 	server.GET("/log/:id", log.getOne)
-	server.DELETE("/log/:id", log.deleteOne)
 	server.GET("/log", log.getPage)
 }
