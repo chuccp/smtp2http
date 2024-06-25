@@ -81,7 +81,7 @@ func getMails(ids []uint, mailMap map[uint]*db.Mail) []*db.Mail {
 func getMailsStr(mails []*db.Mail) string {
 	buffer := new(bytes.Buffer)
 	for _, mail := range mails {
-		buffer.WriteString(";" + mail.Name + ":[" + mail.Mail + "]")
+		buffer.WriteString("," + util.FormatMail(mail.Name, mail.Mail))
 	}
 	if buffer.Len() == 0 {
 		return ""
