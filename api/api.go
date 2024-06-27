@@ -35,7 +35,7 @@ func (s *Server) SendMail(req *web.Request) (any, error) {
 		return nil, err
 	}
 	if req.IsMultipartForm() {
-		cachePath := s.context.GetConfig().GetStringOrDefault("core", "cache-path", "cache")
+		cachePath := s.context.GetConfig().GetStringOrDefault("core", "cachePath", ".cache")
 		form, err := req.MultipartForm()
 		if err != nil {
 			return nil, err

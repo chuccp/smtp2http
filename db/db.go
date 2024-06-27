@@ -2,6 +2,7 @@ package db
 
 import (
 	"fmt"
+	"github.com/chuccp/d-mail/config"
 	"github.com/chuccp/d-mail/util"
 	"github.com/glebarez/sqlite"
 	"gorm.io/driver/mysql"
@@ -31,9 +32,9 @@ func (d *DB) GetTokenModel() *TokenModel {
 func CreateDB() *DB {
 	return &DB{}
 }
-func (d *DB) Init(config *util.Config) error {
+func (d *DB) Init(config *config.Config) error {
 	var err error
-	dbType := config.GetString("core", "db-type")
+	dbType := config.GetString("core", "dbType")
 	if util.EqualsAnyIgnoreCase(dbType, "sqlite") {
 		dbName := config.GetStringOrDefault("sqlite", "filename", "d-mail.db")
 		d.db, err = gorm.Open(sqlite.Open(dbName), &gorm.Config{Logger: logger.Default.LogMode(logger.Info)})

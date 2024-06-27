@@ -1,6 +1,7 @@
 package core
 
 import (
+	"github.com/chuccp/d-mail/config"
 	"github.com/chuccp/d-mail/util"
 	"go.uber.org/zap"
 	"log"
@@ -10,12 +11,12 @@ type DMail struct {
 	context    *Context
 	httpServer *util.HttpServer
 	log        *zap.Logger
-	config     *util.Config
+	config     *config.Config
 	servers    []Server
 }
 
 func Create() *DMail {
-	return &DMail{servers: make([]Server, 0), httpServer: util.NewServer()}
+	return &DMail{servers: make([]Server, 0), httpServer: util.NewServer(), config: config.NewConfig()}
 }
 func (m *DMail) AddServer(server Server) {
 	m.servers = append(m.servers, server)
@@ -35,20 +36,21 @@ func (m *DMail) startHttpServer() error {
 }
 
 func (m *DMail) Start() {
-	configure, err := util.LoadFile("config.ini")
+	err := m.config.Init()
 	if err != nil {
 		log.Panic(err)
 		return
 	}
-	m.config = configure
-	logPath := configure.GetStringOrDefault("log", "filename", "run.log")
-	m.log, err = initLogger(logPath)
+
+	logPath := m.config.GetStringOrDefault("log", "filename", "run.log")
+	logger, err := initLogger(logPath)
 	if err != nil {
 		log.Panic(err)
 		return
 	}
+	m.log = logger
 	m.context = &Context{log: m.log, httpServer: m.httpServer, config: m.config}
-	isInit := configure.GetBooleanOrDefault("core", "init", false)
+	isInit := m.config.GetBooleanOrDefault("core", "init", false)
 	if isInit {
 		err := m.context.initDb()
 		if err != nil {

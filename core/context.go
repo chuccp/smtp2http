@@ -1,8 +1,8 @@
 package core
 
 import (
+	"github.com/chuccp/d-mail/config"
 	"github.com/chuccp/d-mail/db"
-	"github.com/chuccp/d-mail/entity"
 	"github.com/chuccp/d-mail/util"
 	"github.com/chuccp/d-mail/web"
 	"go.uber.org/zap"
@@ -12,7 +12,7 @@ import (
 
 type Context struct {
 	db         *db.DB
-	config     *util.Config
+	config     *config.Config
 	log        *zap.Logger
 	httpServer *util.HttpServer
 }
@@ -23,9 +23,10 @@ func (c *Context) GetLog() *zap.Logger {
 func (c *Context) GetDb() *db.DB {
 	return c.db
 }
-func (c *Context) GetConfig() *util.Config {
+func (c *Context) GetConfig() *config.Config {
 	return c.config
 }
+
 func (c *Context) IsInit() bool {
 	return c.config.GetBooleanOrDefault("core", "init", false)
 }
@@ -44,38 +45,12 @@ func (c *Context) get(relativePath string, handlers ...web.HandlerFunc) {
 	c.httpServer.GET(relativePath, handlers...)
 }
 
-func (c *Context) GetDefaultSetInfo() *entity.SetInfo {
-	var setInfo entity.SetInfo
-	setInfo.HasInit = c.config.GetBooleanOrDefault("core", "init", false)
-	setInfo.DbType = c.config.GetString("core", "db-type")
-	var sqlite entity.Sqlite
-	sqlite.Filename = c.config.GetString("sqlite", "filename")
-	setInfo.Sqlite = &sqlite
-	var mysql entity.Mysql
-	mysql.Host = c.config.GetString("mysql", "host")
-	mysql.Port = c.config.GetIntOrDefault("mysql", "port", 0)
-	mysql.Dbname = c.config.GetString("mysql", "dbname")
-	mysql.Username = c.config.GetString("mysql", "username")
-	mysql.Password = c.config.GetString("mysql", "password")
-	mysql.Charset = c.config.GetString("mysql", "charset")
-	setInfo.Mysql = &mysql
-	return &setInfo
+func (c *Context) GetDefaultSetInfo() *config.SetInfo {
+	return c.config.ReadSetInfo()
 }
 
-func (c *Context) UpdateSetInfo(setInfo *entity.SetInfo) error {
-	c.config.SetBoolean("core", "init", true)
-	c.config.SetString("core", "db-type", setInfo.DbType)
-	if setInfo.DbType == "sqlite" {
-		c.config.SetString("sqlite", "filename", setInfo.Sqlite.Filename)
-	} else {
-		c.config.SetString("mysql", "host", setInfo.Mysql.Host)
-		c.config.SetInt("mysql", "port", setInfo.Mysql.Port)
-		c.config.SetString("mysql", "dbname", setInfo.Mysql.Dbname)
-		c.config.SetString("mysql", "charset", setInfo.Mysql.Charset)
-		c.config.SetString("mysql", "username", setInfo.Mysql.Username)
-		c.config.SetString("mysql", "password", setInfo.Mysql.Password)
-	}
-	err := c.config.Save()
+func (c *Context) UpdateSetInfo(setInfo *config.SetInfo) error {
+	err := c.config.UpdateSetInfo(setInfo)
 	if err != nil {
 		return err
 	}
@@ -94,7 +69,6 @@ func (c *Context) initDb() error {
 			return err
 		}
 		c.db = _db_
-
 		c.db.GetSTMPModel().CreateTable()
 		c.db.GetMailModel().CreateTable()
 		c.db.GetTokenModel().CreateTable()
@@ -117,12 +91,7 @@ func (c *Context) Go(handle func()) {
 	}()
 }
 func (c *Context) GetCfgInt(section string, name string) int {
-	getInt, err := c.config.GetInt(section, name)
-	if err != nil {
-		return 0
-	} else {
-		return getInt
-	}
+	return c.config.GetInt(section, name)
 }
 
 func (c *Context) GetCfgString(section string, name string) string {

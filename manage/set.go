@@ -1,8 +1,8 @@
 package manage
 
 import (
+	"github.com/chuccp/d-mail/config"
 	"github.com/chuccp/d-mail/core"
-	"github.com/chuccp/d-mail/entity"
 	"github.com/chuccp/d-mail/web"
 	"go.uber.org/zap"
 )
@@ -12,7 +12,7 @@ type Set struct {
 }
 
 func (set *Set) putSet(req *web.Request) (any, error) {
-	var setInfo entity.SetInfo
+	var setInfo config.SetInfo
 	err := req.ShouldBindBodyWithJSON(&setInfo)
 	if err != nil {
 		return nil, err
@@ -26,7 +26,7 @@ func (set *Set) putSet(req *web.Request) (any, error) {
 	}
 }
 func (set *Set) getSet(req *web.Request) (any, error) {
-	return &entity.System{HasInit: set.context.IsInit(), HasLogin: false}, nil
+	return &config.System{HasInit: set.context.IsInit(), HasLogin: false}, nil
 }
 func (set *Set) defaultSet(req *web.Request) (any, error) {
 	return set.context.GetDefaultSetInfo(), nil
