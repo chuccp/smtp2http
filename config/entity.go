@@ -6,8 +6,11 @@ type System struct {
 }
 
 type Manage struct {
-	Port    int    `json:"port"`
-	WebPath string `json:"webPath"`
+	Port            int    `json:"port"`
+	WebPath         string `json:"webPath"`
+	Username        string `json:"username"`
+	Password        string `json:"password"`
+	ConfirmPassword string `json:"confirmPassword"`
 }
 
 type Api struct {
@@ -20,7 +23,6 @@ type SetInfo struct {
 	CachePath string  `json:"cachePath"`
 	Sqlite    *Sqlite `json:"sqlite"`
 	Mysql     *Mysql  `json:"mysql"`
-	Admin     *Admin  `json:"admin"`
 	Manage    *Manage `json:"manage"`
 	Api       *Api    `json:"api"`
 }
@@ -31,8 +33,7 @@ var defaultSetInfo = &SetInfo{
 	CachePath: ".cache",
 	Sqlite:    &Sqlite{Filename: "d-mail.db"},
 	Mysql:     &Mysql{Host: "", Port: 3306, Dbname: "d-main", Username: "", Password: "", Charset: "utf-8"},
-	Admin:     &Admin{Username: "", Password: ""},
-	Manage:    &Manage{WebPath: "web", Port: 12566},
+	Manage:    &Manage{WebPath: "web", Port: 12566, Username: "", Password: "", ConfirmPassword: ""},
 	Api:       &Api{Port: 12566},
 }
 
@@ -46,9 +47,4 @@ type Mysql struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 	Charset  string `json:"charset"`
-}
-
-type Admin struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
 }

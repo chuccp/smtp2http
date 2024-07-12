@@ -3,7 +3,6 @@ module github.com/chuccp/d-mail
 go 1.22.2
 
 require (
-	github.com/abbot/go-http-auth v0.4.0
 	github.com/gin-contrib/cors v1.7.2
 	github.com/gin-gonic/gin v1.10.0
 	github.com/glebarez/sqlite v1.11.0

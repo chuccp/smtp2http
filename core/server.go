@@ -1,7 +1,6 @@
 package core
 
 import (
-	"github.com/chuccp/d-mail/util"
 	"github.com/chuccp/d-mail/web"
 	"go.uber.org/zap"
 )
@@ -16,14 +15,20 @@ type IHttpServer interface {
 	useCorePort() bool
 	GET(relativePath string, handlers ...web.HandlerFunc)
 	POST(relativePath string, handlers ...web.HandlerFunc)
+	SignIn(relativePath string)
 	DELETE(relativePath string, handlers ...web.HandlerFunc)
 	PUT(relativePath string, handlers ...web.HandlerFunc)
+
+	GETAuth(relativePath string, handlers ...web.HandlerFunc)
+	POSTAuth(relativePath string, handlers ...web.HandlerFunc)
+	DELETEAuth(relativePath string, handlers ...web.HandlerFunc)
+	PUTAuth(relativePath string, handlers ...web.HandlerFunc)
 }
 type httpServer struct {
 	context    *Context
 	port       int
 	usePort    int
-	httpServer *util.HttpServer
+	httpServer *web.HttpServer
 	certFile   string
 	keyFile    string
 	name       string
@@ -47,6 +52,16 @@ func (server *httpServer) POST(pattern string, handlers ...web.HandlerFunc) {
 		server.context.post(pattern, handlers...)
 	}
 }
+func (server *httpServer) sigIn(req *web.Request) (any, error) {
+	return req.GetDigestAuth().CheckSign(req.GetContext())
+}
+func (server *httpServer) SignIn(relativePath string) {
+	if server.port > 0 {
+		server.httpServer.Any(relativePath, server.sigIn)
+	} else {
+		server.context.any(relativePath, server.sigIn)
+	}
+}
 
 func (server *httpServer) DELETE(pattern string, handlers ...web.HandlerFunc) {
 	if server.port > 0 {
@@ -61,6 +76,32 @@ func (server *httpServer) GET(pattern string, handlers ...web.HandlerFunc) {
 	} else {
 		server.context.get(pattern, handlers...)
 	}
+}
+
+func (server *httpServer) justChecks(handlers ...web.HandlerFunc) []web.HandlerFunc {
+	var hs = make([]web.HandlerFunc, len(handlers))
+	for i, handler := range handlers {
+		hs[i] = func(req *web.Request) (any, error) {
+			check, err := req.GetDigestAuth().JustCheck(req.GetContext())
+			if err != nil || check != nil {
+				return nil, err
+			}
+			return handler(req)
+		}
+	}
+	return hs
+}
+func (server *httpServer) GETAuth(relativePath string, handlers ...web.HandlerFunc) {
+	server.GET(relativePath, server.justChecks(handlers...)...)
+}
+func (server *httpServer) POSTAuth(relativePath string, handlers ...web.HandlerFunc) {
+	server.POST(relativePath, server.justChecks(handlers...)...)
+}
+func (server *httpServer) DELETEAuth(relativePath string, handlers ...web.HandlerFunc) {
+	server.DELETE(relativePath, server.justChecks(handlers...)...)
+}
+func (server *httpServer) PUTAuth(relativePath string, handlers ...web.HandlerFunc) {
+	server.PUT(relativePath, server.justChecks(handlers...)...)
 }
 
 func (server *httpServer) IsTls() bool {
@@ -81,7 +122,7 @@ func (server *httpServer) init(context *Context) {
 		server.keyFile = context.GetCfgString(server.name, "keyFile")
 		server.port = port
 		server.usePort = port
-		server.httpServer = util.NewServer()
+		server.httpServer = web.NewServer(context.GetDigestAuth())
 	} else {
 		server.usePort = corePort
 		context.log.Info("服务名称与端口", zap.String("name", server.name), zap.Int("port", corePort))

@@ -18,6 +18,7 @@ func (set *Set) putSet(req *web.Request) (any, error) {
 		return nil, err
 	} else {
 		set.context.GetLog().Debug("putSet", zap.Any("setInfo", &setInfo))
+		setInfo.HasInit = true
 		err := set.context.UpdateSetInfo(&setInfo)
 		if err != nil {
 			return nil, err

@@ -2,21 +2,23 @@ package core
 
 import (
 	"github.com/chuccp/d-mail/config"
-	"github.com/chuccp/d-mail/util"
+	"github.com/chuccp/d-mail/login"
+	"github.com/chuccp/d-mail/web"
 	"go.uber.org/zap"
 	"log"
 )
 
 type DMail struct {
 	context    *Context
-	httpServer *util.HttpServer
+	httpServer *web.HttpServer
 	log        *zap.Logger
 	config     *config.Config
 	servers    []Server
 }
 
 func Create() *DMail {
-	return &DMail{servers: make([]Server, 0), httpServer: util.NewServer(), config: config.NewConfig()}
+
+	return &DMail{servers: make([]Server, 0), config: config.NewConfig()}
 }
 func (m *DMail) AddServer(server Server) {
 	m.servers = append(m.servers, server)
@@ -49,7 +51,12 @@ func (m *DMail) Start() {
 		return
 	}
 	m.log = logger
-	m.context = &Context{log: m.log, httpServer: m.httpServer, config: m.config}
+	m.context = &Context{log: m.log, config: m.config}
+	digestAuth := login.NewDigestAuth(m.context.SecretProvider)
+	m.context.digestAuth = digestAuth
+	m.httpServer = web.NewServer(digestAuth)
+	m.context.httpServer = m.httpServer
+
 	isInit := m.config.GetBooleanOrDefault("core", "init", false)
 	if isInit {
 		err := m.context.initDb()

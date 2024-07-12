@@ -3,6 +3,7 @@ package core
 import (
 	"github.com/chuccp/d-mail/config"
 	"github.com/chuccp/d-mail/db"
+	"github.com/chuccp/d-mail/login"
 	"github.com/chuccp/d-mail/util"
 	"github.com/chuccp/d-mail/web"
 	"go.uber.org/zap"
@@ -14,15 +15,29 @@ type Context struct {
 	db         *db.DB
 	config     *config.Config
 	log        *zap.Logger
-	httpServer *util.HttpServer
+	httpServer *web.HttpServer
+	digestAuth *login.DigestAuth
 }
 
+func (c *Context) GetDigestAuth() *login.DigestAuth {
+	return c.digestAuth
+}
 func (c *Context) GetLog() *zap.Logger {
 	return c.log
 }
 func (c *Context) GetDb() *db.DB {
 	return c.db
 }
+
+func (c *Context) SecretProvider(user string) string {
+	password := c.config.GetString("manage", "password")
+	username := c.config.GetString("manage", "username")
+	if username == user {
+		return util.MD5Str(util.MD5Str(password) + username)
+	}
+	return ""
+}
+
 func (c *Context) GetConfig() *config.Config {
 	return c.config
 }
@@ -33,6 +48,9 @@ func (c *Context) IsInit() bool {
 
 func (c *Context) post(relativePath string, handlers ...web.HandlerFunc) {
 	c.httpServer.POST(relativePath, handlers...)
+}
+func (c *Context) any(relativePath string, handlers ...web.HandlerFunc) {
+	c.httpServer.Any(relativePath, handlers...)
 }
 func (c *Context) put(relativePath string, handlers ...web.HandlerFunc) {
 	c.httpServer.PUT(relativePath, handlers...)

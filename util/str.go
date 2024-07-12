@@ -18,6 +18,9 @@ func MD5(data []byte) string {
 	md5Hash := hex.EncodeToString(hashValue)
 	return md5Hash
 }
+func MD5Str(data string) string {
+	return MD5([]byte(data))
+}
 
 func SplitPath(path string) []string {
 	path = strings.ReplaceAll(path, "\\", "/")

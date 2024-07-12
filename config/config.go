@@ -16,7 +16,7 @@ func NewConfig() *Config {
 
 func (config *Config) UpdateSetInfo(setInfo *SetInfo) error {
 	config.config.SetBoolean("core", "init", setInfo.HasInit)
-	config.config.SetString("core", "cachePath", setInfo.CachePath)
+	//config.config.SetString("core", "cachePath", setInfo.CachePath)
 	if setInfo.DbType == "sqlite" {
 		config.config.SetString("core", "dbType", setInfo.DbType)
 		config.config.SetString("sqlite", "filename", setInfo.Sqlite.Filename)
@@ -30,8 +30,11 @@ func (config *Config) UpdateSetInfo(setInfo *SetInfo) error {
 		config.config.SetString("mysql", "password", setInfo.Mysql.Password)
 	}
 	config.config.SetInt("manage", "port", setInfo.Manage.Port)
-	config.config.SetString("manage", "webPath", setInfo.Manage.WebPath)
+	config.config.SetString("manage", "username", setInfo.Manage.Username)
+	config.config.SetString("manage", "password", setInfo.Manage.Password)
+	//config.config.SetString("manage", "webPath", setInfo.Manage.WebPath)
 	config.config.SetInt("api", "port", setInfo.Api.Port)
+
 	//Manage
 	err := config.config.Save()
 	if err != nil {
@@ -80,6 +83,8 @@ func (config *Config) ReadSetInfo() *SetInfo {
 	var manage Manage
 	manage.WebPath = config.config.GetString("manage", "webPath")
 	manage.Port = config.config.GetIntOrDefault("manage", "port", 0)
+	manage.WebPath = config.config.GetString("manage", "username")
+	manage.WebPath = config.config.GetString("manage", "password")
 	setInfo.Manage = &manage
 	var api Api
 	api.Port = config.config.GetIntOrDefault("api", "port", 0)

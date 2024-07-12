@@ -32,6 +32,7 @@ func (s *Server) Init(context *core.Context) {
 	s.addManage(&Set{})
 	s.addManage(&Token{})
 	s.addManage(&Log{})
+	s.addManage(&User{})
 	for _, a := range s.manages {
 		a.Init(s.context, s.IHttpServer)
 	}
