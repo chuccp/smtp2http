@@ -1,10 +1,12 @@
 package manage
 
 import (
+	"errors"
 	"github.com/chuccp/d-mail/config"
 	"github.com/chuccp/d-mail/core"
 	"github.com/chuccp/d-mail/web"
 	"go.uber.org/zap"
+	"net/http"
 )
 
 type Set struct {
@@ -12,6 +14,11 @@ type Set struct {
 }
 
 func (set *Set) putSet(req *web.Request) (any, error) {
+	if set.context.IsInit() {
+		req.Status(http.StatusMethodNotAllowed)
+		return nil, errors.New("has init")
+	}
+
 	var setInfo config.SetInfo
 	err := req.ShouldBindBodyWithJSON(&setInfo)
 	if err != nil {
@@ -31,6 +38,12 @@ func (set *Set) getSet(req *web.Request) (any, error) {
 	return &config.System{HasInit: set.context.IsInit(), HasLogin: hasLogin}, nil
 }
 func (set *Set) defaultSet(req *web.Request) (any, error) {
+
+	if set.context.IsInit() {
+		req.Status(http.StatusMethodNotAllowed)
+		return nil, errors.New("has init")
+	}
+
 	return set.context.GetDefaultSetInfo(), nil
 }
 
