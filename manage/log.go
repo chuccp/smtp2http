@@ -34,6 +34,6 @@ func (log *Log) getPage(req *web.Request) (any, error) {
 
 func (log *Log) Init(context *core.Context, server core.IHttpServer) {
 	log.context = context
-	server.GET("/log/:id", log.getOne)
-	server.GET("/log", log.getPage)
+	server.GETAuth("/log/:id", log.getOne)
+	server.GETAuth("/log", log.getPage)
 }

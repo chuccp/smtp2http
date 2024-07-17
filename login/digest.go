@@ -54,6 +54,20 @@ func (dc *digest_client) isValid(key string) bool {
 		return time.Now().Second()-v.last_seen < dc.timeOut
 	}
 }
+
+func (dc *digest_client) toValid(key string) bool {
+	dc.lock.Lock()
+	defer dc.lock.Unlock()
+	v, ok := dc.dataMap[key]
+	if !ok {
+		return false
+	} else {
+		v.isValid = true
+		v.last_seen = time.Now().Second()
+		return true
+	}
+}
+
 func (dc *digest_client) deleteClient(key string) {
 	dc.lock.Lock()
 	defer dc.lock.Unlock()
@@ -71,6 +85,7 @@ func (dc *digest_client) getNew() string {
 		delete(dc.dataMap, v)
 	}
 	dc.data[dc.off] = key
+	dc.dataMap[key] = &client{last_seen: time.Now().Second(), isValid: false}
 	dc.off++
 	return key
 }
@@ -85,11 +100,23 @@ type DigestAuth struct {
 }
 
 func (digestAuth *DigestAuth) JustCheck(ctx *gin.Context) (any, error) {
-	return nil, nil
+	nonce := ctx.GetHeader("Nonce")
+	val := digestAuth.digestClient.isValid(nonce)
+	if val {
+		return nil, nil
+	}
+	ctx.Status(http.StatusUnauthorized)
+	return "login timeout", nil
 }
+
+func (digestAuth *DigestAuth) HasSign(ctx *gin.Context) bool {
+	nonce := ctx.GetHeader("Nonce")
+	return digestAuth.digestClient.isValid(nonce)
+}
+
 func (digestAuth *DigestAuth) CheckSign(ctx *gin.Context) (any, error) {
 	if strings.EqualFold(ctx.Request.Method, "get") {
-		key := RandomKey()
+		key := digestAuth.digestClient.getNew()
 		var authInfo AuthInfo
 		authInfo.Nonce = key
 		return &authInfo, nil
@@ -99,11 +126,15 @@ func (digestAuth *DigestAuth) CheckSign(ctx *gin.Context) (any, error) {
 		if err != nil {
 			return nil, err
 		}
-		key := digestAuth.secretProvider(u.Username)
-		sign := util.MD5Str(key + u.Nonce)
-		if strings.EqualFold(sign, u.Response) {
-			return "success", nil
+		if digestAuth.digestClient.hasClient(u.Nonce) {
+			key := digestAuth.secretProvider(u.Username)
+			sign := util.MD5Str(key + u.Nonce)
+			if strings.EqualFold(sign, u.Response) {
+				digestAuth.digestClient.toValid(u.Nonce)
+				return "success", nil
+			}
 		}
+
 	}
 	ctx.Status(http.StatusUnauthorized)
 	return "username or password is incorrect", nil

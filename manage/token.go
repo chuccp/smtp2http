@@ -68,9 +68,9 @@ func (token *Token) putOne(req *web.Request) (any, error) {
 func (token *Token) Init(context *core.Context, server core.IHttpServer) {
 	token.context = context
 	token.token = service.NewToken(context)
-	server.GET("/token/:id", token.getOne)
-	server.DELETE("/token/:id", token.deleteOne)
-	server.GET("/token", token.getPage)
-	server.POST("/token", token.postOne)
-	server.PUT("/token", token.putOne)
+	server.GETAuth("/token/:id", token.getOne)
+	server.DELETEAuth("/token/:id", token.deleteOne)
+	server.GETAuth("/token", token.getPage)
+	server.POSTAuth("/token", token.postOne)
+	server.PUTAuth("/token", token.putOne)
 }

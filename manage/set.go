@@ -27,7 +27,8 @@ func (set *Set) putSet(req *web.Request) (any, error) {
 	}
 }
 func (set *Set) getSet(req *web.Request) (any, error) {
-	return &config.System{HasInit: set.context.IsInit(), HasLogin: false}, nil
+	hasLogin := req.GetDigestAuth().HasSign(req.GetContext())
+	return &config.System{HasInit: set.context.IsInit(), HasLogin: hasLogin}, nil
 }
 func (set *Set) defaultSet(req *web.Request) (any, error) {
 	return set.context.GetDefaultSetInfo(), nil

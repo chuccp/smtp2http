@@ -102,10 +102,10 @@ func (stmp *Stmp) getPage(req *web.Request) (any, error) {
 }
 func (stmp *Stmp) Init(context *core.Context, server core.IHttpServer) {
 	stmp.context = context
-	server.GET("/stmp/:id", stmp.getOne)
-	server.DELETE("/stmp/:id", stmp.deleteOne)
-	server.GET("/stmp", stmp.getPage)
-	server.POST("/stmp", stmp.postOne)
-	server.POST("/test", stmp.test)
-	server.PUT("/stmp", stmp.putOne)
+	server.GETAuth("/stmp/:id", stmp.getOne)
+	server.DELETEAuth("/stmp/:id", stmp.deleteOne)
+	server.GETAuth("/stmp", stmp.getPage)
+	server.POSTAuth("/stmp", stmp.postOne)
+	server.POSTAuth("/test", stmp.test)
+	server.PUTAuth("/stmp", stmp.putOne)
 }

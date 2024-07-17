@@ -81,9 +81,9 @@ func (m *Mail) putOne(req *web.Request) (any, error) {
 }
 func (m *Mail) Init(context *core.Context, server core.IHttpServer) {
 	m.context = context
-	server.GET("/mail/:id", m.getOne)
-	server.DELETE("/mail/:id", m.deleteOne)
-	server.GET("/mail", m.getPage)
-	server.POST("/mail", m.postOne)
-	server.PUT("/mail", m.putOne)
+	server.GETAuth("/mail/:id", m.getOne)
+	server.DELETEAuth("/mail/:id", m.deleteOne)
+	server.GETAuth("/mail", m.getPage)
+	server.POSTAuth("/mail", m.postOne)
+	server.PUTAuth("/mail", m.putOne)
 }
