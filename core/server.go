@@ -16,6 +16,7 @@ type IHttpServer interface {
 	GET(relativePath string, handlers ...web.HandlerFunc)
 	POST(relativePath string, handlers ...web.HandlerFunc)
 	SignIn(relativePath string)
+	Logout(relativePath string)
 	DELETE(relativePath string, handlers ...web.HandlerFunc)
 	PUT(relativePath string, handlers ...web.HandlerFunc)
 
@@ -55,11 +56,23 @@ func (server *httpServer) POST(pattern string, handlers ...web.HandlerFunc) {
 func (server *httpServer) sigIn(req *web.Request) (any, error) {
 	return req.GetDigestAuth().CheckSign(req.GetContext())
 }
+
+func (server *httpServer) logout(req *web.Request) (any, error) {
+	return req.GetDigestAuth().Logout(req.GetContext())
+}
+
 func (server *httpServer) SignIn(relativePath string) {
 	if server.port > 0 {
 		server.httpServer.Any(relativePath, server.sigIn)
 	} else {
 		server.context.any(relativePath, server.sigIn)
+	}
+}
+func (server *httpServer) Logout(relativePath string) {
+	if server.port > 0 {
+		server.httpServer.Any(relativePath, server.logout)
+	} else {
+		server.context.any(relativePath, server.logout)
 	}
 }
 

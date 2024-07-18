@@ -41,6 +41,7 @@ func (dc *digest_client) hasClient(key string) bool {
 		return time.Now().Second()-v.last_seen < dc.timeOut
 	}
 }
+
 func (dc *digest_client) isValid(key string) bool {
 	dc.lock.Lock()
 	defer dc.lock.Unlock()
@@ -113,7 +114,11 @@ func (digestAuth *DigestAuth) HasSign(ctx *gin.Context) bool {
 	nonce := ctx.GetHeader("Nonce")
 	return digestAuth.digestClient.isValid(nonce)
 }
-
+func (digestAuth *DigestAuth) Logout(ctx *gin.Context) (any, error) {
+	nonce := ctx.GetHeader("Nonce")
+	digestAuth.digestClient.deleteClient(nonce)
+	return "success", nil
+}
 func (digestAuth *DigestAuth) CheckSign(ctx *gin.Context) (any, error) {
 	if strings.EqualFold(ctx.Request.Method, "get") {
 		key := digestAuth.digestClient.getNew()

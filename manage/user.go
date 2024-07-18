@@ -10,4 +10,5 @@ type User struct {
 
 func (u *User) Init(context *core.Context, server core.IHttpServer) {
 	server.SignIn("/signIn")
+	server.Logout("/logout")
 }

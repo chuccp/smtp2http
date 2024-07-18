@@ -87,5 +87,16 @@ func (a *LogModel) GetOne(id uint) (*Log, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	if log.Status == SUCCESS {
+		log.StatusStr = "success"
+	}
+	if log.Status == WARM {
+		log.StatusStr = "warm"
+	}
+	if log.Status == ERROR {
+		log.StatusStr = "error"
+	}
+
 	return &log, nil
 }

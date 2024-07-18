@@ -16,7 +16,7 @@ func (log *Log) getOne(req *web.Request) (any, error) {
 	if err != nil {
 		return nil, err
 	}
-	one, err := log.context.GetDb().GetMailModel().GetOne(uint(atoi))
+	one, err := log.context.GetDb().GetLogModel().GetOne(uint(atoi))
 	if err != nil {
 		return nil, err
 	}
