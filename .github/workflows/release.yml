@@ -56,9 +56,10 @@ jobs:
 
       - name: download web view
         uses: robinraju/release-downloader@v1
-        repository: 'chuccp/d-mail-view'
-        latest: true
-        fileName: 'd-mail-view.zip'
+        with:
+          repository: 'chuccp/d-mail-view'
+          latest: true
+          fileName: 'd-mail-view.zip'
 
       - name: unzip web view
         run: |
