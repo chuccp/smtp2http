@@ -68,17 +68,30 @@ func (c *Context) GetDefaultSetInfo() *config.SetInfo {
 }
 
 func (c *Context) UpdateSetInfo(setInfo *config.SetInfo) error {
-	err := c.config.UpdateSetInfo(setInfo)
+	err := c.initDbBySetInfo(setInfo)
 	if err != nil {
 		return err
 	}
-	err = c.initDb()
+	setInfo.HasInit = true
+	err = c.config.UpdateSetInfo(setInfo)
 	if err != nil {
 		return err
 	}
 	return nil
 }
-
+func (c *Context) initDbBySetInfo(setInfo *config.SetInfo) error {
+	_db_ := db.CreateDB()
+	err := _db_.InitBySetInfo(setInfo)
+	if err != nil {
+		return err
+	}
+	c.db = _db_
+	c.db.GetSTMPModel().CreateTable()
+	c.db.GetMailModel().CreateTable()
+	c.db.GetTokenModel().CreateTable()
+	c.db.GetLogModel().CreateTable()
+	return nil
+}
 func (c *Context) initDb() error {
 	if c.IsInit() {
 		_db_ := db.CreateDB()

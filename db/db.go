@@ -32,6 +32,41 @@ func (d *DB) GetTokenModel() *TokenModel {
 func CreateDB() *DB {
 	return &DB{}
 }
+
+// InitBySetInfo setInfo *config.SetInfo
+func (d *DB) InitBySetInfo(setInfo *config.SetInfo) error {
+	var err error
+	dbType := setInfo.DbType
+	if util.EqualsAnyIgnoreCase(dbType, "sqlite") {
+		dbName := setInfo.Sqlite.Filename
+		d.db, err = gorm.Open(sqlite.Open(dbName), &gorm.Config{Logger: logger.Default.LogMode(logger.Info)})
+		if err != nil {
+			d.err = err
+			return err
+		}
+		d.err = err
+		return err
+	} else if util.EqualsAnyIgnoreCase(dbType, "mysql") {
+		username := setInfo.Mysql.Username
+		password := setInfo.Mysql.Password
+		host := setInfo.Mysql.Host
+		port := setInfo.Mysql.Port
+		dbname := setInfo.Mysql.Dbname
+		if len(setInfo.Mysql.Charset) == 0 {
+			setInfo.Mysql.Charset = "utf8"
+		}
+		charset := setInfo.Mysql.Charset
+		d.db, err = CreateMysqlConnection(username, password, host, port, dbname, charset)
+		if err != nil {
+			d.err = err
+			return err
+		}
+		d.err = err
+		return err
+	}
+	d.err = NoDatabase
+	return d.err
+}
 func (d *DB) Init(config *config.Config) error {
 	var err error
 	dbType := config.GetString("core", "dbType")
@@ -45,14 +80,14 @@ func (d *DB) Init(config *config.Config) error {
 		d.err = err
 		return err
 	} else if util.EqualsAnyIgnoreCase(dbType, "mysql") {
-		username := config.GetString("core", "username")
-		password := config.GetString("core", "password")
-		host := config.GetString("core", "host")
-		port := config.GetString("core", "port")
-		dbname := config.GetString("core", "dbname")
-		charset := config.GetStringOrDefault("core", "charset", "UTF-8")
-		dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=%s&parseTime=True&loc=Local", username, password, host, port, dbname, charset)
-		d.db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{Logger: logger.Default.LogMode(logger.Info)})
+		username := config.GetString("mysql", "username")
+		password := config.GetString("mysql", "password")
+		host := config.GetString("mysql", "host")
+		port := config.GetIntOrDefault("mysql", "port", 3306)
+		dbname := config.GetString("mysql", "dbname")
+		charset := config.GetStringOrDefault("mysql", "charset", "UTF8")
+		//dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=%s&parseTime=True&loc=Local", username, password, host, port, dbname, charset)
+		d.db, err = CreateMysqlConnection(username, password, host, port, dbname, charset)
 		if err != nil {
 			d.err = err
 			return err
@@ -62,6 +97,11 @@ func (d *DB) Init(config *config.Config) error {
 	}
 	d.err = NoDatabase
 	return d.err
+}
+
+func CreateMysqlConnection(username string, password string, host string, port int, dbname string, charset string) (db *gorm.DB, err error) {
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=%s&parseTime=True&loc=Local", username, password, host, port, dbname, charset)
+	return gorm.Open(mysql.Open(dsn), &gorm.Config{Logger: logger.Default.LogMode(logger.Info)})
 }
 
 type NoDatabaseError struct {

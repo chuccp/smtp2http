@@ -68,9 +68,9 @@ func (config *Config) Init() error {
 func (config *Config) ReadSetInfo() *SetInfo {
 	var setInfo SetInfo
 	setInfo.HasInit = config.config.GetBooleanOrDefault("core", "init", false)
-	setInfo.DbType = config.config.GetString("core", "dbType")
+	setInfo.DbType = config.config.GetStringOrDefault("core", "dbType", "sqlite")
 	var sqlite Sqlite
-	sqlite.Filename = config.config.GetString("sqlite", "filename")
+	sqlite.Filename = config.config.GetStringOrDefault("sqlite", "filename", "d-mail.db")
 	setInfo.Sqlite = &sqlite
 	var mysql Mysql
 	mysql.Host = config.config.GetString("mysql", "host")
@@ -81,13 +81,13 @@ func (config *Config) ReadSetInfo() *SetInfo {
 	mysql.Charset = config.config.GetString("mysql", "charset")
 	setInfo.Mysql = &mysql
 	var manage Manage
-	manage.WebPath = config.config.GetString("manage", "webPath")
-	manage.Port = config.config.GetIntOrDefault("manage", "port", 0)
-	manage.WebPath = config.config.GetString("manage", "username")
-	manage.WebPath = config.config.GetString("manage", "password")
+	manage.WebPath = config.config.GetStringOrDefault("manage", "webPath", "web")
+	manage.Port = config.config.GetIntOrDefault("manage", "port", 12566)
+	manage.Username = config.config.GetString("manage", "username")
+	manage.Password = config.config.GetString("manage", "password")
 	setInfo.Manage = &manage
 	var api Api
-	api.Port = config.config.GetIntOrDefault("api", "port", 0)
+	api.Port = config.config.GetIntOrDefault("api", "port", 12566)
 	setInfo.Api = &api
 	return &setInfo
 }
@@ -108,7 +108,14 @@ func (config *Config) GetString(section, name string) string {
 func (config *Config) GetStringOrDefault(section string, name string, defaultValue string) string {
 	return config.config.GetStringOrDefault(section, name, defaultValue)
 }
-
+func (config *Config) GetIntOrDefault(section string, name string, defaultValue int) int {
+	getInt, err := config.config.GetInt(section, name)
+	if err != nil {
+		return defaultValue
+	} else {
+		return getInt
+	}
+}
 func (config *Config) GetBooleanOrDefault(section string, name string, defaultValue bool) bool {
 	return config.config.GetBooleanOrDefault(section, name, defaultValue)
 }
