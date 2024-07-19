@@ -74,7 +74,7 @@ func (config *Config) ReadSetInfo() *SetInfo {
 	setInfo.Sqlite = &sqlite
 	var mysql Mysql
 	mysql.Host = config.config.GetString("mysql", "host")
-	mysql.Port = config.config.GetIntOrDefault("mysql", "port", 0)
+	mysql.Port = config.config.GetIntOrDefault("mysql", "port", 3306)
 	mysql.Dbname = config.config.GetString("mysql", "dbname")
 	mysql.Username = config.config.GetString("mysql", "username")
 	mysql.Password = config.config.GetString("mysql", "password")
