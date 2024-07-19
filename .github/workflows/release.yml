@@ -64,9 +64,6 @@ jobs:
       - name: unzip web view
         run: |
           unzip -o d-mail-view.zip -d web
-
-      - name: cp web view
-        run: |
           mkdir -p build_assets
           cp -r web ./build_assets/web
 
