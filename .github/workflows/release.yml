@@ -15,7 +15,7 @@ jobs:
       matrix:
         # Include amd64 on all platforms.
         goos: [windows,linux]
-        goarch: [amd64, 386]
+        goarch: [amd64]
         exclude:
           # Exclude i386 on darwin and dragonfly.
           - goarch: 386
@@ -53,6 +53,16 @@ jobs:
           echo "GOOS: $GOOS, GOARCH: $GOARCH, GOARM: $GOARM, RELEASE_NAME: $_NAME"
           echo "ASSET_NAME=$_NAME" >> $GITHUB_OUTPUT
           echo "ASSET_NAME=$_NAME" >> $GITHUB_ENV
+
+      - name: download web view
+        uses: robinraju/release-downloader@v1
+        repository: 'chuccp/d-mail-view'
+        latest: true
+        fileName: 'd-mail-view.zip'
+
+      - name: unzip web view
+        run: |
+          unzip -o d-mail-view.zip -d web
 
       - name: Set up Go
         uses: actions/setup-go@v3
