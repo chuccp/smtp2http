@@ -16,7 +16,7 @@ func NewConfig() *Config {
 
 func (config *Config) UpdateSetInfo(setInfo *SetInfo) error {
 	config.config.SetBoolean("core", "init", setInfo.HasInit)
-	//config.config.SetString("core", "cachePath", setInfo.CachePath)
+	config.config.SetString("core", "cachePath", setInfo.CachePath)
 	if setInfo.DbType == "sqlite" {
 		config.config.SetString("core", "dbType", setInfo.DbType)
 		config.config.SetString("sqlite", "filename", setInfo.Sqlite.Filename)
@@ -32,7 +32,7 @@ func (config *Config) UpdateSetInfo(setInfo *SetInfo) error {
 	config.config.SetInt("manage", "port", setInfo.Manage.Port)
 	config.config.SetString("manage", "username", setInfo.Manage.Username)
 	config.config.SetString("manage", "password", setInfo.Manage.Password)
-	//config.config.SetString("manage", "webPath", setInfo.Manage.WebPath)
+	config.config.SetString("manage", "webPath", setInfo.Manage.WebPath)
 	config.config.SetInt("api", "port", setInfo.Api.Port)
 
 	//Manage
@@ -68,26 +68,26 @@ func (config *Config) Init() error {
 func (config *Config) ReadSetInfo() *SetInfo {
 	var setInfo SetInfo
 	setInfo.HasInit = config.config.GetBooleanOrDefault("core", "init", false)
-	setInfo.DbType = config.config.GetStringOrDefault("core", "dbType", "sqlite")
+	setInfo.DbType = config.config.GetStringOrDefault("core", "dbType", defaultSetInfo.DbType)
 	var sqlite Sqlite
-	sqlite.Filename = config.config.GetStringOrDefault("sqlite", "filename", "d-mail.db")
+	sqlite.Filename = config.config.GetStringOrDefault("sqlite", "filename", defaultSetInfo.Sqlite.Filename)
 	setInfo.Sqlite = &sqlite
 	var mysql Mysql
 	mysql.Host = config.config.GetString("mysql", "host")
-	mysql.Port = config.config.GetIntOrDefault("mysql", "port", 3306)
+	mysql.Port = config.config.GetIntOrDefault("mysql", "port", defaultSetInfo.Mysql.Port)
 	mysql.Dbname = config.config.GetString("mysql", "dbname")
 	mysql.Username = config.config.GetString("mysql", "username")
 	mysql.Password = config.config.GetString("mysql", "password")
 	mysql.Charset = config.config.GetString("mysql", "charset")
 	setInfo.Mysql = &mysql
 	var manage Manage
-	manage.WebPath = config.config.GetStringOrDefault("manage", "webPath", "web")
-	manage.Port = config.config.GetIntOrDefault("manage", "port", 12566)
+	manage.WebPath = config.config.GetStringOrDefault("manage", "webPath", defaultSetInfo.Manage.WebPath)
+	manage.Port = config.config.GetIntOrDefault("manage", "port", defaultSetInfo.Manage.Port)
 	manage.Username = config.config.GetString("manage", "username")
 	manage.Password = config.config.GetString("manage", "password")
 	setInfo.Manage = &manage
 	var api Api
-	api.Port = config.config.GetIntOrDefault("api", "port", 12566)
+	api.Port = config.config.GetIntOrDefault("api", "port", defaultSetInfo.Api.Port)
 	setInfo.Api = &api
 	return &setInfo
 }
