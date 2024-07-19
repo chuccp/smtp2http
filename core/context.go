@@ -49,6 +49,11 @@ func (c *Context) IsInit() bool {
 func (c *Context) post(relativePath string, handlers ...web.HandlerFunc) {
 	c.httpServer.POST(relativePath, handlers...)
 }
+
+func (c *Context) staticHandle(relativePath string, filepath string) {
+	c.httpServer.StaticHandle(relativePath, filepath)
+}
+
 func (c *Context) any(relativePath string, handlers ...web.HandlerFunc) {
 	c.httpServer.Any(relativePath, handlers...)
 }

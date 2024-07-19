@@ -2,10 +2,13 @@ package web
 
 import (
 	"github.com/chuccp/d-mail/login"
+	"github.com/chuccp/d-mail/util"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"path"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -15,13 +18,14 @@ func NewServer(digestAuth *login.DigestAuth) *HttpServer {
 	config.AllowOrigins = []string{"*"} // 允许的域名列表，可以使用 * 来允许所有域名
 	config.AllowHeaders = []string{"*"} // 允
 	engine.Use(cors.New(config))
-	return &HttpServer{engine: engine, digestAuth: digestAuth}
+	return &HttpServer{engine: engine, digestAuth: digestAuth, paths: make(map[string]any)}
 }
 
 type HttpServer struct {
 	isTls      bool
 	engine     *gin.Engine
 	digestAuth *login.DigestAuth
+	paths      map[string]any
 }
 
 func (hs *HttpServer) IsTls() bool {
@@ -40,6 +44,45 @@ func (hs *HttpServer) Any(pattern string, handlers ...HandlerFunc) {
 func (hs *HttpServer) POST(pattern string, handlers ...HandlerFunc) {
 	hs.engine.POST(pattern, ToGinHandlerFuncs(handlers, hs.digestAuth)...)
 }
+func (hs *HttpServer) HasPaths(queryPath string) bool {
+	_, ok := hs.paths[queryPath]
+	if ok {
+		return ok
+	}
+	for k, _ := range hs.paths {
+		h := util.IsMatchPath(queryPath, k)
+		if h {
+			return h
+		}
+	}
+	return ok
+}
+
+func (hs *HttpServer) StaticHandle(relativePath string, filepath string) {
+	hs.engine.Use(func(context *gin.Context) {
+		path_ := context.Request.URL.Path
+		if hs.HasPaths(path_) || context.Request.Method != "GET" {
+			context.Next()
+		} else {
+			if strings.Contains(path_, "/manifest.json") {
+				filePath := path.Join(filepath, "/manifest.json")
+				context.File(filePath)
+				context.Abort()
+			} else {
+				relativeFilePath := ""
+				if path_ == relativePath {
+					relativeFilePath = relativePath + "index.html"
+				} else {
+					relativeFilePath = path_
+				}
+				filePath := path.Join(filepath, relativeFilePath)
+				context.File(filePath)
+				context.Abort()
+			}
+		}
+	})
+}
+
 func (hs *HttpServer) GET(pattern string, handlers ...HandlerFunc) {
 	hs.engine.GET(pattern, ToGinHandlerFuncs(handlers, hs.digestAuth)...)
 }

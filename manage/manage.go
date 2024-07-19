@@ -34,6 +34,8 @@ func (s *Server) Init(context *core.Context) {
 	s.addManage(&Log{})
 	s.addManage(&User{})
 	for _, a := range s.manages {
-		a.Init(s.context, s.IHttpServer)
+		a.Init(s.context, s)
 	}
+	webPath := context.GetConfig().GetString("manage", "webPath")
+	s.StaticHandle("/", webPath)
 }

@@ -15,6 +15,7 @@ type IHttpServer interface {
 	useCorePort() bool
 	GET(relativePath string, handlers ...web.HandlerFunc)
 	POST(relativePath string, handlers ...web.HandlerFunc)
+	StaticHandle(relativePath string, filepath string)
 	SignIn(relativePath string)
 	Logout(relativePath string)
 	DELETE(relativePath string, handlers ...web.HandlerFunc)
@@ -45,7 +46,17 @@ func (server *httpServer) PUT(pattern string, handlers ...web.HandlerFunc) {
 		server.context.put(pattern, handlers...)
 	}
 }
+func (server *httpServer) readStatic(req *web.Request) (any, error) {
 
+	return nil, nil
+}
+func (server *httpServer) StaticHandle(relativePath string, filepath string) {
+	if server.port > 0 {
+		server.httpServer.StaticHandle(relativePath, filepath)
+	} else {
+		server.context.staticHandle(relativePath, filepath)
+	}
+}
 func (server *httpServer) POST(pattern string, handlers ...web.HandlerFunc) {
 	if server.port > 0 {
 		server.httpServer.POST(pattern, handlers...)
