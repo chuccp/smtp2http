@@ -37,18 +37,19 @@ func (a *Log) log(st *db.STMP, mails []*db.Mail, token string, subject, bodyStri
 	if status == db.SUCCESS {
 		lg.Result = "success"
 		lg.Status = status
-	}
-	if files != nil && len(files) > 0 {
-
-	}
-	var ee *stmp.UserNotFoundError
-	ok := errors.As(err, &ee)
-	if ok {
-		lg.Status = db.WARM
-		lg.Result = err.Error()
 	} else {
-		lg.Result = err.Error()
-		lg.Status = status
+		if files != nil && len(files) > 0 {
+
+		}
+		var ee *stmp.UserNotFoundError
+		ok := errors.As(err, &ee)
+		if ok {
+			lg.Status = db.WARM
+			lg.Result = err.Error()
+		} else {
+			lg.Result = err.Error()
+			lg.Status = status
+		}
 	}
 	return a.context.GetDb().GetLogModel().Save(&lg)
 }

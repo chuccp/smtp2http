@@ -5,6 +5,7 @@ import (
 	"github.com/chuccp/d-mail/util"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
 	"path"
 	"strconv"
@@ -32,16 +33,20 @@ func (hs *HttpServer) IsTls() bool {
 	return hs.isTls
 }
 func (hs *HttpServer) DELETE(pattern string, handlers ...HandlerFunc) {
+	hs.paths[pattern] = true
 	hs.engine.DELETE(pattern, ToGinHandlerFuncs(handlers, hs.digestAuth)...)
 }
 func (hs *HttpServer) PUT(pattern string, handlers ...HandlerFunc) {
+	hs.paths[pattern] = true
 	hs.engine.PUT(pattern, ToGinHandlerFuncs(handlers, hs.digestAuth)...)
 }
 func (hs *HttpServer) Any(pattern string, handlers ...HandlerFunc) {
+	hs.paths[pattern] = true
 	hs.engine.Any(pattern, ToGinHandlerFuncs(handlers, hs.digestAuth)...)
 }
 
 func (hs *HttpServer) POST(pattern string, handlers ...HandlerFunc) {
+	hs.paths[pattern] = true
 	hs.engine.POST(pattern, ToGinHandlerFuncs(handlers, hs.digestAuth)...)
 }
 func (hs *HttpServer) HasPaths(queryPath string) bool {
@@ -62,8 +67,10 @@ func (hs *HttpServer) StaticHandle(relativePath string, filepath string) {
 	hs.engine.Use(func(context *gin.Context) {
 		path_ := context.Request.URL.Path
 		if hs.HasPaths(path_) || context.Request.Method != "GET" {
+			log.Println("=====================")
 			context.Next()
 		} else {
+			log.Println("!!!!!!!!!!!!!!!!!")
 			if strings.Contains(path_, "/manifest.json") {
 				filePath := path.Join(filepath, "/manifest.json")
 				context.File(filePath)
@@ -84,9 +91,11 @@ func (hs *HttpServer) StaticHandle(relativePath string, filepath string) {
 }
 
 func (hs *HttpServer) GET(pattern string, handlers ...HandlerFunc) {
+	hs.paths[pattern] = true
 	hs.engine.GET(pattern, ToGinHandlerFuncs(handlers, hs.digestAuth)...)
 }
 func (hs *HttpServer) SignIn(pattern string, handlers ...HandlerFunc) {
+	hs.paths[pattern] = true
 	hs.engine.GET(pattern, ToGinHandlerFuncs(handlers, hs.digestAuth)...)
 }
 

@@ -84,6 +84,6 @@ func (s *Server) Init(context *core.Context) {
 	s.context = context
 	s.token = service.NewToken(context)
 	s.log = service.NewLog(context)
-	s.IHttpServer.POST("/sendMail", s.SendMail)
-	s.IHttpServer.GET("/sendMail", s.SendMail)
+	s.POST("/sendMail", s.SendMail)
+	s.GET("/sendMail", s.SendMail)
 }
