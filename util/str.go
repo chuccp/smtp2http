@@ -69,10 +69,11 @@ func StringToUintIds(ids string) []uint {
 	return uIds
 }
 
-func IsMatchPath(path, math string) bool {
-	math = ReplaceAllRegex(math, "\\*[a-zA-Z]+", ".*")
-	re := regexp.MustCompile(math)
-	return re.MatchString(path)
+func IsMatchPath(path, smath string) bool {
+	math := ReplaceAllRegex(smath, "\\*[a-zA-Z]+", ".*")
+	re := regexp.MustCompile("^" + math)
+	fa := re.MatchString(path)
+	return fa
 
 }
 func ReplaceAllRegex(path, regex, math string) string {

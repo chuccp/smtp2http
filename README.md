@@ -13,7 +13,7 @@ curl  'http://127.0.0.1:12566/sendMail?token=99eaf30feb23e28057367431d820cf31991
 post请求例子
 
 ```powershell
-curl  'http://127.0.0.1:12566/sendMail?token=d6a1ee40c5bad981461643f5404a305a2e3f480cc6fcf65ba98efb63ce32d471&content=1212&subject=1212' \
+curl  'http://127.0.0.1:12566/sendMail' \
 --header 'Content-Type: application/x-www-form-urlencoded' \
 --data-urlencode 'token=99eaf30feb23e28057367431d820cf319915792921d9cf21b5f761fb75433225' \
 --data-urlencode 'content=this is a test'
@@ -22,7 +22,7 @@ curl  'http://127.0.0.1:12566/sendMail?token=d6a1ee40c5bad981461643f5404a305a2e3
 发送带文件的邮件
 
 ```powershell
-curl  'http://127.0.0.1:12566/sendMail?token=d6a1ee40c5bad981461643f5404a305a2e3f480cc6fcf65ba98efb63ce32d471&content=1212&subject=1212' \
+curl  'http://127.0.0.1:12566/sendMail' \
 --form 'files=@"/111111.txt"' \
 --form 'files=@"/22222222222222.txt"' \
 --form 'token="d6a1ee40c5bad981461643f5404a305a2e3f480cc6fcf65ba98efb63ce32d471"' \
@@ -40,3 +40,62 @@ content：邮件内容
 subject：邮件主题，在生成token的时候，也设置了一个subject，当参数给空的时候，就会使用设置token时的subject
 
 files：邮件文件，支持多个文件
+
+使用方法：
+
+从下面链接中可以直接下载编译好的版本
+
+&#x20;<https://github.com/chuccp/d-mail/releases>
+
+解压直接后，直接运行即可，默认的端口号为12566，会生成一个配置文件，在配置文件中可以修改端口号，修改完成后，重启就可以使用修改后的端口号
+
+启动后使用ip:12566就可以进入管理系统
+
+系统配置：
+
+首次进入管理系统需要配置数据库以及后台的管理账号，数据库目前支持sqlite以及mysql。
+
+![initial](initial.png "initial")
+
+添加STMP地址
+
+![STMP](STMP.png "STMP")
+
+添加接收的邮件的邮件地址
+
+![mail](mail.png "mail")
+
+添加Token
+
+![token](token.png "token")
+
+添加完成后，就可以通过token给邮箱发信息了
+
+配置文件说明
+
+程序运行后会自动生成一个配置文件
+
+    [core]
+    init      = true   是否已经完成初始化，默认为false，完成数据库以及账号配置后，会变成true
+    cachePath = .cache  邮件发送文件时的临时缓存地址
+    dbType    = sqlite  数据库类型，目前支持sqlite和mysql
+
+    [sqlite]
+    filename = d-mail.db  sqlite文件路径
+
+    [manage]
+    port     = 12566      后台管理的端口号
+    username = 111111     后台管理的账号
+    password = 111111     后台管理的密码  
+    webPath  = web        静态文件路径 
+
+    [api]
+    port = 12566       发送邮件的端口号，也就是sendMail使用的端口号，假如不想与管理平台共用管理账号，则可以设置其它端口号
+
+    [mysql]
+    host     = 127.0.0.1  mysql主机地址
+    port     = 3306       mysql端口号
+    dbname   = d_mail     mysql数据库名称，如果要配置为mysql，需要提前创建数据库
+    charset  = utf8       编码格式，默认为utf8
+    username = root       mysql账号
+    password = 123456     Mysql密码

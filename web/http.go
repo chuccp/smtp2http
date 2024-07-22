@@ -5,7 +5,6 @@ import (
 	"github.com/chuccp/d-mail/util"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"log"
 	"net/http"
 	"path"
 	"strconv"
@@ -67,10 +66,8 @@ func (hs *HttpServer) StaticHandle(relativePath string, filepath string) {
 	hs.engine.Use(func(context *gin.Context) {
 		path_ := context.Request.URL.Path
 		if hs.HasPaths(path_) || context.Request.Method != "GET" {
-			log.Println("=====================")
 			context.Next()
 		} else {
-			log.Println("!!!!!!!!!!!!!!!!!")
 			if strings.Contains(path_, "/manifest.json") {
 				filePath := path.Join(filepath, "/manifest.json")
 				context.File(filePath)
