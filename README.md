@@ -38,7 +38,7 @@ Parameter description:
 - token: Obtained by manually adding in the management interface, the token is a unique value, bound with STMP and the email address to be received.
 - content: Email content.
 - subject: Email subject. When a token is generated, a subject is also set. When the parameter is empty, the subject set at the time of token generation will be used.
-- files: Email files, support for multiple files.
+- files: The file that needs to be sent, support for multiple files.
 
 Usage method:
 

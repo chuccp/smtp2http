@@ -41,7 +41,7 @@ content：邮件内容
 
 subject：邮件主题，在生成token的时候，也设置了一个subject，当参数给空的时候，就会使用设置token时的subject
 
-files：邮件文件，支持多个文件
+files：需要发送的文件，支持多个文件
 
 使用方法：
 
