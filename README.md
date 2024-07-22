@@ -13,7 +13,7 @@ curl  'http://127.0.0.1:12566/sendMail?token=99eaf30feb23e28057367431d820cf31991
 post请求例子
 
 ```powershell
-curl  'http://127.0.0.1:12567/sendMail?token=d6a1ee40c5bad981461643f5404a305a2e3f480cc6fcf65ba98efb63ce32d471&content=1212&subject=1212' \
+curl  'http://127.0.0.1:12566/sendMail?token=d6a1ee40c5bad981461643f5404a305a2e3f480cc6fcf65ba98efb63ce32d471&content=1212&subject=1212' \
 --header 'Content-Type: application/x-www-form-urlencoded' \
 --data-urlencode 'token=99eaf30feb23e28057367431d820cf319915792921d9cf21b5f761fb75433225' \
 --data-urlencode 'content=this is a test'
@@ -22,9 +22,9 @@ curl  'http://127.0.0.1:12567/sendMail?token=d6a1ee40c5bad981461643f5404a305a2e3
 发送带文件的邮件
 
 ```powershell
-curl  'http://127.0.0.1:12567/sendMail?token=d6a1ee40c5bad981461643f5404a305a2e3f480cc6fcf65ba98efb63ce32d471&content=1212&subject=1212' \
---form 'files=@"/C:/Users/cooge/Documents/111111.txt"' \
---form 'files=@"/C:/Users/cooge/Documents/22222222222222.txt"' \
+curl  'http://127.0.0.1:12566/sendMail?token=d6a1ee40c5bad981461643f5404a305a2e3f480cc6fcf65ba98efb63ce32d471&content=1212&subject=1212' \
+--form 'files=@"/111111.txt"' \
+--form 'files=@"/22222222222222.txt"' \
 --form 'token="d6a1ee40c5bad981461643f5404a305a2e3f480cc6fcf65ba98efb63ce32d471"' \
 --form 'content="1212"'
 ```
