@@ -77,7 +77,7 @@ After the program runs, it will automatically generate a configuration file.
 ```
 [core]
 init      = true   Whether initialization is complete, default is false, it will become true after the database and account configuration is completed
-cachePath = .cache   Temporary cache address when sending email files
+cachePath = .cache   Temporary cache path when sending email files
 dbType    = sqlite  Database type, currently supports sqlite and mysql
 
 [sqlite]
