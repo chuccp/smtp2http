@@ -1,4 +1,4 @@
-**English**🀄 | [简体中文🌎](./README_zh.md)
+**English**🌎 | [简体中文🀄](./README_zh.md)
 
 In the project, emails are often used to notify abnormal logs, but this requires configuring STMP in the project, as well as the email address that needs to receive emails. However, when the email address changes, it is necessary to modify the project's configuration file. Or due to network restrictions, STMP cannot be configured.
 
