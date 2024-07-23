@@ -46,6 +46,8 @@ You can directly download the compiled version from the following link:
 
 [Download from GitHub](https://github.com/chuccp/d-mail/releases)
 
+Attention: When downloading the Windows version using Chrome, a virus warning may be triggered, but in fact, there is no virus present. I am unsure how to adjust the settings to avoid such false reports.
+
 After decompression, you can run it directly. The default port number is 12566. A configuration file will be generated, and you can modify the port number in the configuration file. After modification, restart to use the modified port number.
 
 After starting, you can access the management system by opening the browser and entering the IP: 12566.
