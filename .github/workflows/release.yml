@@ -100,7 +100,7 @@ jobs:
       - name: Create ZIP archive
         run: |
           pushd build_assets || exit 1
-          tar -zxvf ../d-mail-${{ steps.get_filename.outputs.ASSET_NAME }}.tar.gz .
+          tar -czvf ../d-mail-${{ steps.get_filename.outputs.ASSET_NAME }}.tar.gz .
           popd || exit 1
           FILE=./d-mail-${{ steps.get_filename.outputs.ASSET_NAME }}.tar.gz
           DGST=$FILE.dgst
