@@ -97,7 +97,7 @@ jobs:
             d-mail.exe
           description: 'sign d-mail.exe'
 
-      - name: Create ZIP archive
+      - name: Create tar.gz archive
         run: |
           pushd build_assets || exit 1
           tar -czvf ../d-mail-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz .
