@@ -33,7 +33,7 @@ jobs:
           # END Other architectures
       fail-fast: false
 
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     env:
       GOOS: ${{ matrix.goos }}
       GOARCH: ${{ matrix.goarch }}
@@ -84,7 +84,18 @@ jobs:
         run: |
           cd ./build_assets || exit 1
           mv d-mail d-mail.exe
-      
+
+      - name: Sign Windows d-mail
+        if: matrix.goos == 'windows'
+        uses: dlemstra/code-sign-action@v1
+        with:
+          certificate: '${{ secrets.CERTIFICATE }}'
+          password: '${{ secrets.CERTIFICATE_PASSWORD }}'
+          folder: ''
+          recursive: true
+          files: |
+            d-mail.exe
+          description: 'sign d-mail.exe'
 
       - name: Create ZIP archive
         run: |
