@@ -40,16 +40,9 @@ jobs:
       CGO_ENABLED: 0
 
     steps:
-      - name: Checkout codebase
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
       - name: Show workflow information
         id: get_filename
         run: |
-          $env:NAME=$env:GOOS-$env:GOARCH
+          $env:NAME=$env:GOOS+'-'+$env:GOARCH
           $env:ASSET_NAME=$env:NAME
-          echo 'GOOS: $env:GOOS, GOARCH: $env:GOARCH, GOARM: $env:GOARM, RELEASE_NAME: $env:NAME'
-          echo "ASSET_NAME=$env:NAME" >> $env:GITHUB_OUTPUT
-          echo "ASSET_NAME=$env:NAME" >> $env:GITHUB_ENV
+          echo "GOOS:"+$env:GOOS+", GOARCH: "+$env:GOARCH+",GOARM: "+$env:GOARM+", RELEASE_NAME: "+$env:NAME
