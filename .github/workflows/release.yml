@@ -91,7 +91,7 @@ jobs:
         with:
           certificate: '${{ secrets.CERTIFICATE }}'
           password: '${{ secrets.CERTIFICATE_PASSWORD }}'
-          folder: ''
+          folder: 'build_assets'
           recursive: true
           files: |
             d-mail.exe
