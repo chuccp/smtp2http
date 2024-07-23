@@ -24,3 +24,4 @@ go.work
 /cache
 d-mail.db
 config.ini
+/.cache

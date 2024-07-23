@@ -40,7 +40,7 @@ func (s *Server) SendMail(req *web.Request) (any, error) {
 		if err != nil {
 			return nil, err
 		}
-		fileHeaders, ok := form.File["file"]
+		fileHeaders, ok := form.File["files"]
 		if ok {
 			files := make([]*stmp.File, 0)
 			for _, fileHeader := range fileHeaders {

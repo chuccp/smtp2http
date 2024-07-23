@@ -1,6 +1,7 @@
 package service
 
 import (
+	"encoding/json"
 	"errors"
 	"github.com/chuccp/d-mail/core"
 	"github.com/chuccp/d-mail/db"
@@ -34,13 +35,16 @@ func (a *Log) log(st *db.STMP, mails []*db.Mail, token string, subject, bodyStri
 	}
 	lg.Subject = subject
 	lg.Content = bodyString
+	if files != nil && len(files) > 0 {
+		marshal, err := json.Marshal(files)
+		if err == nil {
+			lg.Files = string(marshal)
+		}
+	}
 	if status == db.SUCCESS {
 		lg.Result = "success"
 		lg.Status = status
 	} else {
-		if files != nil && len(files) > 0 {
-
-		}
 		var ee *stmp.UserNotFoundError
 		ok := errors.As(err, &ee)
 		if ok {
