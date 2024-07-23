@@ -109,7 +109,7 @@ jobs:
           openssl dgst -sha256 $FILE | sed 's/([^)]*)//g' >>$DGST
           openssl dgst -sha512 $FILE | sed 's/([^)]*)//g' >>$DGST
 
-      - name: Upload ZIP file to Artifacts
+      - name: Upload tar.gz file to Artifacts
         uses: actions/upload-artifact@v3
         with:
           name: d-mail-${{ steps.get_filename.outputs.ASSET_NAME }}.tar.gz
