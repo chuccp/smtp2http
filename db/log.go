@@ -17,7 +17,7 @@ type Log struct {
 	Name       string    `gorm:"column:name" json:"name"`
 	Mail       string    `gorm:"column:mail" json:"mail"`
 	Token      string    `gorm:"column:token" json:"token"`
-	STMP       string    `gorm:"column:stmp" json:"stmp"`
+	SMTP       string    `gorm:"column:smtp" json:"smtp"`
 	Subject    string    `gorm:"column:subject" json:"subject"`
 	Content    string    `gorm:"column:content" json:"content"`
 	Files      string    `gorm:"column:files" json:"files"`

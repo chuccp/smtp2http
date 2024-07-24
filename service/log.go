@@ -18,13 +18,13 @@ func NewLog(context *core.Context) *Log {
 	return &Log{context: context}
 }
 
-func (a *Log) ContentSuccess(stmp *db.SMTP, mails []*db.Mail, token string, subject, bodyString string) error {
-	return a.log(stmp, mails, token, subject, bodyString, nil, db.SUCCESS, nil)
+func (a *Log) ContentSuccess(smtp *db.SMTP, mails []*db.Mail, token string, subject, bodyString string) error {
+	return a.log(smtp, mails, token, subject, bodyString, nil, db.SUCCESS, nil)
 }
 func (a *Log) log(st *db.SMTP, mails []*db.Mail, token string, subject, bodyString string, files []*smtp.File, status byte, err error) error {
 	var lg db.Log
 	lg.Token = token
-	lg.STMP = util.FormatMail(st.Username, st.Mail)
+	lg.SMTP = util.FormatMail(st.Username, st.Mail)
 	buffer := new(buffer.Buffer)
 	for _, mail := range mails {
 		buffer.AppendString(",")
@@ -57,13 +57,13 @@ func (a *Log) log(st *db.SMTP, mails []*db.Mail, token string, subject, bodyStri
 	}
 	return a.context.GetDb().GetLogModel().Save(&lg)
 }
-func (a *Log) FilesError(stmp *db.SMTP, mails []*db.Mail, files []*smtp.File, token string, subject, bodyString string, err error) error {
-	return a.log(stmp, mails, token, subject, bodyString, files, db.ERROR, err)
+func (a *Log) FilesError(smtp *db.SMTP, mails []*db.Mail, files []*smtp.File, token string, subject, bodyString string, err error) error {
+	return a.log(smtp, mails, token, subject, bodyString, files, db.ERROR, err)
 }
-func (a *Log) FilesSuccess(stmp *db.SMTP, mails []*db.Mail, files []*smtp.File, token string, subject, bodyString string) error {
-	return a.log(stmp, mails, token, subject, bodyString, files, db.SUCCESS, nil)
+func (a *Log) FilesSuccess(smtp *db.SMTP, mails []*db.Mail, files []*smtp.File, token string, subject, bodyString string) error {
+	return a.log(smtp, mails, token, subject, bodyString, files, db.SUCCESS, nil)
 }
 
-func (a *Log) ContentError(stmp *db.SMTP, mails []*db.Mail, token string, subject string, bodyString string, err error) error {
-	return a.log(stmp, mails, token, subject, bodyString, nil, db.ERROR, err)
+func (a *Log) ContentError(smtp *db.SMTP, mails []*db.Mail, token string, subject string, bodyString string, err error) error {
+	return a.log(smtp, mails, token, subject, bodyString, nil, db.ERROR, err)
 }
