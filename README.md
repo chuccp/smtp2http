@@ -1,105 +1,107 @@
-**English**🌎 | [简体中文🀄](./README_zh.md)
+**English**🌎 | [**简体中文**🀄](./README_zh.md)
 
-In the project, emails are often used to notify abnormal logs, but this requires configuring STMP in the project, as well as the email address that needs to receive emails. However, when the email address changes, it is necessary to modify the project's configuration file. Or due to network restrictions, STMP cannot be configured.
+In our projects, we often use email to notify about exception logs. However, this usually requires configuring SMTP within the project and providing the email address for receiving emails. When the email address changes, it necessitates modifying the project's configuration file. Additionally, due to network restrictions, it may be impossible to configure SMTP.
 
-This project uses an HTTP interface as an alternative to STMP. It only needs to configure the STMP and the email address that needs to receive emails within this project to achieve email sending.
+This program can replace SMTP with an HTTP interface, simplifying the process of sending emails. You only need to configure SMTP and the email address for receiving emails on the management page to achieve email sending via HTTP.
 
 Supports GET and POST requests.
 
-Example of GET request:
+**GET Request Example**:
 
 ```powershell
 curl 'http://127.0.0.1:12566/sendMail?token=99eaf30feb23e28057367431d820cf319915792921d9cf21b5f761fb75433225&content=this%20is%20a%20test'
 ```
 
-Example of POST request:
+**POST Request Example**:
 
 ```powershell
-curl 'http://127.0.0.1:12566/sendMail' \
+curl -X POST 'http://127.0.0.1:12566/sendMail' \
 --header 'Content-Type: application/x-www-form-urlencoded' \
 --data-urlencode 'token=99eaf30feb23e28057367431d820cf319915792921d9cf21b5f761fb75433225' \
---data-urlencode 'content=this is a test'
+--data-urlencode 'content=this%20is%20a%20test'
 ```
 
-Sending an email with attachments:
+**Example of Sending an Email with Attachments**:
 
 ```powershell
-curl 'http://127.0.0.1:12566/sendMail' \
+curl -X POST 'http://127.0.0.1:12566/sendMail' \
 --form 'files=@"/111111.txt"' \
 --form 'files=@"/22222222222222.txt"' \
---form 'token="d6a1ee40c5bad981461643f5404a305a2e3f480cc6fcf65ba98efb63ce32d471"' \
---form 'content="1212"'
+--form 'token=d6a1ee40c5bad981461643f5404a305a2e3f480cc6fcf65ba98efb63ce32d471"' \
+--form 'content=1212'
 ```
 
-In fact, it is a simple form submission, so different languages and platforms can make good use of this project.
+This method is essentially a simple form submission, making it easy for different languages and platforms to use this project.
 
-Parameter description:
+**Parameter Description**:
 
-- token: Obtained by manually adding in the management interface, the token is a unique value, bound with STMP and the email address to be received.
-- content: Email content.
-- subject: Email subject. When a token is generated, a subject is also set. When the parameter is empty, the subject set at the time of token generation will be used.
-- files: The file that needs to be sent, support for multiple files.
+- `token`: Manually added in the management interface, it is the unique value bound with SMTP and the receiving email address.
+- `content`: The content of the email.
+- `subject`: The subject of the email. If a subject is set when the token is generated, it will be used as the default subject if this parameter is empty.
+- `files`: The attachments to be sent, supports multiple files.
 
-Usage method:
+**Usage Method**:
 
 You can directly download the compiled version from the following link:
 
 [Download from GitHub](https://github.com/chuccp/d-mail/releases)
 
-Attention: When downloading the Windows version using Chrome, a virus warning may be triggered, but in fact, there is no virus present. I am unsure how to adjust the settings to avoid such false reports.
+**Note**: When downloading the Windows version with Chrome, there may be a false positive virus report. In fact, there is no virus.
 
-After decompression, you can run it directly. The default port number is 12566. A configuration file will be generated, and you can modify the port number in the configuration file. After modification, restart to use the modified port number.
+After downloading and extracting, you can run it directly. The default port number is 12566. After the program runs, it will generate a configuration file where you can modify the port number. After modification, restart the program to use the new port number.
 
-After starting, you can access the management system by opening the browser and entering the IP: 12566.
-For example: http://127.0.0.1:12566
+After starting, you can enter the management interface by opening a browser to `http://127.0.0.1:12566`.
 
-System configuration:
+**Configuration File Description**:
 
-When entering the management system for the first time, you need to configure the database and the background management account. The database currently supports sqlite and mysql.
-
-![initial](initial.png "initial")
-
-Add STMP address
-
-![STMP](STMP.png "STMP")
-
-Add the email address to receive emails
-
-![mail](mail.png "mail")
-
-Add Token
-
-![token](token.png "token")
-
-After adding, you can send messages to the mailbox through the token.
-
-Configuration file description:
-
-After the program runs, it will automatically generate a configuration file.
+After the program runs, it automatically generates a configuration file, including the following sections:
 
 ```
 [core]
-init      = true   Whether initialization is complete, default is false, it will become true after the database and account configuration is completed
-cachePath = .cache   Temporary cache path when sending email files
-dbType    = sqlite  Database type, currently supports sqlite and mysql
+init      = true   # Whether initialization is complete, default is false
+cachePath = .cache  # Temporary cache address for email sending files
+dbType    = sqlite  # Database type, currently supports sqlite and mysql
 
 [sqlite]
-filename = d-mail.db  SQLite file path
+filename = d-mail.db  # SQLite file path
 
 [manage]
-port     = 12566      Backend management port number
-username = 111111     Backend management account
-password = 111111     Backend management password
-webPath  = web        Static file path
+port     = 12566      # Port number for backend management
+username = 111111     # Backend management account
+password = 111111     # Backend management password
+webPath  = web        # Static file path
 
 [api]
-port = 12566       Port number for sending emails, which is also the port number used by sendMail. If you do not want to share the management account with the management platform, you can set another port number
+port = 12566          # Port number for sending emails, if you do not want to share the port number with the management backend, you can change it to another port number
 
 [mysql]
-host     = 127.0.0.1  MySQL host address
-port     = 3306       MySQL port number
-dbname   = d_mail     MySQL database name, if configured as mysql, you need to create the database in advance
-charset  = utf8       Encoding format, default is utf8
-username = root       MySQL account
-password = 123456     MySQL password
+host     = 127.0.0.1  # MySQL host address
+port     = 3306       # MySQL port number
+dbname   = d_mail     # MySQL database name
+charset  = utf8       # Encoding format, default is utf8
+username = root       # MySQL account
+password = 123456     # MySQL password
 ```
+
+---
+
+**Software Operation**:
+
+When you first enter the management backend, you need to configure the database and the backend management account. Currently, SQLite and MySQL databases are supported.
+
+![initial](initial.png "Initial Configuration")
+
+Add SMTP address:
+
+![SMTP Configuration](STMP.png "SMTP Configuration")
+
+Add the email address for receiving emails:
+
+![Mail Configuration](mail.png "Mail Configuration")
+
+Add Token:
+
+![Token Configuration](token.png "Token Configuration")
+
+After the configuration is complete, you can use the Token to send messages to the email.
+
