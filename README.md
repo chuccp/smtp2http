@@ -59,7 +59,7 @@ After the program runs, it automatically generates a configuration file, includi
 ```
 [core]
 init      = true   # Whether initialization is complete, default is false
-cachePath = .cache  # Temporary cache address for email sending files
+cachePath = .cache  # Temporary cache path for email sending files
 dbType    = sqlite  # Database type, currently supports sqlite and mysql
 
 [sqlite]
@@ -84,6 +84,11 @@ password = 123456     # MySQL password
 ```
 
 ---
+
+**Compilation Instructions**:
+
+If you wish to compile the project yourself, you will need to compile not only this project but also the web page found at https://github.com/chuccp/d-mail-view.
+
 
 **Software Operation**:
 

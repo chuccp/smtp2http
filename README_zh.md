@@ -59,7 +59,7 @@ curl -X POST 'http://127.0.0.1:12566/sendMail' \
 ```
 [core]
 init      = true   # 是否已经完成初始化，默认为false
-cachePath = .cache  # 邮件发送文件的临时缓存地址
+cachePath = .cache  # 邮件发送文件的临时缓存路径
 dbType    = sqlite  # 数据库类型，目前支持sqlite和mysql
 
 [sqlite]
@@ -69,7 +69,7 @@ filename = d-mail.db  # SQLite文件路径
 port     = 12566      # 后台管理的端口号
 username = 111111     # 后台管理的账号
 password = 111111     # 后台管理的密码
-webPath  = web        # 静态文件路径
+webPath  = web        # web静态文件路径
 
 [api]
 port = 12566          # 发送邮件的端口号，如果不想与管理后台共用端口号，可以改成其它端口号
@@ -84,6 +84,10 @@ password = 123456     # MySQL密码
 ```
 
 ---
+
+**编译说明**：
+
+如果想自行编译，除了需要编译本项目的外，还需要编译web页面 https://github.com/chuccp/d-mail-view
 
 **软件操作**：
 
