@@ -52,58 +52,58 @@ func (a *STMPModel) Save(stmp *SMTP) error {
 	return a.Model.Save(stmp)
 }
 func (a *STMPModel) GetOne(id uint) (*SMTP, error) {
-	var stmp SMTP
-	err := a.Model.GetOne(id, &stmp)
+	var smtp SMTP
+	err := a.Model.GetOne(id, &smtp)
 	if err != nil {
 		return nil, err
 	}
-	stmp.Name = stmp.Username
-	return &stmp, nil
+	smtp.Name = smtp.Username
+	return &smtp, nil
 }
 
 func (a *STMPModel) GetByIds(id []uint) ([]*SMTP, error) {
-	var stmps []*SMTP
-	err := a.Model.GetByIds(id, &stmps)
+	var smtps []*SMTP
+	err := a.Model.GetByIds(id, &smtps)
 	if err != nil {
 		return nil, err
 	}
-	for _, stmp := range stmps {
-		stmp.Name = stmp.Username
+	for _, smtp := range smtps {
+		smtp.Name = smtp.Username
 	}
-	return stmps, nil
+	return smtps, nil
 }
 
 func (a *STMPModel) GetMapByIds(id []uint) (map[uint]*SMTP, error) {
-	STMPs, err := a.GetByIds(id)
+	SMTPs, err := a.GetByIds(id)
 	if err != nil {
 		return nil, err
 	}
-	var STMPMap = make(map[uint]*SMTP)
-	for _, st := range STMPs {
-		STMPMap[st.Id] = st
+	var SMTPMap = make(map[uint]*SMTP)
+	for _, st := range SMTPs {
+		SMTPMap[st.Id] = st
 	}
-	return STMPMap, nil
+	return SMTPMap, nil
 }
 
 func (a *STMPModel) DeleteOne(id uint) error {
 	return a.Model.DeleteOne(id, &SMTP{})
 }
 
-func (a *STMPModel) Edit(stmp *SMTP) error {
-	return a.Model.Edit(stmp)
+func (a *STMPModel) Edit(smtp *SMTP) error {
+	return a.Model.Edit(smtp)
 }
 
 func (a *STMPModel) NewModel(db *gorm.DB) *STMPModel {
 	return &STMPModel{db: db, tableName: a.tableName}
 }
 func (a *STMPModel) Page(page *web.Page) (*Page[*SMTP], error) {
-	var stmps []*SMTP
-	num, err := a.Model.Page(page, &stmps)
+	var smtps []*SMTP
+	num, err := a.Model.Page(page, &smtps)
 	if err != nil {
 		return nil, err
 	}
-	for _, stmp := range stmps {
-		stmp.Name = stmp.Username
+	for _, smtp := range smtps {
+		smtp.Name = smtp.Username
 	}
-	return ToPage[*SMTP](num, stmps), nil
+	return ToPage[*SMTP](num, smtps), nil
 }
