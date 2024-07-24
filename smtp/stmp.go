@@ -56,27 +56,27 @@ func SendTestMsg(st *db.SMTP) error {
 	}
 	return sendTestMsg(&SMTP{Username: st.Username, Mail: st.Mail, Password: st.Password, Host: st.Host, Port: st.Port})
 }
-func SendContentMsg(stmp *db.SMTP, mails []*db.Mail, subject, bodyString string) error {
-	STMP := &SMTP{Username: stmp.Username, Mail: stmp.Mail, Password: stmp.Password, Host: stmp.Host, Port: stmp.Port}
+func SendContentMsg(smtp *db.SMTP, mails []*db.Mail, subject, bodyString string) error {
+	SMTP := &SMTP{Username: smtp.Username, Mail: smtp.Mail, Password: smtp.Password, Host: smtp.Host, Port: smtp.Port}
 	receiveEmails := make([]*Mail, 0)
 	for _, d := range mails {
 		receiveEmails = append(receiveEmails, &Mail{Name: d.Name, Mail: d.Mail})
 	}
 	var sendMsg SendMsg
-	sendMsg.SendMail = STMP
+	sendMsg.SendMail = SMTP
 	sendMsg.ReceiveEmails = receiveEmails
 	sendMsg.Subject = subject
 	sendMsg.BodyString = bodyString
 	return SendMail(&sendMsg)
 }
-func SendFilesMsg(stmp *db.SMTP, mails []*db.Mail, files []*File, subject, bodyString string) error {
-	STMP := &SMTP{Username: stmp.Username, Mail: stmp.Mail, Password: stmp.Password, Host: stmp.Host, Port: stmp.Port}
+func SendFilesMsg(smtp *db.SMTP, mails []*db.Mail, files []*File, subject, bodyString string) error {
+	SMTP := &SMTP{Username: smtp.Username, Mail: smtp.Mail, Password: smtp.Password, Host: smtp.Host, Port: smtp.Port}
 	receiveEmails := make([]*Mail, 0)
 	for _, d := range mails {
 		receiveEmails = append(receiveEmails, &Mail{Name: d.Name, Mail: d.Mail})
 	}
 	var sendMsg SendMsg
-	sendMsg.SendMail = STMP
+	sendMsg.SendMail = SMTP
 	sendMsg.ReceiveEmails = receiveEmails
 	sendMsg.Subject = subject
 	sendMsg.BodyString = bodyString
