@@ -1,7 +1,7 @@
 package db
 
 type Data interface {
-	*STMP | any
+	*SMTP | any
 }
 
 type Page[T Data] struct {

@@ -13,9 +13,9 @@ type Token struct {
 	ReceiveEmailIds  string    `gorm:"column:receive_emails" json:"receiveEmailIds"`
 	ReceiveEmails    []*Mail   `gorm:"-" json:"receiveEmails"`
 	ReceiveEmailsStr string    `gorm:"-" json:"receiveEmailsStr"`
-	STMPId           uint      `gorm:"column:STMP_Id" json:"STMPId"`
-	STMP             *STMP     `gorm:"-" json:"STMP"`
-	STMPStr          string    `gorm:"-" json:"STMPStr"`
+	SMTPId           uint      `gorm:"column:SMTP_Id" json:"SMTPId"`
+	SMTP             *SMTP     `gorm:"-" json:"SMTP"`
+	SMTPStr          string    `gorm:"-" json:"SMTPStr"`
 	IsUse            bool      `gorm:"column:is_use" json:"isUse"`
 	CreateTime       time.Time `gorm:"column:create_time" json:"createTime"`
 	UpdateTime       time.Time `gorm:"column:update_time" json:"updateTime"`
@@ -81,7 +81,7 @@ func (a *TokenModel) Edit(token *Token) error {
 		"is_use":         token.IsUse,
 		"update_time":    time.Now(),
 		"receive_emails": token.ReceiveEmailIds,
-		"STMP_Id":        token.STMPId,
+		"SMTP_Id":        token.SMTPId,
 	})
 }
 

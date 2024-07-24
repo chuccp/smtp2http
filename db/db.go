@@ -17,8 +17,8 @@ type DB struct {
 	err error
 }
 
-func (d *DB) GetSTMPModel() *STMPModel {
-	return NewSTMPModel(d.db, "t_STMP")
+func (d *DB) GetSMTPModel() *STMPModel {
+	return NewSMTPModel(d.db, "t_SMTP")
 }
 func (d *DB) GetMailModel() *MailModel {
 	return NewMailModel(d.db, "t_mail")

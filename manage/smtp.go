@@ -3,44 +3,44 @@ package manage
 import (
 	"github.com/chuccp/d-mail/core"
 	"github.com/chuccp/d-mail/db"
-	stmp2 "github.com/chuccp/d-mail/stmp"
+	stmp2 "github.com/chuccp/d-mail/smtp"
 	"github.com/chuccp/d-mail/web"
 	"net/mail"
 	"strconv"
 )
 
-type Stmp struct {
+type Smtp struct {
 	context *core.Context
 }
 
-func (stmp *Stmp) getOne(req *web.Request) (any, error) {
+func (smtp *Smtp) getOne(req *web.Request) (any, error) {
 	id := req.Param("id")
 	atoi, err := strconv.Atoi(id)
 	if err != nil {
 		return nil, err
 	}
-	one, err := stmp.context.GetDb().GetSTMPModel().GetOne(uint(atoi))
+	one, err := smtp.context.GetDb().GetSMTPModel().GetOne(uint(atoi))
 	if err != nil {
 		return nil, err
 	}
 	return one, nil
 
 }
-func (stmp *Stmp) deleteOne(req *web.Request) (any, error) {
+func (smtp *Smtp) deleteOne(req *web.Request) (any, error) {
 	id := req.Param("id")
 	atoi, err := strconv.Atoi(id)
 	if err != nil {
 		return nil, err
 	}
-	err = stmp.context.GetDb().GetSTMPModel().DeleteOne(uint(atoi))
+	err = smtp.context.GetDb().GetSMTPModel().DeleteOne(uint(atoi))
 	if err != nil {
 		return nil, err
 	}
 	return "ok", nil
 
 }
-func (stmp *Stmp) postOne(req *web.Request) (any, error) {
-	var st db.STMP
+func (smtp *Smtp) postOne(req *web.Request) (any, error) {
+	var st db.SMTP
 	err := req.ShouldBindBodyWithJSON(&st)
 	if err != nil {
 		return nil, err
@@ -51,15 +51,15 @@ func (stmp *Stmp) postOne(req *web.Request) (any, error) {
 		return nil, err
 	}
 
-	err = stmp.context.GetDb().GetSTMPModel().Save(&st)
+	err = smtp.context.GetDb().GetSMTPModel().Save(&st)
 	if err != nil {
 		return nil, err
 	}
 	return "ok", nil
 
 }
-func (stmp *Stmp) putOne(req *web.Request) (any, error) {
-	var st db.STMP
+func (smtp *Smtp) putOne(req *web.Request) (any, error) {
+	var st db.SMTP
 	err := req.ShouldBindBodyWithJSON(&st)
 	if err != nil {
 		return nil, err
@@ -68,15 +68,15 @@ func (stmp *Stmp) putOne(req *web.Request) (any, error) {
 	if err != nil {
 		return nil, err
 	}
-	err = stmp.context.GetDb().GetSTMPModel().Edit(&st)
+	err = smtp.context.GetDb().GetSMTPModel().Edit(&st)
 	if err != nil {
 		return nil, err
 	}
 	return "ok", nil
 
 }
-func (stmp *Stmp) test(req *web.Request) (any, error) {
-	var st db.STMP
+func (smtp *Smtp) test(req *web.Request) (any, error) {
+	var st db.SMTP
 	err := req.ShouldBindBodyWithJSON(&st)
 	if err != nil {
 		return nil, err
@@ -92,20 +92,20 @@ func (stmp *Stmp) test(req *web.Request) (any, error) {
 	return "ok", nil
 
 }
-func (stmp *Stmp) getPage(req *web.Request) (any, error) {
+func (smtp *Smtp) getPage(req *web.Request) (any, error) {
 	page := req.GetPage()
-	p, err := stmp.context.GetDb().GetSTMPModel().Page(page)
+	p, err := smtp.context.GetDb().GetSMTPModel().Page(page)
 	if err != nil {
 		return nil, err
 	}
 	return p, nil
 }
-func (stmp *Stmp) Init(context *core.Context, server core.IHttpServer) {
-	stmp.context = context
-	server.GETAuth("/stmp/:id", stmp.getOne)
-	server.DELETEAuth("/stmp/:id", stmp.deleteOne)
-	server.GETAuth("/stmp", stmp.getPage)
-	server.POSTAuth("/stmp", stmp.postOne)
-	server.POSTAuth("/test", stmp.test)
-	server.PUTAuth("/stmp", stmp.putOne)
+func (smtp *Smtp) Init(context *core.Context, server core.IHttpServer) {
+	smtp.context = context
+	server.GETAuth("/smtp/:id", smtp.getOne)
+	server.DELETEAuth("/smtp/:id", smtp.deleteOne)
+	server.GETAuth("/smtp", smtp.getPage)
+	server.POSTAuth("/smtp", smtp.postOne)
+	server.POSTAuth("/test", smtp.test)
+	server.PUTAuth("/smtp", smtp.putOne)
 }

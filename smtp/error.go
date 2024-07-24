@@ -1,4 +1,4 @@
-package stmp
+package smtp
 
 import "strings"
 

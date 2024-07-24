@@ -45,7 +45,7 @@ func (token *Token) supplement(st ...*db.Token) {
 	stmpIds := make([]uint, 0)
 	for _, d := range st {
 		mailIds = append(mailIds, util.StringToUintIds(d.ReceiveEmailIds)...)
-		stmpIds = append(stmpIds, d.STMPId)
+		stmpIds = append(stmpIds, d.SMTPId)
 	}
 	mailMap, err := token.context.GetDb().GetMailModel().GetMapByIds(mailIds)
 	if err == nil {
@@ -56,12 +56,12 @@ func (token *Token) supplement(st ...*db.Token) {
 		}
 	}
 
-	idsMap, err := token.context.GetDb().GetSTMPModel().GetMapByIds(stmpIds)
+	idsMap, err := token.context.GetDb().GetSMTPModel().GetMapByIds(stmpIds)
 	if err == nil {
 		for _, d := range st {
-			d.STMP = idsMap[d.STMPId]
-			if d.STMP != nil {
-				d.STMPStr = d.STMP.Name
+			d.SMTP = idsMap[d.SMTPId]
+			if d.SMTP != nil {
+				d.SMTPStr = d.SMTP.Name
 			}
 		}
 	}

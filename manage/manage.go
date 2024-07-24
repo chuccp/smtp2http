@@ -27,7 +27,7 @@ func (s *Server) addManage(manage manage) {
 func (s *Server) Init(context *core.Context) {
 	s.context = context
 	s.manages = make([]manage, 0)
-	s.addManage(&Stmp{})
+	s.addManage(&Smtp{})
 	s.addManage(&Mail{})
 	s.addManage(&Set{})
 	s.addManage(&Token{})

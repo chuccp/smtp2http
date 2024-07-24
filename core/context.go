@@ -91,7 +91,7 @@ func (c *Context) initDbBySetInfo(setInfo *config.SetInfo) error {
 		return err
 	}
 	c.db = _db_
-	c.db.GetSTMPModel().CreateTable()
+	c.db.GetSMTPModel().CreateTable()
 	c.db.GetMailModel().CreateTable()
 	c.db.GetTokenModel().CreateTable()
 	c.db.GetLogModel().CreateTable()
@@ -105,7 +105,7 @@ func (c *Context) initDb() error {
 			return err
 		}
 		c.db = _db_
-		c.db.GetSTMPModel().CreateTable()
+		c.db.GetSMTPModel().CreateTable()
 		c.db.GetMailModel().CreateTable()
 		c.db.GetTokenModel().CreateTable()
 		c.db.GetLogModel().CreateTable()

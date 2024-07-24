@@ -3,7 +3,7 @@ package api
 import (
 	"github.com/chuccp/d-mail/core"
 	"github.com/chuccp/d-mail/service"
-	"github.com/chuccp/d-mail/stmp"
+	"github.com/chuccp/d-mail/smtp"
 	"github.com/chuccp/d-mail/util"
 	"github.com/chuccp/d-mail/web"
 	"os"
@@ -42,7 +42,7 @@ func (s *Server) SendMail(req *web.Request) (any, error) {
 		}
 		fileHeaders, ok := form.File["files"]
 		if ok {
-			files := make([]*stmp.File, 0)
+			files := make([]*smtp.File, 0)
 			for _, fileHeader := range fileHeaders {
 				filePath := util.GetCachePath(cachePath, fileHeader.Filename)
 				err := web.SaveUploadedFile(fileHeader, filePath)
@@ -53,15 +53,15 @@ func (s *Server) SendMail(req *web.Request) (any, error) {
 				if err != nil {
 					return nil, err
 				}
-				files = append(files, &stmp.File{File: file, Name: fileHeader.Filename, FilePath: filePath})
+				files = append(files, &smtp.File{File: file, Name: fileHeader.Filename, FilePath: filePath})
 			}
 			if len(files) > 0 {
-				err := stmp.SendFilesMsg(byToken.STMP, byToken.ReceiveEmails, files, subject, content)
+				err := smtp.SendFilesMsg(byToken.SMTP, byToken.ReceiveEmails, files, subject, content)
 				if err != nil {
-					s.log.FilesError(byToken.STMP, byToken.ReceiveEmails, files, token, subject, content, err)
+					s.log.FilesError(byToken.SMTP, byToken.ReceiveEmails, files, token, subject, content, err)
 					return nil, err
 				} else {
-					s.log.FilesSuccess(byToken.STMP, byToken.ReceiveEmails, files, token, subject, content)
+					s.log.FilesSuccess(byToken.SMTP, byToken.ReceiveEmails, files, token, subject, content)
 				}
 			}
 		}
@@ -69,12 +69,12 @@ func (s *Server) SendMail(req *web.Request) (any, error) {
 		if len(subject) == 0 {
 			subject = byToken.Subject
 		}
-		err := stmp.SendContentMsg(byToken.STMP, byToken.ReceiveEmails, subject, content)
+		err := smtp.SendContentMsg(byToken.SMTP, byToken.ReceiveEmails, subject, content)
 		if err != nil {
-			s.log.ContentError(byToken.STMP, byToken.ReceiveEmails, token, subject, content, err)
+			s.log.ContentError(byToken.SMTP, byToken.ReceiveEmails, token, subject, content, err)
 			return nil, err
 		} else {
-			s.log.ContentSuccess(byToken.STMP, byToken.ReceiveEmails, token, subject, content)
+			s.log.ContentSuccess(byToken.SMTP, byToken.ReceiveEmails, token, subject, content)
 		}
 	}
 	return "ok", nil

@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-type STMP struct {
+type SMTP struct {
 	Id         uint      `gorm:"primaryKey;autoIncrement;column:id" json:"id"`
 	Host       string    `gorm:"column:host" json:"host"`
 	Port       int       `gorm:"column:port" json:"port"`
@@ -18,41 +18,41 @@ type STMP struct {
 	UpdateTime time.Time `gorm:"column:update_time" json:"updateTime"`
 }
 
-func (stmp *STMP) SetCreateTime(createTime time.Time) {
-	stmp.CreateTime = createTime
+func (smtp *SMTP) SetCreateTime(createTime time.Time) {
+	smtp.CreateTime = createTime
 }
-func (stmp *STMP) SetUpdateTime(updateTime time.Time) {
-	stmp.UpdateTime = updateTime
+func (smtp *SMTP) SetUpdateTime(updateTime time.Time) {
+	smtp.UpdateTime = updateTime
 }
-func (stmp *STMP) GetId() uint {
-	return stmp.Id
+func (smtp *SMTP) GetId() uint {
+	return smtp.Id
 }
-func (stmp *STMP) SetId(id uint) {
-	stmp.Id = id
+func (smtp *SMTP) SetId(id uint) {
+	smtp.Id = id
 }
 
 type STMPModel struct {
-	*Model[*STMP]
+	*Model[*SMTP]
 	db        *gorm.DB
 	tableName string
 }
 
-func NewSTMPModel(db *gorm.DB, tableName string) *STMPModel {
-	return &STMPModel{db: db, tableName: tableName, Model: NewModel[*STMP](db, tableName)}
+func NewSMTPModel(db *gorm.DB, tableName string) *STMPModel {
+	return &STMPModel{db: db, tableName: tableName, Model: NewModel[*SMTP](db, tableName)}
 }
 
 func (a *STMPModel) CreateTable() error {
-	return a.Model.CreateTable(&STMP{})
+	return a.Model.CreateTable(&SMTP{})
 }
 func (a *STMPModel) DeleteTable() error {
-	return a.Model.DeleteTable(&STMP{})
+	return a.Model.DeleteTable(&SMTP{})
 }
 
-func (a *STMPModel) Save(stmp *STMP) error {
+func (a *STMPModel) Save(stmp *SMTP) error {
 	return a.Model.Save(stmp)
 }
-func (a *STMPModel) GetOne(id uint) (*STMP, error) {
-	var stmp STMP
+func (a *STMPModel) GetOne(id uint) (*SMTP, error) {
+	var stmp SMTP
 	err := a.Model.GetOne(id, &stmp)
 	if err != nil {
 		return nil, err
@@ -61,8 +61,8 @@ func (a *STMPModel) GetOne(id uint) (*STMP, error) {
 	return &stmp, nil
 }
 
-func (a *STMPModel) GetByIds(id []uint) ([]*STMP, error) {
-	var stmps []*STMP
+func (a *STMPModel) GetByIds(id []uint) ([]*SMTP, error) {
+	var stmps []*SMTP
 	err := a.Model.GetByIds(id, &stmps)
 	if err != nil {
 		return nil, err
@@ -73,12 +73,12 @@ func (a *STMPModel) GetByIds(id []uint) ([]*STMP, error) {
 	return stmps, nil
 }
 
-func (a *STMPModel) GetMapByIds(id []uint) (map[uint]*STMP, error) {
+func (a *STMPModel) GetMapByIds(id []uint) (map[uint]*SMTP, error) {
 	STMPs, err := a.GetByIds(id)
 	if err != nil {
 		return nil, err
 	}
-	var STMPMap = make(map[uint]*STMP)
+	var STMPMap = make(map[uint]*SMTP)
 	for _, st := range STMPs {
 		STMPMap[st.Id] = st
 	}
@@ -86,18 +86,18 @@ func (a *STMPModel) GetMapByIds(id []uint) (map[uint]*STMP, error) {
 }
 
 func (a *STMPModel) DeleteOne(id uint) error {
-	return a.Model.DeleteOne(id, &STMP{})
+	return a.Model.DeleteOne(id, &SMTP{})
 }
 
-func (a *STMPModel) Edit(stmp *STMP) error {
+func (a *STMPModel) Edit(stmp *SMTP) error {
 	return a.Model.Edit(stmp)
 }
 
 func (a *STMPModel) NewModel(db *gorm.DB) *STMPModel {
 	return &STMPModel{db: db, tableName: a.tableName}
 }
-func (a *STMPModel) Page(page *web.Page) (*Page[*STMP], error) {
-	var stmps []*STMP
+func (a *STMPModel) Page(page *web.Page) (*Page[*SMTP], error) {
+	var stmps []*SMTP
 	num, err := a.Model.Page(page, &stmps)
 	if err != nil {
 		return nil, err
@@ -105,5 +105,5 @@ func (a *STMPModel) Page(page *web.Page) (*Page[*STMP], error) {
 	for _, stmp := range stmps {
 		stmp.Name = stmp.Username
 	}
-	return ToPage[*STMP](num, stmps), nil
+	return ToPage[*SMTP](num, stmps), nil
 }

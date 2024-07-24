@@ -1,4 +1,4 @@
-package stmp
+package smtp
 
 import (
 	"errors"
@@ -13,7 +13,7 @@ type Mail struct {
 	Name string
 	Mail string
 }
-type STMP struct {
+type SMTP struct {
 	Username string
 	Mail     string
 	Password string
@@ -31,20 +31,20 @@ type SendMsg struct {
 	Subject       string
 	BodyString    string
 	ReceiveEmails []*Mail
-	SendMail      *STMP
+	SendMail      *SMTP
 	ff            []*File
 }
 
-func sendTestMsg(STMP *STMP) error {
+func sendTestMsg(Smtp *SMTP) error {
 	var sendMsg SendMsg
-	sendMsg.SendMail = STMP
-	sendMsg.ReceiveEmails = []*Mail{{Name: STMP.Username, Mail: STMP.Mail}}
+	sendMsg.SendMail = Smtp
+	sendMsg.ReceiveEmails = []*Mail{{Name: Smtp.Username, Mail: Smtp.Mail}}
 	sendMsg.Subject = "mail test"
 	sendMsg.BodyString = " this is a test"
 	return SendMail(&sendMsg)
 }
 
-func SendTestMsg(st *db.STMP) error {
+func SendTestMsg(st *db.SMTP) error {
 	if len(st.Username) == 0 {
 		return errors.New("username cannot be empty")
 	}
@@ -54,10 +54,10 @@ func SendTestMsg(st *db.STMP) error {
 	if len(st.Host) == 0 {
 		return errors.New("host cannot be empty")
 	}
-	return sendTestMsg(&STMP{Username: st.Username, Mail: st.Mail, Password: st.Password, Host: st.Host, Port: st.Port})
+	return sendTestMsg(&SMTP{Username: st.Username, Mail: st.Mail, Password: st.Password, Host: st.Host, Port: st.Port})
 }
-func SendContentMsg(stmp *db.STMP, mails []*db.Mail, subject, bodyString string) error {
-	STMP := &STMP{Username: stmp.Username, Mail: stmp.Mail, Password: stmp.Password, Host: stmp.Host, Port: stmp.Port}
+func SendContentMsg(stmp *db.SMTP, mails []*db.Mail, subject, bodyString string) error {
+	STMP := &SMTP{Username: stmp.Username, Mail: stmp.Mail, Password: stmp.Password, Host: stmp.Host, Port: stmp.Port}
 	receiveEmails := make([]*Mail, 0)
 	for _, d := range mails {
 		receiveEmails = append(receiveEmails, &Mail{Name: d.Name, Mail: d.Mail})
@@ -69,8 +69,8 @@ func SendContentMsg(stmp *db.STMP, mails []*db.Mail, subject, bodyString string)
 	sendMsg.BodyString = bodyString
 	return SendMail(&sendMsg)
 }
-func SendFilesMsg(stmp *db.STMP, mails []*db.Mail, files []*File, subject, bodyString string) error {
-	STMP := &STMP{Username: stmp.Username, Mail: stmp.Mail, Password: stmp.Password, Host: stmp.Host, Port: stmp.Port}
+func SendFilesMsg(stmp *db.SMTP, mails []*db.Mail, files []*File, subject, bodyString string) error {
+	STMP := &SMTP{Username: stmp.Username, Mail: stmp.Mail, Password: stmp.Password, Host: stmp.Host, Port: stmp.Port}
 	receiveEmails := make([]*Mail, 0)
 	for _, d := range mails {
 		receiveEmails = append(receiveEmails, &Mail{Name: d.Name, Mail: d.Mail})
