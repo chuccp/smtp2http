@@ -1,6 +1,7 @@
 package login
 
 import (
+	"errors"
 	"github.com/chuccp/d-mail/util"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -107,7 +108,7 @@ func (digestAuth *DigestAuth) JustCheck(ctx *gin.Context) (any, error) {
 		return nil, nil
 	}
 	ctx.Status(http.StatusUnauthorized)
-	return "login timeout", nil
+	return "login timeout", errors.New("login timeout, please refresh the page")
 }
 
 func (digestAuth *DigestAuth) HasSign(ctx *gin.Context) bool {
