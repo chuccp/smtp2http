@@ -1,6 +1,8 @@
 module github.com/chuccp/d-mail
 
-go 1.22.2
+go 1.21
+
+toolchain go1.21.4
 
 require (
 	github.com/gin-contrib/cors v1.7.2
