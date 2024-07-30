@@ -77,7 +77,7 @@ jobs:
 
       - name: Build d-mail
         run: |
-          go build -v -o build_assets/d-mail -trimpath -ldflags "-s -w -buildid=" ./
+          go build -v -o build_assets/d-mail  ./
 
       - name: Rename Windows d-mail
         if: matrix.goos == 'windows'
