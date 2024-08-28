@@ -31,9 +31,12 @@ func (log *Log) getPage(req *web.Request) (any, error) {
 	}
 	return p, nil
 }
-
+func (log *Log) downLoad(req *web.Request) (any, error) {
+	return nil, nil
+}
 func (log *Log) Init(context *core.Context, server core.IHttpServer) {
 	log.context = context
 	server.GETAuth("/log/:id", log.getOne)
 	server.GETAuth("/log", log.getPage)
+	server.GETAuth("/downLoad", log.downLoad)
 }
