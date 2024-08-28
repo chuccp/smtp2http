@@ -77,6 +77,6 @@ func (set *Set) Init(context *core.Context, server core.IHttpServer) {
 	server.GET("/set", set.getSet)
 	server.GET("/defaultSet", set.defaultSet)
 	server.PUT("/set", set.putSet)
-	server.GETAuth("readSet", set.readSet)
+	server.GETAuth("/readSet", set.readSet)
 	server.POST("/testConnection", set.testConnection)
 }
