@@ -69,11 +69,14 @@ func (set *Set) testConnection(req *web.Request) (any, error) {
 		return "ok", nil
 	}
 }
-
+func (set *Set) readSet(req *web.Request) (any, error) {
+	return set.context.GetDefaultSetInfo(), nil
+}
 func (set *Set) Init(context *core.Context, server core.IHttpServer) {
 	set.context = context
 	server.GET("/set", set.getSet)
 	server.GET("/defaultSet", set.defaultSet)
 	server.PUT("/set", set.putSet)
+	server.GETAuth("readSet", set.readSet)
 	server.POST("/testConnection", set.testConnection)
 }
