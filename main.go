@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/chuccp/d-mail/api"
-	"github.com/chuccp/d-mail/core"
-	"github.com/chuccp/d-mail/manage"
+	"github.com/chuccp/smtp2http/api"
+	"github.com/chuccp/smtp2http/core"
+	"github.com/chuccp/smtp2http/manage"
 )
 
 func main() {

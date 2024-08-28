@@ -3,10 +3,10 @@ package service
 import (
 	"encoding/json"
 	"errors"
-	"github.com/chuccp/d-mail/core"
-	"github.com/chuccp/d-mail/db"
-	"github.com/chuccp/d-mail/smtp"
-	"github.com/chuccp/d-mail/util"
+	"github.com/chuccp/smtp2http/core"
+	"github.com/chuccp/smtp2http/db"
+	"github.com/chuccp/smtp2http/smtp"
+	"github.com/chuccp/smtp2http/util"
 	"go.uber.org/zap/buffer"
 )
 

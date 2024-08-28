@@ -1,7 +1,7 @@
 package db
 
 import (
-	"github.com/chuccp/d-mail/web"
+	"github.com/chuccp/smtp2http/web"
 	"gorm.io/gorm"
 	"time"
 )

@@ -2,8 +2,8 @@ package smtp
 
 import (
 	"errors"
-	"github.com/chuccp/d-mail/db"
-	"github.com/chuccp/d-mail/util"
+	"github.com/chuccp/smtp2http/db"
+	"github.com/chuccp/smtp2http/util"
 	"github.com/wneessen/go-mail"
 	"os"
 	"strings"

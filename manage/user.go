@@ -1,7 +1,7 @@
 package manage
 
 import (
-	"github.com/chuccp/d-mail/core"
+	"github.com/chuccp/smtp2http/core"
 )
 
 type User struct {

@@ -2,10 +2,10 @@ package manage
 
 import (
 	"errors"
-	"github.com/chuccp/d-mail/config"
-	"github.com/chuccp/d-mail/core"
-	"github.com/chuccp/d-mail/db"
-	"github.com/chuccp/d-mail/web"
+	"github.com/chuccp/smtp2http/config"
+	"github.com/chuccp/smtp2http/core"
+	"github.com/chuccp/smtp2http/db"
+	"github.com/chuccp/smtp2http/web"
 	"go.uber.org/zap"
 	"net/http"
 )

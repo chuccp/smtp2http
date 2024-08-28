@@ -75,15 +75,15 @@ jobs:
       - name: Get project dependencies
         run: go mod download
 
-      - name: Build d-mail
+      - name: Build smtp2http
         run: |
-          go build -v -o build_assets/d-mail  ./
+          go build -v -o build_assets/smtp2http  ./
 
-      - name: Rename Windows d-mail
+      - name: Rename Windows smtp2http
         if: matrix.goos == 'windows'
         run: |
           cd ./build_assets || exit 1
-          mv d-mail d-mail.exe
+          mv smtp2http smtp2http.exe
 
       - name: Sign Windows d-mail
         if: matrix.goos == 'windows'
@@ -94,13 +94,13 @@ jobs:
           folder: 'build_assets'
           recursive: true
           files: |
-            d-mail.exe
-          description: 'sign d-mail.exe'
+            smtp2http.exe
+          description: 'sign smtp2http.exe'
 
       - name: Create tar.gz archive
         run: |
           pushd build_assets || exit 1
-          tar -czvf ../d-mail-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz .
+          tar -czvf ../smtp2http-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz .
           popd || exit 1
 
       - name: Upload tar.gz file to Artifacts
@@ -114,5 +114,5 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file_glob: true
-          file: ./d-mail-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz*
+          file: ./smtp2http-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz*
           tag: ${{ github.ref }}

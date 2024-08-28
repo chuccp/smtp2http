@@ -2,7 +2,7 @@ package web
 
 import (
 	"encoding/json"
-	"github.com/chuccp/d-mail/login"
+	"github.com/chuccp/smtp2http/login"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"io"

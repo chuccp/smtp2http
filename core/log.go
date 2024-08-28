@@ -1,7 +1,7 @@
 package core
 
 import (
-	"github.com/chuccp/d-mail/util"
+	"github.com/chuccp/smtp2http/util"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"

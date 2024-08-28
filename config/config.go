@@ -1,7 +1,7 @@
 package config
 
 import (
-	"github.com/chuccp/d-mail/util"
+	"github.com/chuccp/smtp2http/util"
 	"os"
 )
 

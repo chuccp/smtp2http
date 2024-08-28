@@ -1,11 +1,11 @@
 package api
 
 import (
-	"github.com/chuccp/d-mail/core"
-	"github.com/chuccp/d-mail/service"
-	"github.com/chuccp/d-mail/smtp"
-	"github.com/chuccp/d-mail/util"
-	"github.com/chuccp/d-mail/web"
+	"github.com/chuccp/smtp2http/core"
+	"github.com/chuccp/smtp2http/service"
+	"github.com/chuccp/smtp2http/smtp"
+	"github.com/chuccp/smtp2http/util"
+	"github.com/chuccp/smtp2http/web"
 	"os"
 )
 

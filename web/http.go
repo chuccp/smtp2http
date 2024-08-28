@@ -1,8 +1,8 @@
 package web
 
 import (
-	"github.com/chuccp/d-mail/login"
-	"github.com/chuccp/d-mail/util"
+	"github.com/chuccp/smtp2http/login"
+	"github.com/chuccp/smtp2http/util"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"net/http"

@@ -2,10 +2,10 @@ package service
 
 import (
 	"bytes"
-	"github.com/chuccp/d-mail/core"
-	"github.com/chuccp/d-mail/db"
-	"github.com/chuccp/d-mail/util"
-	"github.com/chuccp/d-mail/web"
+	"github.com/chuccp/smtp2http/core"
+	"github.com/chuccp/smtp2http/db"
+	"github.com/chuccp/smtp2http/util"
+	"github.com/chuccp/smtp2http/web"
 )
 
 type Token struct {

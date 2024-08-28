@@ -1,4 +1,4 @@
-module github.com/chuccp/d-mail
+module github.com/chuccp/smtp2http
 
 go 1.19
 

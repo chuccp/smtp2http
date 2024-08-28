@@ -44,11 +44,11 @@ This method is essentially a simple form submission, making it easy for differen
 
 You can directly download the compiled version from the following link:
 
-[Download from GitHub](https://github.com/chuccp/d-mail/releases)
+[Download from GitHub](https://github.com/chuccp/smtp2http/releases)
 
 **Note**: When downloading the Windows version with Chrome, there may be a false positive virus report. In fact, there is no virus. It is suggested to use other download tools or download with curl, and add to the whitelist.
 ```
-curl -uri "https://github.com/chuccp/d-mail/releases/download/v0.0.9/d-mail-windows-amd64.tar.gz" -o d-mail-windows-amd64.tar.gz
+curl -uri "https://github.com/chuccp/smtp2http/releases/download/v0.0.9/d-mail-windows-amd64.tar.gz" -o d-mail-windows-amd64.tar.gz
 ```
 After downloading and extracting, you can run it directly. The default port number is 12566. After the program runs, it will generate a configuration file where you can modify the port number. After modification, restart the program to use the new port number.
 

@@ -1,9 +1,9 @@
 package core
 
 import (
-	"github.com/chuccp/d-mail/config"
-	"github.com/chuccp/d-mail/login"
-	"github.com/chuccp/d-mail/web"
+	"github.com/chuccp/smtp2http/config"
+	"github.com/chuccp/smtp2http/login"
+	"github.com/chuccp/smtp2http/web"
 	"go.uber.org/zap"
 	"log"
 )

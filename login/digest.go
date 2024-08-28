@@ -2,7 +2,7 @@ package login
 
 import (
 	"errors"
-	"github.com/chuccp/d-mail/util"
+	"github.com/chuccp/smtp2http/util"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"

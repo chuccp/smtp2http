@@ -1,11 +1,11 @@
 package manage
 
 import (
-	"github.com/chuccp/d-mail/core"
-	"github.com/chuccp/d-mail/db"
-	"github.com/chuccp/d-mail/service"
-	"github.com/chuccp/d-mail/util"
-	"github.com/chuccp/d-mail/web"
+	"github.com/chuccp/smtp2http/core"
+	"github.com/chuccp/smtp2http/db"
+	"github.com/chuccp/smtp2http/service"
+	"github.com/chuccp/smtp2http/util"
+	"github.com/chuccp/smtp2http/web"
 	"strconv"
 )
 

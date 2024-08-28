@@ -1,7 +1,7 @@
 package core
 
 import (
-	"github.com/chuccp/d-mail/web"
+	"github.com/chuccp/smtp2http/web"
 	"go.uber.org/zap"
 )
 

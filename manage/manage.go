@@ -1,6 +1,6 @@
 package manage
 
-import "github.com/chuccp/d-mail/core"
+import "github.com/chuccp/smtp2http/core"
 
 type manage interface {
 	Init(context *core.Context, server core.IHttpServer)
