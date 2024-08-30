@@ -3,16 +3,16 @@ package web
 import "path/filepath"
 
 type File struct {
-	path     string
-	fileName string
+	Path     string
+	FileName string
 }
 
 func (f *File) GetPath() string {
-	return f.path
+	return f.Path
 }
 func (f *File) GetFilename() string {
-	if len(f.fileName) > 0 {
-		return f.fileName
+	if len(f.FileName) > 0 {
+		return f.FileName
 	}
-	return filepath.Base(f.path)
+	return filepath.Base(f.Path)
 }

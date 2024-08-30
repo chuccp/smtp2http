@@ -9,6 +9,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
+	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -136,6 +137,10 @@ func ToGinHandlerFunc(handler HandlerFunc, digestAuth *login.DigestAuth) gin.Han
 				case string:
 					context.Writer.Write([]byte(t))
 				case *File:
+					if len(t.GetFilename()) == 0 {
+						_, filename := path.Split(t.Path)
+						t.FileName = filename
+					}
 					context.FileAttachment(t.GetPath(), t.GetFilename())
 				default:
 					context.AbortWithStatusJSON(200, t)

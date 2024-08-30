@@ -2,6 +2,7 @@ package manage
 
 import (
 	"github.com/chuccp/smtp2http/core"
+	"github.com/chuccp/smtp2http/util"
 	"github.com/chuccp/smtp2http/web"
 	"strconv"
 )
@@ -32,11 +33,14 @@ func (log *Log) getPage(req *web.Request) (any, error) {
 	return p, nil
 }
 func (log *Log) downLoad(req *web.Request) (any, error) {
-	return nil, nil
+	cachePath := log.context.GetConfig().GetStringOrDefault("core", "cachePath", ".cache")
+	rFilePath := req.FormValue("file")
+	filePath := util.GetCachePath(cachePath, rFilePath)
+	return &web.File{Path: filePath}, nil
 }
 func (log *Log) Init(context *core.Context, server core.IHttpServer) {
 	log.context = context
 	server.GETAuth("/log/:id", log.getOne)
 	server.GETAuth("/log", log.getPage)
-	server.GETAuth("/downLoad", log.downLoad)
+	server.GET("/downLoad", log.downLoad)
 }
