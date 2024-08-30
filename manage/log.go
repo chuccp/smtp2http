@@ -41,5 +41,5 @@ func (log *Log) Init(context *core.Context, server core.IHttpServer) {
 	log.context = context
 	server.GETAuth("/log/:id", log.getOne)
 	server.GETAuth("/log", log.getPage)
-	server.GET("/download", log.downLoad)
+	server.GETAuth("/download", log.downLoad)
 }

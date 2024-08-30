@@ -102,8 +102,18 @@ type DigestAuth struct {
 	digestClient   *digest_client
 }
 
-func (digestAuth *DigestAuth) JustCheck(ctx *gin.Context) (any, error) {
+func (digestAuth *DigestAuth) getNonce(ctx *gin.Context) string {
 	nonce := ctx.GetHeader("Nonce")
+	if len(nonce) == 0 {
+		cookie, err := ctx.Cookie("Nonce")
+		if err == nil {
+			nonce = cookie
+		}
+	}
+	return nonce
+}
+func (digestAuth *DigestAuth) JustCheck(ctx *gin.Context) (any, error) {
+	nonce := digestAuth.getNonce(ctx)
 	val := digestAuth.digestClient.isValid(nonce)
 	if val {
 		return nil, nil
@@ -113,11 +123,11 @@ func (digestAuth *DigestAuth) JustCheck(ctx *gin.Context) (any, error) {
 }
 
 func (digestAuth *DigestAuth) HasSign(ctx *gin.Context) bool {
-	nonce := ctx.GetHeader("Nonce")
+	nonce := digestAuth.getNonce(ctx)
 	return digestAuth.digestClient.isValid(nonce)
 }
 func (digestAuth *DigestAuth) Logout(ctx *gin.Context) (any, error) {
-	nonce := ctx.GetHeader("Nonce")
+	nonce := digestAuth.getNonce(ctx)
 	digestAuth.digestClient.deleteClient(nonce)
 	return "success", nil
 }
