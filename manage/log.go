@@ -2,8 +2,8 @@ package manage
 
 import (
 	"github.com/chuccp/smtp2http/core"
-	"github.com/chuccp/smtp2http/util"
 	"github.com/chuccp/smtp2http/web"
+	"go.uber.org/zap"
 	"strconv"
 )
 
@@ -33,14 +33,13 @@ func (log *Log) getPage(req *web.Request) (any, error) {
 	return p, nil
 }
 func (log *Log) downLoad(req *web.Request) (any, error) {
-	cachePath := log.context.GetConfig().GetStringOrDefault("core", "cachePath", ".cache")
 	rFilePath := req.FormValue("file")
-	filePath := util.GetCachePath(cachePath, rFilePath)
-	return &web.File{Path: filePath}, nil
+	log.context.GetLog().Info("downLoad", zap.String("filePath", rFilePath))
+	return &web.File{Path: rFilePath}, nil
 }
 func (log *Log) Init(context *core.Context, server core.IHttpServer) {
 	log.context = context
 	server.GETAuth("/log/:id", log.getOne)
 	server.GETAuth("/log", log.getPage)
-	server.GET("/downLoad", log.downLoad)
+	server.GET("/download", log.downLoad)
 }

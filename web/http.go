@@ -15,8 +15,11 @@ import (
 func NewServer(digestAuth *login.DigestAuth) *HttpServer {
 	engine := gin.Default()
 	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{"*"} // 允许的域名列表，可以使用 * 来允许所有域名
-	config.AllowHeaders = []string{"*"} // 允
+	config.AllowOriginFunc = func(origin string) bool {
+		return true
+	}
+	config.AllowCredentials = true
+	config.AllowHeaders = []string{"Nonce", "Content-Type"} // 允
 	engine.Use(cors.New(config))
 	return &HttpServer{engine: engine, digestAuth: digestAuth, paths: make(map[string]any)}
 }

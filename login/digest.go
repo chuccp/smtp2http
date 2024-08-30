@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/chuccp/smtp2http/util"
 	"github.com/gin-gonic/gin"
+	"net"
 	"net/http"
 	"strings"
 	"sync"
@@ -137,6 +138,10 @@ func (digestAuth *DigestAuth) CheckSign(ctx *gin.Context) (any, error) {
 			sign := util.MD5Str(key + u.Nonce)
 			if strings.EqualFold(sign, u.Response) {
 				digestAuth.digestClient.toValid(u.Nonce)
+
+				host, _, _ := net.SplitHostPort(ctx.Request.Host)
+				ctx.SetSameSite(http.SameSiteNoneMode)
+				ctx.SetCookie("Nonce", u.Nonce, 3600*24*30, "/", host, true, true)
 				return "success", nil
 			}
 		}
