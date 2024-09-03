@@ -51,7 +51,7 @@ curl -X POST 'http://127.0.0.1:12566/sendMail' \
 建议使用其它下载工具或者curl下载，并且加白名单
 
 ```
-curl -uri "https://github.com/chuccp/smtp2http/releases/download/v0.0.9/d-mail-windows-amd64.tar.gz" -o d-mail-windows-amd64.tar.gz
+curl -uri "https://github.com/chuccp/smtp2http/releases/download/v0.1.0/smtp2http-windows-amd64.tar.gz" -o smtp2http-windows-amd64.tar.gz
 ```
 
 下载并解压后，直接运行即可。默认端口号为12566。程序运行后会生成配置文件，您可以在其中修改端口号，修改后重启程序即可使用新的端口号。
