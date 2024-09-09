@@ -1,6 +1,6 @@
 **English**🌎 | [**简体中文**🀄](./README_zh.md)
 
-In our projects, we often use email to notify about exception logs. However, this usually requires configuring SMTP within the project and providing the email address for receiving emails. When the email address changes, it necessitates modifying the project's configuration file. Additionally, due to network restrictions, it may be impossible to configure SMTP.
+In the project, emails are often used to notify exception logs. However, this usually requires configuring SMTP within the project and providing the email address for receiving emails. When the email address changes, it necessitates modifying the project's configuration file. Additionally, due to network restrictions, it may be impossible to configure SMTP.
 
 This program can replace SMTP with an HTTP interface, simplifying the process of sending emails. You only need to configure SMTP and the email address for receiving emails on the management page to achieve email sending via HTTP.
 
