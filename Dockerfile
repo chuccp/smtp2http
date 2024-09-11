@@ -19,9 +19,8 @@ COPY . ./
 ##go build -o C:/Users/cooge/software/httpPush/httpPush.exe github.com/chuccp/httpPush
 # Build
 RUN CGO_ENABLED=0 GOOS=linux go build -o /home/smtp2http .
-
-##https://github.com/chuccp/d-mail-view/releases/latest/download/d-mail-view.zip
-ADD d-mail-view.zip /home/
+#ADD d-mail-view.zip /home/
+ADD https://github.com/chuccp/d-mail-view/releases/latest/download/d-mail-view.zip /home/
 
 #CMD [ "/home/smtp2http","-unzip","/home/d-mail-view.zip /home/web" ]
 
