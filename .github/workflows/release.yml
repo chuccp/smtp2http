@@ -106,8 +106,8 @@ jobs:
       - name: Upload tar.gz file to Artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: d-mail-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz
-          path: d-mail-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz
+          name: smtp2http-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz
+          path: smtp2http-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz
 
       - name: Upload files to GitHub release
         uses: svenstaro/upload-release-action@v2
