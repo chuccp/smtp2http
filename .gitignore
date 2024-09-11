@@ -25,3 +25,5 @@ go.work
 d-mail.db
 config.ini
 /.cache
+/unzip/web
+*.zip
