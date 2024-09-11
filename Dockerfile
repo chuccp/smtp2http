@@ -29,7 +29,7 @@ ADD d-mail-view.zip /home/
 # But we can (optionally) document in the Dockerfile what ports
 # the application is going to listen on by default.
 # https://docs.docker.com/engine/reference/builder/#expose
-#EXPOSE 12566 12567
+EXPOSE 12566 12567
 WORKDIR /home
 # Run
 CMD [ "/home/smtp2http","-web_port","12566","-api_port","12577","-unzip","/home/d-mail-view.zip /home/web"  ]
