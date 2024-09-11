@@ -68,9 +68,9 @@ jobs:
           cp -r webview ./build_assets/web
 
       - name: Set up Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v5
         with:
-          go-version: go 1.23
+          go-version: go 1.23.1
 
       - name: Get project dependencies
         run: go mod download
