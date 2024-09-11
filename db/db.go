@@ -3,8 +3,8 @@ package db
 import (
 	"fmt"
 	"github.com/chuccp/smtp2http/config"
+	"github.com/chuccp/smtp2http/sqlite"
 	"github.com/chuccp/smtp2http/util"
-	"github.com/glebarez/sqlite"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -39,6 +39,7 @@ func (d *DB) InitBySetInfo(setInfo *config.SetInfo) error {
 	dbType := setInfo.DbType
 	if util.EqualsAnyIgnoreCase(dbType, "sqlite") {
 		dbName := setInfo.Sqlite.Filename
+
 		d.db, err = gorm.Open(sqlite.Open(dbName), &gorm.Config{Logger: logger.Default.LogMode(logger.Info)})
 		if err != nil {
 			d.err = err
@@ -72,6 +73,7 @@ func (d *DB) Init(config *config.Config) error {
 	dbType := config.GetString("core", "dbType")
 	if util.EqualsAnyIgnoreCase(dbType, "sqlite") {
 		dbName := config.GetStringOrDefault("sqlite", "filename", "d-mail.db")
+
 		d.db, err = gorm.Open(sqlite.Open(dbName), &gorm.Config{Logger: logger.Default.LogMode(logger.Info)})
 		if err != nil {
 			d.err = err
