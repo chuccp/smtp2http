@@ -43,7 +43,7 @@ func (config *Config) UpdateSetInfo(setInfo *SetInfo) error {
 	return nil
 }
 
-func (config *Config) Init() error {
+func (config *Config) Init(webPort int, apiPort int) error {
 	if !util.FileExists(config.filename) {
 		_, err := os.Create(config.filename)
 		if err != nil {
@@ -54,12 +54,24 @@ func (config *Config) Init() error {
 			return err
 		}
 		config.config = fig
+		if apiPort > 0 {
+			defaultSetInfo.Api.Port = apiPort
+		}
+		if webPort > 0 {
+			defaultSetInfo.Manage.Port = webPort
+		}
 		config.UpdateSetInfo(defaultSetInfo)
 		return nil
 	} else {
 		fig, err := util.LoadFile(config.filename)
 		if err != nil {
 			return err
+		}
+		if apiPort > 0 {
+			fig.SetInt("api", "port", apiPort)
+		}
+		if webPort > 0 {
+			fig.SetInt("manage", "port", webPort)
 		}
 		config.config = fig
 		return nil

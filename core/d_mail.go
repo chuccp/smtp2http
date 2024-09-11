@@ -37,8 +37,8 @@ func (m *DMail) startHttpServer() error {
 	return nil
 }
 
-func (m *DMail) Start() {
-	err := m.config.Init()
+func (m *DMail) Start(webPort int, apiPort int) {
+	err := m.config.Init(webPort, apiPort)
 	if err != nil {
 		log.Panic(err)
 		return
