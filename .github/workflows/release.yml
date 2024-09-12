@@ -97,10 +97,10 @@ jobs:
             smtp2http.exe
           description: 'sign smtp2http.exe'
 
-      - name: Create tar.gz archive
+      - name: Create zip archive
         run: |
           pushd build_assets || exit 1
-          tar -czvf ../smtp2http-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz .
+          zip -9vr ../smtp2http-${{ matrix.goos }}-${{ matrix.goarch }}.zip .
           popd || exit 1
 
       - name: Upload files to GitHub release
@@ -108,5 +108,5 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file_glob: true
-          file: ./smtp2http-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz*
+          file: ./smtp2http-${{ matrix.goos }}-${{ matrix.goarch }}.zip*
           tag: ${{ github.ref }}
