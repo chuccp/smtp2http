@@ -46,14 +46,16 @@ curl -X POST 'http://127.0.0.1:12566/sendMail' \
 
 [Download from GitHub](https://github.com/chuccp/smtp2http/releases)
 
-**注意**：使用Chrome下载Windows版本时，可能会误报病毒，实际上并无病毒。
-
-建议使用其它下载工具或者curl下载，并且加白名单
+or
 
 ```
-curl -uri "https://github.com/chuccp/smtp2http/releases/download/v0.1.0/smtp2http-windows-amd64.tar.gz" -o smtp2http-windows-amd64.tar.gz
+curl -uri "https://github.com/chuccp/smtp2http/releases/latest/download/smtp2http-windows-amd64.tar.gz" -o smtp2http-windows-amd64.tar.gz
 ```
 
+docker 镜像
+```
+docker pull cooge123/smtp2http:v0.1.5
+```
 下载并解压后，直接运行即可。默认端口号为12566。程序运行后会生成配置文件，您可以在其中修改端口号，修改后重启程序即可使用新的端口号。
 
 启动后，使用浏览器打开 `http://127.0.0.1:12566` 即可进入管理管理。

@@ -46,10 +46,18 @@ You can directly download the compiled version from the following link:
 
 [Download from GitHub](https://github.com/chuccp/smtp2http/releases)
 
-**Note**: When downloading the Windows version with Chrome, there may be a false positive virus report. In fact, there is no virus. It is suggested to use other download tools or download with curl, and add to the whitelist.
+or
+
 ```
-curl -uri "https://github.com/chuccp/smtp2http/releases/download/v0.1.0/smtp2http-windows-amd64.tar.gz" -o smtp2http-windows-amd64.tar.gz
+curl -uri "https://github.com/chuccp/smtp2http/releases/latest/download/smtp2http-windows-amd64.tar.gz" -o smtp2http-windows-amd64.tar.gz
 ```
+
+docker Images
+```
+docker pull cooge123/smtp2http:v0.1.5
+```
+
+
 After downloading and extracting, you can run it directly. The default port number is 12566. After the program runs, it will generate a configuration file where you can modify the port number. After modification, restart the program to use the new port number.
 
 After starting, you can enter the management interface by opening a browser to `http://127.0.0.1:12566`.
