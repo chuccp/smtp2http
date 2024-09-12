@@ -33,7 +33,7 @@ jobs:
           # END Other architectures
       fail-fast: false
 
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     env:
       GOOS: ${{ matrix.goos }}
       GOARCH: ${{ matrix.goarch }}
@@ -97,10 +97,10 @@ jobs:
             smtp2http.exe
           description: 'sign smtp2http.exe'
 
-      - name: Create zip archive
+      - name: Create tar.gz archive
         run: |
           pushd build_assets || exit 1
-          zip -9vr ../smtp2http-${{ matrix.goos }}-${{ matrix.goarch }}.zip .
+          tar -czvf ../smtp2http-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz .
           popd || exit 1
 
       - name: Upload files to GitHub release
@@ -108,5 +108,5 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file_glob: true
-          file: ./smtp2http-${{ matrix.goos }}-${{ matrix.goarch }}.zip*
+          file: ./smtp2http-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz*
           tag: ${{ github.ref }}
