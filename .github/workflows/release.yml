@@ -33,7 +33,7 @@ jobs:
           # END Other architectures
       fail-fast: false
 
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     env:
       GOOS: ${{ matrix.goos }}
       GOARCH: ${{ matrix.goarch }}
