@@ -103,12 +103,6 @@ jobs:
           tar -czvf ../smtp2http-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz .
           popd || exit 1
 
-      - name: Upload tar.gz file to Artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: smtp2http-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz
-          path: smtp2http-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz
-
       - name: Upload files to GitHub release
         uses: svenstaro/upload-release-action@v2
         with:
