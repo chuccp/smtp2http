@@ -3,8 +3,8 @@ FROM busybox:latest
 WORKDIR /app
 ADD https://github.com/chuccp/smtp2http/releases/latest/download/smtp2http-linux-amd64.tar.gz /app/
 
-RUN tar -xzf /app/smtp2http-linux-amd64.tar.gz
-
+RUN tar -xzf smtp2http-linux-amd64.tar.gz
+RUN rm -rf  *.tar.gz
 RUN chmod a+x /app/smtp2http
 
 EXPOSE 12566 12567
