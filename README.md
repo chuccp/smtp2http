@@ -54,7 +54,7 @@ curl -uri "https://github.com/chuccp/smtp2http/releases/latest/download/smtp2htt
 
 docker Images
 ```
-docker pull cooge123/smtp2http:v0.1.5
+docker pull cooge123/smtp2http
 ```
 
 

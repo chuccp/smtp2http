@@ -54,7 +54,7 @@ curl -uri "https://github.com/chuccp/smtp2http/releases/latest/download/smtp2htt
 
 docker 镜像
 ```
-docker pull cooge123/smtp2http:v0.1.5
+docker pull cooge123/smtp2http
 ```
 下载并解压后，直接运行即可。默认端口号为12566。程序运行后会生成配置文件，您可以在其中修改端口号，修改后重启程序即可使用新的端口号。
 
