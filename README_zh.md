@@ -9,13 +9,13 @@
 **GET请求示例**：
 
 ```powershell
-curl 'http://127.0.0.1:12566/sendMail?token=99eaf30feb23e28057367431d820cf319915792921d9cf21b5f761fb75433225&content=this%20is%20a%20test'
+curl 'http://127.0.0.1:12567/sendMail?token=99eaf30feb23e28057367431d820cf319915792921d9cf21b5f761fb75433225&content=this%20is%20a%20test'
 ```
 
 **POST请求示例**：
 
 ```powershell
-curl -X POST 'http://127.0.0.1:12566/sendMail' \
+curl -X POST 'http://127.0.0.1:12567/sendMail' \
 --header 'Content-Type: application/x-www-form-urlencoded' \
 --data-urlencode 'token=99eaf30feb23e28057367431d820cf319915792921d9cf21b5f761fb75433225' \
 --data-urlencode 'content=this%20is%20a%20test'
@@ -24,7 +24,7 @@ curl -X POST 'http://127.0.0.1:12566/sendMail' \
 **发送带附件的邮件示例**：
 
 ```powershell
-curl -X POST 'http://127.0.0.1:12566/sendMail' \
+curl -X POST 'http://127.0.0.1:12567/sendMail' \
 --form 'files=@"/111111.txt"' \
 --form 'files=@"/22222222222222.txt"' \
 --form 'token=d6a1ee40c5bad981461643f5404a305a2e3f480cc6fcf65ba98efb63ce32d471"' \

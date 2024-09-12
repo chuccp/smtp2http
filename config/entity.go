@@ -34,7 +34,7 @@ var defaultSetInfo = &SetInfo{
 	Sqlite:    &Sqlite{Filename: "d-mail.db"},
 	Mysql:     &Mysql{Host: "", Port: 3306, Dbname: "d-main", Username: "", Password: "", Charset: "utf8"},
 	Manage:    &Manage{WebPath: "web", Port: 12566, Username: "", Password: "", ConfirmPassword: ""},
-	Api:       &Api{Port: 12566},
+	Api:       &Api{Port: 12567},
 }
 
 type Sqlite struct {
