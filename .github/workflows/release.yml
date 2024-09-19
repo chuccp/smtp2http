@@ -118,6 +118,8 @@ jobs:
         goos: [ linux ]
         goarch: [ amd64,arm64 ]
     runs-on: ubuntu-latest
+    needs:
+      - build
     env:
       GOOS: ${{ matrix.goos }}
       GOARCH: ${{ matrix.goarch }}
