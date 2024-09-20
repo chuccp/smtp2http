@@ -65,6 +65,21 @@ func (token *Token) putOne(req *web.Request) (any, error) {
 	}
 	return "ok", nil
 }
+
+func (token *Token) sendMail(req *web.Request) (any, error) {
+	id := req.Param("id")
+	atoi, err := strconv.Atoi(id)
+	if err != nil {
+		return nil, err
+	}
+	one, err := token.token.GetOne(atoi)
+	if err != nil {
+		return nil, err
+	}
+
+	return one, nil
+}
+
 func (token *Token) Init(context *core.Context, server core.IHttpServer) {
 	token.context = context
 	token.token = service.NewToken(context)
@@ -73,4 +88,6 @@ func (token *Token) Init(context *core.Context, server core.IHttpServer) {
 	server.GETAuth("/token", token.getPage)
 	server.POSTAuth("/token", token.postOne)
 	server.PUTAuth("/token", token.putOne)
+	server.POSTAuth("/sendMail", token.sendMail)
+
 }

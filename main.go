@@ -19,12 +19,11 @@ func main() {
 	flag.IntVar(&apiPort, "api_port", 0, "api port")
 	flag.StringVar(&unzipFile, "unzip", "", "unzip file dir")
 	flag.Parse()
-	log.Println(unzipFile)
 	if len(unzipFile) > 2 {
 		vs := strings.Split(unzipFile, " ")
 		err := unzip.Unzip(vs[0], vs[1])
 		if err != nil {
-			log.Println(err)
+			log.Panicln(err)
 		}
 	}
 	dMail := core.Create()

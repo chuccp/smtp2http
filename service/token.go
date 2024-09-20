@@ -23,7 +23,7 @@ func (token *Token) GetPage(page *web.Page) (any, error) {
 	token.supplement(p.List...)
 	return p, nil
 }
-func (token *Token) GetOne(id int) (any, error) {
+func (token *Token) GetOne(id int) (*db.Token, error) {
 	one, err := token.context.GetDb().GetTokenModel().GetOne(uint(id))
 	if err != nil {
 		return nil, err
