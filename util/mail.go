@@ -1,6 +1,7 @@
 package util
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
 )
@@ -10,6 +11,29 @@ func FormatMail(name, mail string) string {
 		return mail
 	}
 	return fmt.Sprintf(`"%s" <%s>`, name, mail)
+}
+
+func ParseMail(recipient string) (name string, mail string, err error) {
+	str := `"(.+)" <(.+@.+)>`
+	re := regexp.MustCompile(str)
+	match := re.FindStringSubmatch(recipient)
+	if len(match) == 3 {
+		return match[1], match[2], nil
+	}
+	str = `(.+) <(.+@.+)>`
+	re = regexp.MustCompile(str)
+	match = re.FindStringSubmatch(recipient)
+	if len(match) == 3 {
+		return match[1], match[2], nil
+	}
+	str = `([a-zA-Z0-9]+@[a-zA-Z0-9\.]+)`
+	re = regexp.MustCompile(str)
+	match = re.FindStringSubmatch(recipient)
+	if len(match) == 2 {
+		return "", match[0], nil
+	}
+	return "", "", errors.New("recipient Format error")
+
 }
 
 func ExtractEmails(text string) []string {

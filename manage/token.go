@@ -3,7 +3,9 @@ package manage
 import (
 	"github.com/chuccp/smtp2http/core"
 	"github.com/chuccp/smtp2http/db"
+	"github.com/chuccp/smtp2http/entity"
 	"github.com/chuccp/smtp2http/service"
+	"github.com/chuccp/smtp2http/smtp"
 	"github.com/chuccp/smtp2http/util"
 	"github.com/chuccp/smtp2http/web"
 	"strconv"
@@ -12,6 +14,7 @@ import (
 type Token struct {
 	context *core.Context
 	token   *service.Token
+	log     *service.Log
 }
 
 func (token *Token) getOne(req *web.Request) (any, error) {
@@ -67,27 +70,37 @@ func (token *Token) putOne(req *web.Request) (any, error) {
 }
 
 func (token *Token) sendMail(req *web.Request) (any, error) {
-	id := req.Param("id")
-	atoi, err := strconv.Atoi(id)
+	var sendMail entity.SendMail
+	err := req.ShouldBindBodyWithJSON(&sendMail)
 	if err != nil {
 		return nil, err
 	}
-	one, err := token.token.GetOne(atoi)
+	byToken, err := token.token.GetOne(int(sendMail.SMTPId))
 	if err != nil {
 		return nil, err
 	}
-
-	return one, nil
+	if len(sendMail.Subject) == 0 {
+		sendMail.Subject = byToken.Subject
+	}
+	err = smtp.SendContentMsgByRecipients(byToken.SMTP, sendMail.Recipients, sendMail.Subject, sendMail.Content)
+	if err != nil {
+		token.log.ContentError(byToken.SMTP, byToken.ReceiveEmails, byToken.Token, sendMail.Subject, sendMail.Content, err)
+		return nil, err
+	} else {
+		token.log.ContentSuccess(byToken.SMTP, byToken.ReceiveEmails, byToken.Token, sendMail.Subject, sendMail.Content)
+	}
+	return "ok", nil
 }
 
 func (token *Token) Init(context *core.Context, server core.IHttpServer) {
 	token.context = context
 	token.token = service.NewToken(context)
+	token.log = service.NewLog(context)
 	server.GETAuth("/token/:id", token.getOne)
 	server.DELETEAuth("/token/:id", token.deleteOne)
 	server.GETAuth("/token", token.getPage)
 	server.POSTAuth("/token", token.postOne)
 	server.PUTAuth("/token", token.putOne)
-	server.POSTAuth("/sendMail", token.sendMail)
+	server.POSTAuth("/sendMailByToken", token.sendMail)
 
 }
