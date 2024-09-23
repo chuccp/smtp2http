@@ -1,6 +1,7 @@
 package smtp
 
 import (
+	"crypto/tls"
 	"errors"
 	"github.com/chuccp/smtp2http/db"
 	"github.com/chuccp/smtp2http/util"
@@ -148,7 +149,7 @@ func SendMail(sendMsg *SendMsg, invalidMails ...string) error {
 			continue
 		}
 	}
-	c, err := mail.NewClient(sendMsg.SendMail.Host, mail.WithPort(sendMsg.SendMail.Port), mail.WithSMTPAuth(mail.SMTPAuthPlain), mail.WithUsername(sendMsg.SendMail.Username), mail.WithPassword(sendMsg.SendMail.Password))
+	c, err := mail.NewClient(sendMsg.SendMail.Host, mail.WithTLSConfig(&tls.Config{InsecureSkipVerify: true}), mail.WithPort(sendMsg.SendMail.Port), mail.WithSMTPAuth(mail.SMTPAuthPlain), mail.WithUsername(sendMsg.SendMail.Username), mail.WithPassword(sendMsg.SendMail.Password))
 	if err != nil {
 		return err
 	}
