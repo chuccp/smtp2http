@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/chuccp/smtp2http/core"
+	"github.com/chuccp/smtp2http/db"
 	"github.com/chuccp/smtp2http/service"
 	"github.com/chuccp/smtp2http/smtp"
 	"github.com/chuccp/smtp2http/util"
@@ -30,9 +31,15 @@ func (s *Server) SendMail(req *web.Request) (any, error) {
 	token := req.FormValue("token")
 	content := req.FormValue("content")
 	subject := req.FormValue("subject")
+	recipients := req.FormValue("recipients")
+
 	byToken, err := s.token.GetOneByToken(token)
 	if err != nil {
 		return nil, err
+	}
+	mails := util.SplitAndDeduplicate(recipients, ",")
+	for _, mail := range mails {
+		byToken.ReceiveEmails = append(byToken.ReceiveEmails, &db.Mail{Mail: mail})
 	}
 	if req.IsMultipartForm() {
 		cachePath := s.context.GetConfig().GetStringOrDefault("core", "cachePath", ".cache")

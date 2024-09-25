@@ -22,6 +22,25 @@ func MD5Str(data string) string {
 	return MD5([]byte(data))
 }
 
+func SplitAndDeduplicate(text, sep string) []string {
+	ps := make([]string, 0)
+	if len(text) == 0 {
+		return ps
+	}
+	vs := strings.Split(text, sep)
+	m := make(map[string]bool)
+	for _, i2 := range vs {
+		i2 = strings.TrimSpace(i2)
+		if len(i2) == 0 || m[i2] {
+			continue
+		} else {
+			m[i2] = true
+			ps = append(ps, i2)
+		}
+	}
+	return ps
+}
+
 func SplitPath(path string) []string {
 	path = strings.ReplaceAll(path, "\\", "/")
 	vs := strings.Split(path, "/")
