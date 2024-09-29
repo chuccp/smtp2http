@@ -55,6 +55,8 @@ curl -uri "https://github.com/chuccp/smtp2http/releases/latest/download/smtp2htt
 docker Images
 ```
 docker pull cooge123/smtp2http
+
+docker run -p 12566:12566 -p 12567:12567 -it --rm cooge123/smtp2http
 ```
 
 
