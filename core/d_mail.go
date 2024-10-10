@@ -14,11 +14,12 @@ type DMail struct {
 	log        *zap.Logger
 	config     *config.Config
 	servers    []Server
+	webPort    int
+	apiPort    int
 }
 
 func Create() *DMail {
-
-	return &DMail{servers: make([]Server, 0), config: config.NewConfig()}
+	return &DMail{webPort: 0, apiPort: 0, servers: make([]Server, 0), config: config.NewConfig()}
 }
 func (m *DMail) AddServer(server Server) {
 	m.servers = append(m.servers, server)
@@ -36,14 +37,17 @@ func (m *DMail) startHttpServer() error {
 	}
 	return nil
 }
-
 func (m *DMail) Start(webPort int, apiPort int) {
-	err := m.config.Init(webPort, apiPort)
+	m.webPort = webPort
+	m.apiPort = apiPort
+	m.reStart()
+}
+func (m *DMail) reStart() {
+	err := m.config.Init(m.webPort, m.apiPort)
 	if err != nil {
 		log.Panic(err)
 		return
 	}
-
 	logPath := m.config.GetStringOrDefault("log", "filename", "run.log")
 	logger, err := initLogger(logPath)
 	if err != nil {
@@ -56,7 +60,6 @@ func (m *DMail) Start(webPort int, apiPort int) {
 	m.context.digestAuth = digestAuth
 	m.httpServer = web.NewServer(digestAuth)
 	m.context.httpServer = m.httpServer
-
 	isInit := m.config.GetBooleanOrDefault("core", "init", false)
 	if isInit {
 		err := m.context.initDb()

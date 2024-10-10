@@ -29,6 +29,7 @@ type HttpServer struct {
 	engine     *gin.Engine
 	digestAuth *login.DigestAuth
 	paths      map[string]any
+	httpServer *http.Server
 }
 
 func (hs *HttpServer) IsTls() bool {
@@ -106,7 +107,7 @@ const MaxReadHeaderTimeout = time.Second * 30
 const MaxReadTimeout = time.Minute * 10
 
 func (hs *HttpServer) Start(port int) error {
-	srv := &http.Server{
+	hs.httpServer = &http.Server{
 		Addr:              ":" + strconv.Itoa(port),
 		Handler:           hs.engine,
 		ReadHeaderTimeout: MaxReadHeaderTimeout,
@@ -114,11 +115,11 @@ func (hs *HttpServer) Start(port int) error {
 		ReadTimeout:       MaxReadTimeout,
 	}
 	hs.isTls = false
-	error := srv.ListenAndServe()
+	error := hs.httpServer.ListenAndServe()
 	return error
 }
 func (hs *HttpServer) StartTLS(port int, certFile, keyFile string) error {
-	srv := &http.Server{
+	hs.httpServer = &http.Server{
 		Addr:              ":" + strconv.Itoa(port),
 		Handler:           hs.engine,
 		ReadHeaderTimeout: MaxReadHeaderTimeout,
@@ -126,9 +127,16 @@ func (hs *HttpServer) StartTLS(port int, certFile, keyFile string) error {
 		ReadTimeout:       MaxReadTimeout,
 	}
 	hs.isTls = true
-	return srv.ListenAndServeTLS(certFile, keyFile)
+	return hs.httpServer.ListenAndServeTLS(certFile, keyFile)
+}
+
+func (hs *HttpServer) stop() {
+	if hs.httpServer != nil {
+		hs.httpServer.Close()
+	}
 }
 func (hs *HttpServer) StartAutoTLS(port int, certFile, keyFile string) error {
+	hs.stop()
 	if len(certFile) > 0 && len(keyFile) > 0 {
 		return hs.StartTLS(port, certFile, keyFile)
 	} else {
