@@ -19,6 +19,9 @@ func (set *Set) putSet(req *web.Request) (any, error) {
 		req.Status(http.StatusMethodNotAllowed)
 		return nil, errors.New("has init")
 	}
+	return set.putReSet(req)
+}
+func (set *Set) putReSet(req *web.Request) (any, error) {
 	var setInfo config.SetInfo
 	err := req.ShouldBindBodyWithJSON(&setInfo)
 	if err != nil {
@@ -37,6 +40,7 @@ func (set *Set) putSet(req *web.Request) (any, error) {
 		return "ok", nil
 	}
 }
+
 func (set *Set) getSet(req *web.Request) (any, error) {
 	hasLogin := req.GetDigestAuth().HasSign(req.GetContext())
 	return &config.System{HasInit: set.context.IsInit(), HasLogin: hasLogin}, nil
@@ -72,11 +76,17 @@ func (set *Set) testConnection(req *web.Request) (any, error) {
 func (set *Set) readSet(req *web.Request) (any, error) {
 	return set.context.GetDefaultSetInfo(), nil
 }
+
+func (set *Set) reStart(req *web.Request) (any, error) {
+	return nil, nil
+}
 func (set *Set) Init(context *core.Context, server core.IHttpServer) {
 	set.context = context
 	server.GET("/set", set.getSet)
 	server.GET("/defaultSet", set.defaultSet)
 	server.PUT("/set", set.putSet)
 	server.GETAuth("/readSet", set.readSet)
+	server.PUTAuth("/reSet", set.putReSet)
+	server.GETAuth("/reStart", set.reStart)
 	server.POST("/testConnection", set.testConnection)
 }
