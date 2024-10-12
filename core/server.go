@@ -12,6 +12,7 @@ type Server interface {
 type IHttpServer interface {
 	init(context *Context)
 	start() error
+	Stop()
 	useCorePort() bool
 	GET(relativePath string, handlers ...web.HandlerFunc)
 	POST(relativePath string, handlers ...web.HandlerFunc)
@@ -156,7 +157,9 @@ func (server *httpServer) init(context *Context) {
 func (server *httpServer) useCorePort() bool {
 	return server.port < 1
 }
-
+func (server *httpServer) Stop() {
+	server.httpServer.Stop()
+}
 func (server *httpServer) start() error {
 	if server.port > 0 {
 		err := server.httpServer.StartAutoTLS(server.port, server.certFile, server.keyFile)

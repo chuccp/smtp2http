@@ -23,15 +23,14 @@ func (set *Set) putSet(req *web.Request) (any, error) {
 }
 func (set *Set) putReSet(req *web.Request) (any, error) {
 	var setInfo config.SetInfo
+	setInfo.HasInit = true
 	err := req.ShouldBindBodyWithJSON(&setInfo)
 	if err != nil {
 		return nil, err
 	} else {
-
 		if len(setInfo.Manage.Username) == 0 || len(setInfo.Manage.Password) == 0 {
 			return nil, errors.New("username or password is blank")
 		}
-
 		set.context.GetLog().Debug("putSet", zap.Any("setInfo", &setInfo))
 		err := set.context.UpdateSetInfo(&setInfo)
 		if err != nil {
@@ -78,7 +77,8 @@ func (set *Set) readSet(req *web.Request) (any, error) {
 }
 
 func (set *Set) reStart(req *web.Request) (any, error) {
-	return nil, nil
+	set.context.ReStart()
+	return "ok", nil
 }
 func (set *Set) Init(context *core.Context, server core.IHttpServer) {
 	set.context = context
@@ -87,6 +87,6 @@ func (set *Set) Init(context *core.Context, server core.IHttpServer) {
 	server.PUT("/set", set.putSet)
 	server.GETAuth("/readSet", set.readSet)
 	server.PUTAuth("/reSet", set.putReSet)
-	server.GETAuth("/reStart", set.reStart)
+	server.POSTAuth("/reStart", set.reStart)
 	server.POST("/testConnection", set.testConnection)
 }

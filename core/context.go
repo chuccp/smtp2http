@@ -17,6 +17,7 @@ type Context struct {
 	log        *zap.Logger
 	httpServer *web.HttpServer
 	digestAuth *login.DigestAuth
+	reStart    func()
 }
 
 func (c *Context) GetDigestAuth() *login.DigestAuth {
@@ -41,7 +42,11 @@ func (c *Context) SecretProvider(user string) string {
 func (c *Context) GetConfig() *config.Config {
 	return c.config
 }
-
+func (c *Context) ReStart() {
+	if c.reStart != nil {
+		c.reStart()
+	}
+}
 func (c *Context) IsInit() bool {
 	return c.config.GetBooleanOrDefault("core", "init", false)
 }

@@ -130,13 +130,12 @@ func (hs *HttpServer) StartTLS(port int, certFile, keyFile string) error {
 	return hs.httpServer.ListenAndServeTLS(certFile, keyFile)
 }
 
-func (hs *HttpServer) stop() {
+func (hs *HttpServer) Stop() {
 	if hs.httpServer != nil {
 		hs.httpServer.Close()
 	}
 }
 func (hs *HttpServer) StartAutoTLS(port int, certFile, keyFile string) error {
-	hs.stop()
 	if len(certFile) > 0 && len(keyFile) > 0 {
 		return hs.StartTLS(port, certFile, keyFile)
 	} else {
