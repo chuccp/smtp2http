@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/chuccp/smtp2http/core"
 	"github.com/chuccp/smtp2http/db"
+	"github.com/chuccp/smtp2http/entity"
 	"github.com/chuccp/smtp2http/service"
 	"github.com/chuccp/smtp2http/smtp"
 	"github.com/chuccp/smtp2http/util"
@@ -28,17 +29,23 @@ func (s *Server) Name() string {
 }
 
 func (s *Server) SendMail(req *web.Request) (any, error) {
-	token := req.FormValue("token")
-	content := req.FormValue("content")
-	subject := req.FormValue("subject")
-	recipients := req.FormValue("recipients")
-
-	byToken, err := s.token.GetOneByToken(token)
+	var sendMailApi entity.SendMailApi
+	if util.ContainsAnyIgnoreCase(req.GetContext().ContentType(), "application/json") {
+		err := req.ShouldBindBodyWithJSON(&sendMailApi)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		sendMailApi.Token = req.FormValue("token")
+		sendMailApi.Content = req.FormValue("content")
+		sendMailApi.Subject = req.FormValue("subject")
+		sendMailApi.Recipients = util.SplitAndDeduplicate(req.FormValue("recipients"), ",")
+	}
+	byToken, err := s.token.GetOneByToken(sendMailApi.Token)
 	if err != nil {
 		return nil, err
 	}
-	mails := util.SplitAndDeduplicate(recipients, ",")
-	for _, mail := range mails {
+	for _, mail := range sendMailApi.Recipients {
 		byToken.ReceiveEmails = append(byToken.ReceiveEmails, &db.Mail{Mail: mail})
 	}
 	if req.IsMultipartForm() {
@@ -63,25 +70,25 @@ func (s *Server) SendMail(req *web.Request) (any, error) {
 				files = append(files, &smtp.File{File: file, Name: fileHeader.Filename, FilePath: filePath})
 			}
 			if len(files) > 0 {
-				err := smtp.SendFilesMsg(byToken.SMTP, byToken.ReceiveEmails, files, subject, content)
+				err := smtp.SendFilesMsg(byToken.SMTP, byToken.ReceiveEmails, files, sendMailApi.Subject, sendMailApi.Content)
 				if err != nil {
-					s.log.FilesError(byToken.SMTP, byToken.ReceiveEmails, files, token, subject, content, err)
+					s.log.FilesError(byToken.SMTP, byToken.ReceiveEmails, files, sendMailApi.Token, sendMailApi.Subject, sendMailApi.Content, err)
 					return nil, err
 				} else {
-					s.log.FilesSuccess(byToken.SMTP, byToken.ReceiveEmails, files, token, subject, content)
+					s.log.FilesSuccess(byToken.SMTP, byToken.ReceiveEmails, files, sendMailApi.Token, sendMailApi.Subject, sendMailApi.Content)
 				}
 			}
 		}
 	} else {
-		if len(subject) == 0 {
-			subject = byToken.Subject
+		if len(sendMailApi.Subject) == 0 {
+			sendMailApi.Subject = byToken.Subject
 		}
-		err := smtp.SendContentMsg(byToken.SMTP, byToken.ReceiveEmails, subject, content)
+		err := smtp.SendContentMsg(byToken.SMTP, byToken.ReceiveEmails, sendMailApi.Subject, sendMailApi.Content)
 		if err != nil {
-			s.log.ContentError(byToken.SMTP, byToken.ReceiveEmails, token, subject, content, err)
+			s.log.ContentError(byToken.SMTP, byToken.ReceiveEmails, sendMailApi.Token, sendMailApi.Subject, sendMailApi.Content, err)
 			return nil, err
 		} else {
-			s.log.ContentSuccess(byToken.SMTP, byToken.ReceiveEmails, token, subject, content)
+			s.log.ContentSuccess(byToken.SMTP, byToken.ReceiveEmails, sendMailApi.Token, sendMailApi.Subject, sendMailApi.Content)
 		}
 	}
 	return "ok", nil

@@ -6,3 +6,10 @@ type SendMail struct {
 	Subject    string   `json:"subject"`
 	Content    string   `json:"content"`
 }
+
+type SendMailApi struct {
+	Token      string   `json:"token"`
+	Recipients []string `json:"recipients"`
+	Subject    string   `json:"subject"`
+	Content    string   `json:"content"`
+}
