@@ -9,7 +9,7 @@
 **GET请求示例**：
 
 ```powershell
-curl 'http://127.0.0.1:12567/sendMail?token=99eaf30feb23e28057367431d820cf319915792921d9cf21b5f761fb75433225&content=this%20is%20a%20test'
+curl 'http://127.0.0.1:12567/sendMail?token={{token}}&content=this%20is%20a%20test&recipients=aaa@mail.com,bbb@mail.com'
 ```
 
 **POST请求示例**：
@@ -17,7 +17,7 @@ curl 'http://127.0.0.1:12567/sendMail?token=99eaf30feb23e28057367431d820cf319915
 ```powershell
 curl -X POST 'http://127.0.0.1:12567/sendMail' \
 --header 'Content-Type: application/x-www-form-urlencoded' \
---data-urlencode 'token=99eaf30feb23e28057367431d820cf319915792921d9cf21b5f761fb75433225' \
+--data-urlencode 'token={{token}}' \
 --data-urlencode 'content=this%20is%20a%20test'
 ```
 
@@ -27,11 +27,23 @@ curl -X POST 'http://127.0.0.1:12567/sendMail' \
 curl -X POST 'http://127.0.0.1:12567/sendMail' \
 --form 'files=@"/111111.txt"' \
 --form 'files=@"/22222222222222.txt"' \
---form 'token=d6a1ee40c5bad981461643f5404a305a2e3f480cc6fcf65ba98efb63ce32d471"' \
+--form 'token={{token}}"' \
 --form 'content=1212'
 ```
 
 这种方式本质上是简单的表单提交，不同语言和平台都能方便地使用本项目。
+
+**POST提交json格式例子**:
+
+```powershell
+curl -X POST 'http://127.0.0.1:12567/sendMail' \
+--header 'Content-Type: application/json' \
+--data '{
+"token": "{{token}}",
+"content":"this is a test",
+"recipients":["aaa@mail.com","bbb@mail.com"]
+}'
+```
 
 **参数说明**：
 
@@ -39,8 +51,9 @@ curl -X POST 'http://127.0.0.1:12567/sendMail' \
 - `content`：邮件内容。
 - `subject`：邮件主题。如果在生成token时已设置主题，当此参数为空时将使用预设主题。
 - `files`：需要发送的附件，支持多个文件。
+- `recipients`:补充的邮箱地址，选填
 
-**使用方法**：
+**安装方法**：
 
 您可以直接从以下链接下载编译好的版本：
 

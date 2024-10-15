@@ -9,7 +9,7 @@ Supports GET and POST requests.
 **GET Request Example**:
 
 ```powershell
-curl 'http://127.0.0.1:12567/sendMail?token=99eaf30feb23e28057367431d820cf319915792921d9cf21b5f761fb75433225&content=this%20is%20a%20test'
+curl 'http://127.0.0.1:12567/sendMail?token={{token}}&content=this%20is%20a%20test&recipients=aaa@mail.com,bbb@mail.com'
 ```
 
 **POST Request Example**:
@@ -17,7 +17,7 @@ curl 'http://127.0.0.1:12567/sendMail?token=99eaf30feb23e28057367431d820cf319915
 ```powershell
 curl -X POST 'http://127.0.0.1:12567/sendMail' \
 --header 'Content-Type: application/x-www-form-urlencoded' \
---data-urlencode 'token=99eaf30feb23e28057367431d820cf319915792921d9cf21b5f761fb75433225' \
+--data-urlencode 'token={{token}}' \
 --data-urlencode 'content=this%20is%20a%20test'
 ```
 
@@ -27,11 +27,22 @@ curl -X POST 'http://127.0.0.1:12567/sendMail' \
 curl -X POST 'http://127.0.0.1:12567/sendMail' \
 --form 'files=@"/111111.txt"' \
 --form 'files=@"/22222222222222.txt"' \
---form 'token=d6a1ee40c5bad981461643f5404a305a2e3f480cc6fcf65ba98efb63ce32d471"' \
+--form 'token={{token}}"' \
 --form 'content=1212'
 ```
-
 This method is essentially a simple form submission, making it easy for different languages and platforms to use this project.
+
+**POST submission json format example**:
+```powershell
+curl -X POST 'http://127.0.0.1:12567/sendMail' \
+--header 'Content-Type: application/json' \
+--data '{
+"token": "{{token}}",
+"content":"this is a test",
+"recipients":["aaa@mail.com","bbb@mail.com"]
+}'
+```
+
 
 **Parameter Description**:
 
@@ -39,8 +50,9 @@ This method is essentially a simple form submission, making it easy for differen
 - `content`: The content of the email.
 - `subject`: The subject of the email. If a subject is set when the token is generated, it will be used as the default subject if this parameter is empty.
 - `files`: The attachments to be sent, supports multiple files.
+- `recipients`: Supplementary email address, optional.
 
-**Usage Method**:
+**Install Method**:
 
 You can directly download the compiled version from the following link:
 
