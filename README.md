@@ -118,19 +118,19 @@ If you wish to compile the project yourself, you will need to compile not only t
 
 When you first enter the management backend, you need to configure the database and the backend management account. Currently, SQLite and MySQL databases are supported.
 
-![initial](initial.png "Initial Configuration")
+![initial](https://github.com/chuccp/smtp2http/blob/main/image/0001.png?raw=true "Initial Configuration")
 
 Add SMTP address:
 
-![SMTP Configuration](STMP.png "SMTP Configuration")
+![SMTP Configuration](https://github.com/chuccp/smtp2http/blob/main/image/0002.png?raw=true "SMTP Configuration")
 
 Add the email address for receiving emails:
 
-![Mail Configuration](mail.png "Mail Configuration")
+![Mail Configuration](https://github.com/chuccp/smtp2http/blob/main/image/0003.png?raw=true "Mail Configuration")
 
 Add Token:
 
-![Token Configuration](token.png "Token Configuration")
+![Token Configuration](https://github.com/chuccp/smtp2http/blob/main/image/0004.png?raw=true "Token Configuration")
 
 After the configuration is complete, you can use the Token to send messages to the email.
 
