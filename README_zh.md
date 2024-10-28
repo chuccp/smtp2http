@@ -116,19 +116,19 @@ password = 123456     # MySQL密码
 
 首次进入管理后台时，需要配置数据库和后台管理账号。目前支持SQLite和MySQL数据库。
 
-![initial](initial.png "Initial Configuration")
+![initial](https://github.com/chuccp/smtp2http/blob/main/image/0001.png?raw=true "Initial Configuration")
 
 添加SMTP地址：
 
-![SMTP Configuration](STMP.png "SMTP Configuration")
+![SMTP Configuration](https://github.com/chuccp/smtp2http/blob/main/image/0002.png?raw=true "SMTP Configuration")
 
 添加接收邮件的邮箱地址：
 
-![Mail Configuration](mail.png "Mail Configuration")
+![Mail Configuration](https://github.com/chuccp/smtp2http/blob/main/image/0003.png?raw=true "Mail Configuration")
 
 添加Token：
 
-![Token Configuration](token.png "Token Configuration")
+![Token Configuration](https://github.com/chuccp/smtp2http/blob/main/image/0004.png?raw=true "Token Configuration")
 
 配置完成后，即可使用Token给邮箱发送信息。
 
