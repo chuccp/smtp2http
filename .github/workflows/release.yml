@@ -79,7 +79,7 @@ jobs:
 
       - name: Build smtp2http
         run: |
-          go build -ldflags "-s -w" -v -o build_assets/smtp2http  ./
+          go build  -v -o build_assets/smtp2http  ./
 
       - name: Rename Windows smtp2http
         if: matrix.goos == 'windows'
