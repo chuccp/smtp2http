@@ -1,6 +1,6 @@
 module github.com/chuccp/smtp2http
 
-go 1.23.7
+go 1.23.8
 
 require (
 	github.com/gin-contrib/cors v1.7.5
