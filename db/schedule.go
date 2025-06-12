@@ -12,20 +12,21 @@ type Header struct {
 }
 
 type Schedule struct {
-	Id          uint      `gorm:"primaryKey;autoIncrement;column:id" json:"id"`
-	Name        string    `gorm:"column:name" json:"name"`
-	Token       string    `gorm:"column:token" json:"token"`
-	Cron        string    `gorm:"column:cron" json:"cron"`
-	Url         string    `gorm:"column:url" json:"url"`
-	Method      string    `gorm:"column:method" json:"method"`
-	HeaderStr   string    `gorm:"column:header_str" json:"headerStr"`
-	Headers     []*Header `gorm:"-" json:"headers"`
-	Body        string    `gorm:"column:body" json:"body"`
-	UseTemplate bool      `gorm:"column:use_template" json:"useTemplate"`
-	Template    string    `gorm:"column:template" json:"template"`
-	IsUse       bool      `gorm:"column:is_use" json:"isUse"`
-	CreateTime  time.Time `gorm:"column:create_time" json:"createTime"`
-	UpdateTime  time.Time `gorm:"column:update_time" json:"updateTime"`
+	Id                uint      `gorm:"primaryKey;autoIncrement;column:id" json:"id"`
+	Name              string    `gorm:"column:name" json:"name"`
+	Token             string    `gorm:"column:token" json:"token"`
+	Cron              string    `gorm:"column:cron" json:"cron"`
+	Url               string    `gorm:"column:url" json:"url"`
+	Method            string    `gorm:"column:method" json:"method"`
+	HeaderStr         string    `gorm:"column:header_str" json:"headerStr"`
+	Headers           []*Header `gorm:"-" json:"headers"`
+	Body              string    `gorm:"column:body" json:"body"`
+	UseTemplate       bool      `gorm:"column:use_template" json:"useTemplate"`
+	Template          string    `gorm:"column:template" json:"template"`
+	IsUse             bool      `gorm:"column:is_use" json:"isUse"`
+	IsOnlySendByError bool      `gorm:"column:is_only_send_by_error" json:"isOnlySendByError"`
+	CreateTime        time.Time `gorm:"column:create_time" json:"createTime"`
+	UpdateTime        time.Time `gorm:"column:update_time" json:"updateTime"`
 }
 
 func (schedule *Schedule) SetCreateTime(createTime time.Time) {
