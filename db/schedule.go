@@ -6,13 +6,24 @@ import (
 	"time"
 )
 
+type Header struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
+}
+
 type Schedule struct {
 	Id          uint      `gorm:"primaryKey;autoIncrement;column:id" json:"id"`
+	Name        string    `gorm:"column:name" json:"name"`
+	Token       string    `gorm:"column:token" json:"token"`
+	Cron        string    `gorm:"column:cron" json:"cron"`
 	Url         string    `gorm:"column:url" json:"url"`
-	Header      string    `gorm:"column:Header" json:"header"`
 	Method      string    `gorm:"column:method" json:"method"`
-	ContentType string    `gorm:"column:content_type" json:"contentType"`
+	HeaderStr   string    `gorm:"column:header_str" json:"headerStr"`
+	Headers     []*Header `gorm:"-" json:"headers"`
 	Body        string    `gorm:"column:body" json:"body"`
+	UseTemplate bool      `gorm:"column:use_template" json:"useTemplate"`
+	Template    string    `gorm:"column:template" json:"template"`
+	IsUse       bool      `gorm:"column:is_use" json:"isUse"`
 	CreateTime  time.Time `gorm:"column:create_time" json:"createTime"`
 	UpdateTime  time.Time `gorm:"column:update_time" json:"updateTime"`
 }

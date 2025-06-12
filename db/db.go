@@ -29,6 +29,9 @@ func (d *DB) GetLogModel() *LogModel {
 func (d *DB) GetTokenModel() *TokenModel {
 	return NewTokenModel(d.db, "t_token")
 }
+func (d *DB) GetScheduleModel() *ScheduleModel {
+	return NewScheduleModel(d.db, "t_schedule")
+}
 func CreateDB() *DB {
 	return &DB{}
 }

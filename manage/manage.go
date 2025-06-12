@@ -33,6 +33,7 @@ func (s *Server) Init(context *core.Context) {
 	s.addManage(&Token{})
 	s.addManage(&Log{})
 	s.addManage(&User{})
+	s.addManage(&Schedule{})
 	for _, a := range s.manages {
 		a.Init(s.context, s)
 	}
