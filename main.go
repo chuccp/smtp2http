@@ -26,8 +26,8 @@ func main() {
 			log.Panicln(err)
 		}
 	}
-	dMail := core.Create()
-	dMail.AddServer(manage.NewServer())
-	dMail.AddServer(api.NewServer())
-	dMail.Start(webPort, apiPort)
+	smtp2Http := core.Create()
+	smtp2Http.AddServer(manage.NewServer())
+	smtp2Http.AddServer(api.NewServer())
+	smtp2Http.Start(webPort, apiPort)
 }

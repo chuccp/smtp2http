@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-type DMail struct {
+type SMTP2Http struct {
 	context     *Context
 	httpServer  *web.HttpServer
 	log         *zap.Logger
@@ -22,14 +22,14 @@ type DMail struct {
 	iHttpServer []IHttpServer
 }
 
-func Create() *DMail {
-	return &DMail{webPort: 0, apiPort: 0, servers: make([]Server, 0), config: config.NewConfig(), iHttpServer: make([]IHttpServer, 0)}
+func Create() *SMTP2Http {
+	return &SMTP2Http{webPort: 0, apiPort: 0, servers: make([]Server, 0), config: config.NewConfig(), iHttpServer: make([]IHttpServer, 0)}
 }
-func (m *DMail) AddServer(server Server) {
+func (m *SMTP2Http) AddServer(server Server) {
 	m.servers = append(m.servers, server)
 }
 
-func (m *DMail) startHttpServer() error {
+func (m *SMTP2Http) startHttpServer() error {
 	port := m.context.GetCfgInt("manage", "port")
 	certFile := m.context.GetCfgString("manage", "certFile")
 	keyFile := m.context.GetCfgString("manage", "keyFile")
@@ -41,21 +41,21 @@ func (m *DMail) startHttpServer() error {
 	}
 	return nil
 }
-func (m *DMail) Start(webPort int, apiPort int) {
+func (m *SMTP2Http) Start(webPort int, apiPort int) {
 	m.webPort = webPort
 	m.apiPort = apiPort
 	for {
 		m.reStart()
 	}
 }
-func (m *DMail) ReStart() {
+func (m *SMTP2Http) ReStart() {
 	for _, server := range m.iHttpServer {
 		server.Stop()
 	}
 	time.Sleep(2 * time.Second)
 	m.httpServer.Stop()
 }
-func (m *DMail) reStart() {
+func (m *SMTP2Http) reStart() {
 	m.iHttpServer = make([]IHttpServer, 0)
 	err := m.config.Init(m.webPort, m.apiPort)
 	if err != nil {
