@@ -30,6 +30,8 @@ jobs:
           # BEGIN Other architectures
           - goos: linux
             goarch: arm64
+          - goos: linux
+            goarch: riscv64
           - goos: windows
             goarch: arm64
           # END Other architectures
