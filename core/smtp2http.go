@@ -99,6 +99,9 @@ func (m *SMTP2Http) reStart() {
 			}
 		}
 	}
+	for _, server := range m.servers {
+		server.Start()
+	}
 	err = m.startHttpServer()
 	if !errors.Is(err, http.ErrServerClosed) && err != nil {
 		m.log.Panic("Start", zap.Error(err))

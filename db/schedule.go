@@ -69,6 +69,14 @@ func (a *ScheduleModel) GetOne(id uint) (*Schedule, error) {
 	}
 	return &schedule, nil
 }
+func (a *ScheduleModel) FindAllByUse() ([]*Schedule, error) {
+	var schedules []*Schedule
+	tx := a.db.Table(a.tableName).Where("`is_use`=1 ").Find(&schedules)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return schedules, nil
+}
 
 func (a *ScheduleModel) DeleteOne(id uint) error {
 	return a.Model.DeleteOne(id, &Schedule{})

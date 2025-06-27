@@ -8,6 +8,7 @@ import (
 type Server interface {
 	Init(context *Context)
 	Name() string
+	Start()
 }
 type IHttpServer interface {
 	init(context *Context)

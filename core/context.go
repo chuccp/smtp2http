@@ -95,12 +95,7 @@ func (c *Context) initDbBySetInfo(setInfo *config.SetInfo) error {
 	if err != nil {
 		return err
 	}
-	c.db = _db_
-	c.db.GetSMTPModel().CreateTable()
-	c.db.GetMailModel().CreateTable()
-	c.db.GetTokenModel().CreateTable()
-	c.db.GetLogModel().CreateTable()
-	return nil
+	return c.creatDB(_db_)
 }
 func (c *Context) initDb() error {
 	if c.IsInit() {
@@ -109,11 +104,32 @@ func (c *Context) initDb() error {
 		if err != nil {
 			return err
 		}
-		c.db = _db_
-		c.db.GetSMTPModel().CreateTable()
-		c.db.GetMailModel().CreateTable()
-		c.db.GetTokenModel().CreateTable()
-		c.db.GetLogModel().CreateTable()
+		return c.creatDB(_db_)
+
+	}
+	return nil
+}
+func (c *Context) creatDB(db2 *db.DB) error {
+	c.db = db2
+	err := c.db.GetSMTPModel().CreateTable()
+	if err != nil {
+		return err
+	}
+	err = c.db.GetMailModel().CreateTable()
+	if err != nil {
+		return err
+	}
+	err = c.db.GetTokenModel().CreateTable()
+	if err != nil {
+		return err
+	}
+	err = c.db.GetLogModel().CreateTable()
+	if err != nil {
+		return err
+	}
+	err = c.db.GetScheduleModel().CreateTable()
+	if err != nil {
+		return err
 	}
 	return nil
 }

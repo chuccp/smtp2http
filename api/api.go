@@ -27,6 +27,7 @@ func NewServer() *Server {
 func (s *Server) Name() string {
 	return "api"
 }
+func (s *Server) Start() {}
 
 func (s *Server) SendMail(req *web.Request) (any, error) {
 	var sendMailApi entity.SendMailApi

@@ -2,6 +2,7 @@ package smtp
 
 import (
 	"crypto/tls"
+	"encoding/json"
 	"errors"
 	"github.com/chuccp/smtp2http/db"
 	"github.com/chuccp/smtp2http/util"
@@ -163,6 +164,34 @@ func SendMail(sendMsg *SendMsg, invalidMails ...string) error {
 				return ToUserNotFoundError(mails)
 			}
 		}
+		return err
+	}
+	return nil
+}
+
+func SendAPIMail(schedule *db.Schedule, smtp *db.SMTP, mails []*db.Mail) error {
+	url := schedule.Url
+	Method := schedule.Method
+	request := util.NewRequest()
+	var headers []db.Header
+	var dataMap = make(map[string]string)
+	if len(schedule.HeaderStr) > 0 {
+		err := json.Unmarshal([]byte(schedule.HeaderStr), &headers)
+		if err == nil {
+			for _, header := range headers {
+				dataMap[header.Name] = header.Value
+			}
+		} else {
+			return err
+		}
+	}
+
+	data, err := request.CallApi(url, dataMap, Method, []byte(schedule.Body))
+	if err != nil {
+		return err
+	}
+	err = SendContentMsg(smtp, mails, schedule.Name, string(data))
+	if err != nil {
 		return err
 	}
 	return nil

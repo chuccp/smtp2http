@@ -18,6 +18,8 @@ func NewServer() *Server {
 	return server
 }
 
+func (s *Server) Start() {}
+
 func (s *Server) Name() string {
 	return "manage"
 }
