@@ -118,7 +118,7 @@ jobs:
     strategy:
       matrix:
         goos: [ linux ]
-        goarch: [ amd64,arm64 ]
+        goarch: [ amd64,arm64,riscv64 ]
     runs-on: ubuntu-latest
     needs:
       - build
