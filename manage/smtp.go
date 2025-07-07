@@ -3,6 +3,7 @@ package manage
 import (
 	"github.com/chuccp/smtp2http/core"
 	"github.com/chuccp/smtp2http/db"
+	"github.com/chuccp/smtp2http/service"
 	stmp2 "github.com/chuccp/smtp2http/smtp"
 	"github.com/chuccp/smtp2http/web"
 	"net/mail"
@@ -10,7 +11,8 @@ import (
 )
 
 type Smtp struct {
-	context *core.Context
+	context  *core.Context
+	schedule *service.Schedule
 }
 
 func (smtp *Smtp) getOne(req *web.Request) (any, error) {

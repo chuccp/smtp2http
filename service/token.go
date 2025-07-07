@@ -40,10 +40,19 @@ func (token *Token) GetOneByToken(tokenStr string) (*db.Token, error) {
 	return byToken, err
 }
 
+func (token *Token) QueryOneByToken(tokenStr string) (*db.Token, error) {
+	byToken, err := token.context.GetDb().GetTokenModel().GetOneByToken(tokenStr)
+	if err != nil {
+		return nil, err
+	}
+	return byToken, err
+}
+
 func (token *Token) supplement(st ...*db.Token) {
 	mailIds := make([]uint, 0)
 	stmpIds := make([]uint, 0)
 	for _, d := range st {
+		d.Name = d.Token
 		mailIds = append(mailIds, util.StringToUintIds(d.ReceiveEmailIds)...)
 		stmpIds = append(stmpIds, d.SMTPId)
 	}

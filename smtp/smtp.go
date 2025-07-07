@@ -185,7 +185,6 @@ func SendAPIMail(schedule *db.Schedule, smtp *db.SMTP, mails []*db.Mail) error {
 			return err
 		}
 	}
-
 	data, err := request.CallApi(url, dataMap, Method, []byte(schedule.Body))
 	if err != nil {
 		return err

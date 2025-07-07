@@ -1,9 +1,11 @@
 package manage
 
 import (
+	"errors"
 	"github.com/chuccp/smtp2http/core"
 	"github.com/chuccp/smtp2http/db"
 	"github.com/chuccp/smtp2http/service"
+	"github.com/chuccp/smtp2http/util"
 	"github.com/chuccp/smtp2http/web"
 	"strconv"
 )
@@ -43,7 +45,11 @@ func (schedule *Schedule) postOne(req *web.Request) (any, error) {
 	if err != nil {
 		return nil, err
 	}
-	err = schedule.context.GetDb().GetScheduleModel().Save(&st)
+	err = schedule.validate(&st)
+	if err != nil {
+		return nil, err
+	}
+	err = schedule.schedule.Save(&st)
 	if err != nil {
 		return nil, err
 	}
@@ -55,11 +61,38 @@ func (schedule *Schedule) putOne(req *web.Request) (any, error) {
 	if err != nil {
 		return nil, err
 	}
-	err = schedule.context.GetDb().GetScheduleModel().Edit(&st)
+	err = schedule.validate(&st)
+	if err != nil {
+		return nil, err
+	}
+	err = schedule.schedule.Edit(&st)
 	if err != nil {
 		return nil, err
 	}
 	return "ok", nil
+}
+func (schedule *Schedule) sendMail(req *web.Request) (any, error) {
+	var st db.Schedule
+	err := req.ShouldBindBodyWithJSON(&st)
+	err = schedule.validate(&st)
+	if err != nil {
+		return nil, err
+	}
+	err = schedule.schedule.SendMail(&st)
+	if err != nil {
+		return nil, err
+	}
+	return "ok", nil
+}
+func (schedule *Schedule) validate(st *db.Schedule) error {
+	err := util.ValidateURL(st.Url)
+	if err != nil {
+		return err
+	}
+	if len(st.Token) == 0 {
+		return errors.New(" token  cannot be empty")
+	}
+	return nil
 }
 
 func (schedule *Schedule) Init(context *core.Context, server core.IHttpServer) {
@@ -70,5 +103,6 @@ func (schedule *Schedule) Init(context *core.Context, server core.IHttpServer) {
 	server.GETAuth("/schedule", schedule.getPage)
 	server.POSTAuth("/schedule", schedule.postOne)
 	server.PUTAuth("/schedule", schedule.putOne)
+	server.POSTAuth("/sendMailBySchedule", schedule.sendMail)
 
 }

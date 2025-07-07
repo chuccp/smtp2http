@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -175,4 +176,26 @@ func (r *Request) JustCall(link string, jsonData []byte) error {
 		r.netBreak.noBreak()
 	}
 	return err
+}
+
+func ValidateURL(urlStr string) error {
+
+	// 空字符串无效
+	if strings.TrimSpace(urlStr) == "" {
+		return errors.New("URL cannot be empty")
+	}
+	// 尝试解析URL
+	u, err := url.Parse(urlStr)
+	if err != nil {
+		return err
+	}
+	scheme := strings.ToLower(u.Scheme)
+	if scheme != "http" && scheme != "https" {
+		return errors.New("URL must start with http or https")
+	}
+
+	if u.Host == "" {
+		return errors.New("URL must have a host")
+	}
+	return nil
 }
