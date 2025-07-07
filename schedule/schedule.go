@@ -49,6 +49,9 @@ func (server *Server) Name() string {
 	return "cronManage"
 }
 func (server *Server) init() {
+	if server.context.GetDb() == nil {
+		return
+	}
 	schedules, err := server.context.GetDb().GetScheduleModel().FindAllByUse()
 	if err != nil {
 		return
