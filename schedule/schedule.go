@@ -98,13 +98,16 @@ func (server *Server) Run(schedule *db.Schedule) error {
 }
 
 func (server *Server) Start() {
-	server.lock.Lock()
-	defer server.lock.Unlock()
-	if server.cronManage != nil {
-		server.cronManage.stop()
+	isInit := server.context.GetConfig().GetBooleanOrDefault("core", "init", false)
+	if isInit {
+		server.lock.Lock()
+		defer server.lock.Unlock()
+		if server.cronManage != nil {
+			server.cronManage.stop()
+		}
+		server.cronManage = newCronManage()
+		server.init()
+		server.cronManage.Start()
+		server.context.GetLog().Info("start Schedule")
 	}
-	server.cronManage = newCronManage()
-	server.init()
-	server.cronManage.Start()
-	server.context.GetLog().Info("start Schedule")
 }
