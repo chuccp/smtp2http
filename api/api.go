@@ -97,8 +97,8 @@ func (s *Server) SendMail(req *web.Request) (any, error) {
 
 func (s *Server) Init(context *core.Context) {
 	s.context = context
-	s.token = service.NewToken(context)
-	s.log = service.NewLog(context)
+	s.token = context.GetTokenService()
+	s.log = context.GetLogService()
 	s.POST("/sendMail", s.SendMail)
 	s.GET("/sendMail", s.SendMail)
 }

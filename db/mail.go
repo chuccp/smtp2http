@@ -1,6 +1,8 @@
 package db
 
 import (
+	"bytes"
+	"github.com/chuccp/smtp2http/util"
 	"github.com/chuccp/smtp2http/web"
 	"gorm.io/gorm"
 	"time"
@@ -91,4 +93,25 @@ func (a *MailModel) Page(page *web.Page) (*Page[*Mail], error) {
 		return nil, err
 	}
 	return ToPage[*Mail](num, mails), nil
+}
+
+func GetMails(ids []uint, mailMap map[uint]*Mail) []*Mail {
+	mails := make([]*Mail, 0)
+	for _, id := range ids {
+		v, ok := mailMap[id]
+		if ok {
+			mails = append(mails, v)
+		}
+	}
+	return mails
+}
+func GetMailsStr(mails []*Mail) string {
+	buffer := new(bytes.Buffer)
+	for _, mail := range mails {
+		buffer.WriteString("," + util.FormatMail(mail.Name, mail.Mail))
+	}
+	if buffer.Len() == 0 {
+		return ""
+	}
+	return buffer.String()[1:]
 }

@@ -169,7 +169,7 @@ func SendMail(sendMsg *SendMsg, invalidMails ...string) error {
 	return nil
 }
 
-func SendAPIMail(schedule *db.Schedule, smtp *db.SMTP, mails []*db.Mail) error {
+func SendAPIMail(schedule *db.Schedule, smtp *db.SMTP, mails []*db.Mail) (string, error) {
 	url := schedule.Url
 	Method := schedule.Method
 	request := util.NewRequest()
@@ -182,16 +182,16 @@ func SendAPIMail(schedule *db.Schedule, smtp *db.SMTP, mails []*db.Mail) error {
 				dataMap[header.Name] = header.Value
 			}
 		} else {
-			return err
+			return "", err
 		}
 	}
 	data, err := request.CallApi(url, dataMap, Method, []byte(schedule.Body))
 	if err != nil {
-		return err
+		return "", err
 	}
 	err = SendContentMsg(smtp, mails, schedule.Name, string(data))
 	if err != nil {
-		return err
+		return string(data), err
 	}
-	return nil
+	return string(data), nil
 }

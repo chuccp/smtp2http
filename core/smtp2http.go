@@ -5,6 +5,7 @@ import (
 	"github.com/chuccp/smtp2http/config"
 	"github.com/chuccp/smtp2http/login"
 	"github.com/chuccp/smtp2http/web"
+	"github.com/robfig/cron/v3"
 	"go.uber.org/zap"
 	"log"
 	"net/http"
@@ -41,6 +42,16 @@ func (m *SMTP2Http) startHttpServer() error {
 	}
 	return nil
 }
+
+func Parser(cronStr string) error {
+	parser := cron.NewParser(cron.SecondOptional)
+	_, err := parser.Parse(cronStr)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (m *SMTP2Http) Start(webPort int, apiPort int) {
 	m.webPort = webPort
 	m.apiPort = apiPort

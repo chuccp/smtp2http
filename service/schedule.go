@@ -2,59 +2,56 @@ package service
 
 import (
 	"errors"
-	"github.com/chuccp/smtp2http/core"
 	"github.com/chuccp/smtp2http/db"
 	"github.com/chuccp/smtp2http/smtp"
 	"github.com/chuccp/smtp2http/web"
 )
 
 type Schedule struct {
-	context *core.Context
-	token   *Token
+	db    *db.DB
+	token *Token
 }
 
-func NewSchedule(context *core.Context) *Schedule {
-	return &Schedule{context: context, token: NewToken(context)}
+func NewSchedule(db *db.DB, token *Token) *Schedule {
+	return &Schedule{db: db, token: token}
 }
 func (schedule *Schedule) GetPage(page *web.Page) (any, error) {
-	return schedule.context.GetDb().GetScheduleModel().Page(page)
+	return schedule.db.GetScheduleModel().Page(page)
 }
 func (schedule *Schedule) Edit(sd *db.Schedule) error {
-	token := sd.Token
-	v, err := schedule.token.QueryOneByToken(token)
-	if v == nil {
-		return errors.New("token not found")
-	}
+	v, err := schedule.db.GetTokenModel().GetOneByToken(sd.Token)
 	if err != nil {
 		return err
 	}
-	return schedule.context.GetDb().GetScheduleModel().Edit(sd)
+	if v == nil {
+		return errors.New("token not found")
+	}
+	return schedule.db.GetScheduleModel().Edit(sd)
 }
 func (schedule *Schedule) Save(sd *db.Schedule) error {
-	token := sd.Token
-	v, err := schedule.token.QueryOneByToken(token)
-	if v == nil {
-		return errors.New("token not found")
-	}
+	v, err := schedule.db.GetTokenModel().GetOneByToken(sd.Token)
 	if err != nil {
 		return err
 	}
-	return schedule.context.GetDb().GetScheduleModel().Save(sd)
+	if v == nil {
+		return errors.New("token not found")
+	}
+	return schedule.db.GetScheduleModel().Save(sd)
 
 }
 
 func (schedule *Schedule) GetOne(id int) (*db.Schedule, error) {
-	return schedule.context.GetDb().GetScheduleModel().GetOne(uint(id))
+	return schedule.db.GetScheduleModel().GetOne(uint(id))
 }
 
 func (schedule *Schedule) SendMail(sd *db.Schedule) error {
-	token := sd.Token
-	byToken, err := schedule.token.GetOneByToken(token)
-	if byToken == nil {
-		return errors.New("token not found")
-	}
+	byToken, err := schedule.token.GetOneByToken(sd.Token)
 	if err != nil {
 		return err
 	}
-	return smtp.SendAPIMail(sd, byToken.SMTP, byToken.ReceiveEmails)
+	if byToken == nil {
+		return errors.New("token not found")
+	}
+	_, err = smtp.SendAPIMail(sd, byToken.SMTP, byToken.ReceiveEmails)
+	return err
 }

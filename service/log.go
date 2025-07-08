@@ -3,7 +3,6 @@ package service
 import (
 	"encoding/json"
 	"errors"
-	"github.com/chuccp/smtp2http/core"
 	"github.com/chuccp/smtp2http/db"
 	"github.com/chuccp/smtp2http/smtp"
 	"github.com/chuccp/smtp2http/util"
@@ -11,11 +10,11 @@ import (
 )
 
 type Log struct {
-	context *core.Context
+	db *db.DB
 }
 
-func NewLog(context *core.Context) *Log {
-	return &Log{context: context}
+func NewLog(db *db.DB) *Log {
+	return &Log{db: db}
 }
 
 func (a *Log) ContentSuccess(smtp *db.SMTP, mails []*db.Mail, token string, subject, bodyString string) error {
@@ -55,7 +54,7 @@ func (a *Log) log(st *db.SMTP, mails []*db.Mail, token string, subject, bodyStri
 			lg.Status = status
 		}
 	}
-	return a.context.GetDb().GetLogModel().Save(&lg)
+	return a.db.GetLogModel().Save(&lg)
 }
 func (a *Log) FilesError(smtp *db.SMTP, mails []*db.Mail, files []*smtp.File, token string, subject, bodyString string, err error) error {
 	return a.log(smtp, mails, token, subject, bodyString, files, db.ERROR, err)

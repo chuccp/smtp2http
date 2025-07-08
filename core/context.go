@@ -4,6 +4,7 @@ import (
 	"github.com/chuccp/smtp2http/config"
 	"github.com/chuccp/smtp2http/db"
 	"github.com/chuccp/smtp2http/login"
+	"github.com/chuccp/smtp2http/service"
 	"github.com/chuccp/smtp2http/util"
 	"github.com/chuccp/smtp2http/web"
 	"go.uber.org/zap"
@@ -47,6 +48,17 @@ func (c *Context) ReStart() {
 		c.reStart()
 	}
 }
+
+func (c *Context) GetLogService() *service.Log {
+	return service.NewLog(c.db)
+}
+func (c *Context) GetTokenService() *service.Token {
+	return service.NewToken(c.db)
+}
+func (c *Context) GetScheduleService() *service.Schedule {
+	return service.NewSchedule(c.db, c.GetTokenService())
+}
+
 func (c *Context) IsInit() bool {
 	return c.config.GetBooleanOrDefault("core", "init", false)
 }

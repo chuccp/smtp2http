@@ -97,7 +97,7 @@ func (schedule *Schedule) validate(st *db.Schedule) error {
 
 func (schedule *Schedule) Init(context *core.Context, server core.IHttpServer) {
 	schedule.context = context
-	schedule.schedule = service.NewSchedule(context)
+	schedule.schedule = context.GetScheduleService()
 	server.GETAuth("/schedule/:id", schedule.getOne)
 	server.DELETEAuth("/schedule/:id", schedule.deleteOne)
 	server.GETAuth("/schedule", schedule.getPage)

@@ -94,8 +94,8 @@ func (token *Token) sendMail(req *web.Request) (any, error) {
 
 func (token *Token) Init(context *core.Context, server core.IHttpServer) {
 	token.context = context
-	token.token = service.NewToken(context)
-	token.log = service.NewLog(context)
+	token.token = context.GetTokenService()
+	token.log = context.GetLogService()
 	server.GETAuth("/token/:id", token.getOne)
 	server.DELETEAuth("/token/:id", token.deleteOne)
 	server.GETAuth("/token", token.getPage)
