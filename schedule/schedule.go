@@ -3,6 +3,7 @@ package schedule
 import (
 	"github.com/chuccp/smtp2http/core"
 	"github.com/chuccp/smtp2http/db"
+	"github.com/chuccp/smtp2http/service"
 	"github.com/chuccp/smtp2http/smtp"
 	"github.com/chuccp/smtp2http/util"
 	"github.com/robfig/cron/v3"
@@ -32,24 +33,29 @@ func (cronM *cronManage) stop() {
 
 type Server struct {
 	cronManage *cronManage
-	context    *core.Context
 	lock       *sync.Mutex
 	request    *util.Request
+	log        *service.Log
+	token      *service.Token
+	context    *core.Context
 }
 
 func NewServer() *Server {
 	return &Server{
-		lock:    new(sync.Mutex),
-		request: util.NewRequest(),
+		lock:       new(sync.Mutex),
+		request:    util.NewRequest(),
+		cronManage: newCronManage(),
 	}
 }
 
 func (server *Server) Init(context *core.Context) {
 	server.context = context
+	context.SetSchedule(server)
 }
 func (server *Server) Name() string {
-	return "cronManage"
+	return "schedule"
 }
+
 func (server *Server) init() {
 	if server.context.GetDb() == nil {
 		return
@@ -59,28 +65,21 @@ func (server *Server) init() {
 		return
 	}
 	for _, schedule := range schedules {
-		entryID, err := server.cronManage.cron.AddFunc(schedule.Cron, func() {
-			_, err := server.request.CallApi(schedule.Url, nil, schedule.Method, []byte(schedule.Body))
-			if err != nil {
-				return
-			}
-		})
+		err := server.Run(schedule)
 		if err != nil {
-			server.context.GetLog().Error("cron start error", zap.String("cron", schedule.Cron), zap.Error(err))
-		} else {
-			server.cronManage.cronMap[schedule.GetId()] = entryID
+			server.context.GetLog().Error("SendAPIMail Run log error", zap.Error(err))
 		}
 	}
 }
 func (server *Server) Run(schedule *db.Schedule) error {
 	entryID, err := server.cronManage.cron.AddFunc(schedule.Cron, func() {
-		byToken, err := server.context.GetTokenService().GetOneByToken(schedule.Token)
+		byToken, err := server.token.GetOneByToken(schedule.Token)
 		if err == nil {
 			body, err := smtp.SendAPIMail(schedule, byToken.SMTP, byToken.ReceiveEmails)
 			if err != nil {
-				err := server.context.GetLogService().ContentError(byToken.SMTP, byToken.ReceiveEmails, schedule.Token, schedule.Name, body, err)
+				err := server.log.ContentError(byToken.SMTP, byToken.ReceiveEmails, schedule.Token, schedule.Name, body, err)
 				if err != nil {
-					server.context.GetLog().Error("SendAPIMail log error", zap.Error(err))
+
 				}
 			} else {
 				err := server.context.GetLogService().ContentSuccess(byToken.SMTP, byToken.ReceiveEmails, schedule.Token, schedule.Name, body)

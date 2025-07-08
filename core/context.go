@@ -16,6 +16,7 @@ type Context struct {
 	db         *db.DB
 	config     *config.Config
 	log        *zap.Logger
+	schedule   Schedule
 	httpServer *web.HttpServer
 	digestAuth *login.DigestAuth
 	reStart    func()
@@ -29,6 +30,12 @@ func (c *Context) GetLog() *zap.Logger {
 }
 func (c *Context) GetDb() *db.DB {
 	return c.db
+}
+func (c *Context) SetSchedule(schedule Schedule) {
+	c.schedule = schedule
+}
+func (c *Context) GetSchedule() Schedule {
+	return c.schedule
 }
 
 func (c *Context) SecretProvider(user string) string {
