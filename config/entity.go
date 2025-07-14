@@ -3,6 +3,7 @@ package config
 type System struct {
 	HasInit  bool `json:"hasInit"`
 	HasLogin bool `json:"hasLogin"`
+	IsDocker bool `json:"isDocker"`
 }
 
 type Manage struct {
@@ -25,6 +26,7 @@ type SetInfo struct {
 	Mysql     *Mysql  `json:"mysql"`
 	Manage    *Manage `json:"manage"`
 	Api       *Api    `json:"api"`
+	IsDocker  bool    `json:"isDocker"`
 }
 
 var defaultSetInfo = &SetInfo{

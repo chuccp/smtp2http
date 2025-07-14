@@ -21,6 +21,7 @@ type SMTP2Http struct {
 	webPort     int
 	apiPort     int
 	iHttpServer []IHttpServer
+	IsDocker    bool
 }
 
 func Create() *SMTP2Http {
@@ -37,7 +38,7 @@ func (m *SMTP2Http) startHttpServer() error {
 	m.context.log.Info("startHttpServer", zap.String("name", "manage"), zap.Int("port", port))
 	err := m.httpServer.StartAutoTLS(port, certFile, keyFile)
 	if err != nil {
-		m.context.log.Error("服务启动失败", zap.String("name", "DMail"), zap.Int("port", port), zap.Error(err))
+		m.context.log.Error("服务启动失败", zap.String("name", "smtp2http"), zap.Int("port", port), zap.Error(err))
 		return err
 	}
 	return nil
@@ -55,6 +56,9 @@ func Parser(cronStr string) error {
 func (m *SMTP2Http) Start(webPort int, apiPort int) {
 	m.webPort = webPort
 	m.apiPort = apiPort
+	if m.webPort > 0 || m.apiPort > 0 {
+		m.IsDocker = true
+	}
 	for {
 		m.reStart()
 	}
@@ -80,7 +84,7 @@ func (m *SMTP2Http) reStart() {
 		return
 	}
 	m.log = logger
-	m.context = &Context{log: m.log, config: m.config, reStart: m.ReStart}
+	m.context = &Context{log: m.log, config: m.config, reStart: m.ReStart, IsDocker: m.IsDocker}
 	digestAuth := login.NewDigestAuth(m.context.SecretProvider)
 	m.context.digestAuth = digestAuth
 	m.httpServer = web.NewServer(digestAuth)

@@ -7,6 +7,8 @@ import (
 	"github.com/chuccp/smtp2http/service"
 	"github.com/chuccp/smtp2http/util"
 	"github.com/chuccp/smtp2http/web"
+	"go.uber.org/zap"
+	"io"
 	"strconv"
 )
 
@@ -98,6 +100,17 @@ func (schedule *Schedule) validate(st *db.Schedule) error {
 	}
 	return nil
 }
+func (schedule *Schedule) scheduleTestApi(req *web.Request) (any, error) {
+	params := make(map[string]any)
+	request := req.GetRawRequest()
+	params["header"] = request.Header
+	body, _ := io.ReadAll(request.Body)
+	params["body"] = string(body)
+	params["method"] = request.Method
+	params["url"] = request.URL.String()
+	schedule.context.GetLog().Debug("scheduleTestApi", zap.String("body", string(body)))
+	return params, nil
+}
 
 func (schedule *Schedule) Init(context *core.Context, server core.IHttpServer) {
 	schedule.context = context
@@ -108,5 +121,6 @@ func (schedule *Schedule) Init(context *core.Context, server core.IHttpServer) {
 	server.POSTAuth("/schedule", schedule.postOne)
 	server.PUTAuth("/schedule", schedule.putOne)
 	server.POSTAuth("/sendMailBySchedule", schedule.sendMail)
+	server.Any("/scheduleTestApi", schedule.scheduleTestApi)
 
 }

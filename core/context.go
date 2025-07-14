@@ -19,6 +19,7 @@ type Context struct {
 	schedule   Schedule
 	httpServer *web.HttpServer
 	digestAuth *login.DigestAuth
+	IsDocker   bool
 	reStart    func()
 }
 
@@ -93,7 +94,9 @@ func (c *Context) get(relativePath string, handlers ...web.HandlerFunc) {
 }
 
 func (c *Context) GetDefaultSetInfo() *config.SetInfo {
-	return c.config.ReadSetInfo()
+	setInfo := c.config.ReadSetInfo()
+	setInfo.IsDocker = c.IsDocker
+	return setInfo
 }
 
 func (c *Context) UpdateSetInfo(setInfo *config.SetInfo) error {

@@ -42,7 +42,7 @@ func (set *Set) putReSet(req *web.Request) (any, error) {
 
 func (set *Set) getSet(req *web.Request) (any, error) {
 	hasLogin := req.GetDigestAuth().HasSign(req.GetContext())
-	return &config.System{HasInit: set.context.IsInit(), HasLogin: hasLogin}, nil
+	return &config.System{HasInit: set.context.IsInit(), HasLogin: hasLogin, IsDocker: set.context.IsDocker}, nil
 }
 func (set *Set) defaultSet(req *web.Request) (any, error) {
 

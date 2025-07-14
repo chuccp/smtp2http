@@ -23,10 +23,13 @@ type IHttpServer interface {
 	DELETE(relativePath string, handlers ...web.HandlerFunc)
 	PUT(relativePath string, handlers ...web.HandlerFunc)
 
+	Any(relativePath string, handlers ...web.HandlerFunc)
+
 	GETAuth(relativePath string, handlers ...web.HandlerFunc)
 	POSTAuth(relativePath string, handlers ...web.HandlerFunc)
 	DELETEAuth(relativePath string, handlers ...web.HandlerFunc)
 	PUTAuth(relativePath string, handlers ...web.HandlerFunc)
+	AnyAuth(relativePath string, handlers ...web.HandlerFunc)
 }
 type httpServer struct {
 	context    *Context
@@ -104,6 +107,14 @@ func (server *httpServer) GET(pattern string, handlers ...web.HandlerFunc) {
 	}
 }
 
+func (server *httpServer) Any(pattern string, handlers ...web.HandlerFunc) {
+	if server.port > 0 {
+		server.httpServer.Any(pattern, handlers...)
+	} else {
+		server.context.any(pattern, handlers...)
+	}
+}
+
 func (server *httpServer) justChecks(handlers ...web.HandlerFunc) []web.HandlerFunc {
 	var hs = make([]web.HandlerFunc, len(handlers))
 	for i, handler := range handlers {
@@ -128,6 +139,10 @@ func (server *httpServer) DELETEAuth(relativePath string, handlers ...web.Handle
 }
 func (server *httpServer) PUTAuth(relativePath string, handlers ...web.HandlerFunc) {
 	server.PUT(relativePath, server.justChecks(handlers...)...)
+}
+
+func (server *httpServer) AnyAuth(relativePath string, handlers ...web.HandlerFunc) {
+	server.Any(relativePath, server.justChecks(handlers...)...)
 }
 
 func (server *httpServer) IsTls() bool {
