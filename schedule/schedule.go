@@ -130,54 +130,12 @@ func (server *Server) Init(context *core.Context) {
 func (server *Server) Name() string {
 	return "schedule"
 }
-
-// func (server *Server) init() {
-//
-//		if server.context.GetDb() == nil {
-//			return
-//		}
-//		schedules, err := server.context.GetDb().GetScheduleModel().FindAllByUse()
-//		if err != nil {
-//			return
-//		}
-//		for _, schedule := range schedules {
-//			err := server.Run(schedule)
-//			if err != nil {
-//				server.context.GetLog().Error("SendAPIMail Run log error", zap.Error(err))
-//			}
-//		}
-//	}
 func (server *Server) Run(schedule *db.Schedule) error {
 	return nil
 }
 func (server *Server) Stop(Id uint) error {
 	return nil
 }
-
-//	entryID, err := server.cronManage.cron.AddFunc(schedule.Cron, func() {
-//		byToken, err := server.token.GetOneByToken(schedule.Token)
-//		if err == nil {
-//			body, err := smtp.SendAPIMail(schedule, byToken.SMTP, byToken.ReceiveEmails)
-//			if err != nil {
-//				err := server.log.ContentError(byToken.SMTP, byToken.ReceiveEmails, schedule.Token, schedule.Name, body, err)
-//				if err != nil {
-//
-//				}
-//			} else {
-//				err := server.context.GetLogService().ContentSuccess(byToken.SMTP, byToken.ReceiveEmails, schedule.Token, schedule.Name, body)
-//				if err != nil {
-//					server.context.GetLog().Error("SendAPIMail log error", zap.Error(err))
-//				}
-//			}
-//		}
-//	})
-//	if err != nil {
-//		server.context.GetLog().Error("cron start error", zap.String("cron", schedule.Cron), zap.Error(err))
-//	} else {
-//		server.cronManage.cronMap[schedule.GetId()] = entryID
-//	}
-//	return err
-//}
 
 func (server *Server) Start() {
 	isInit := server.context.GetConfig().GetBooleanOrDefault("core", "init", false)
