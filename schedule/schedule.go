@@ -124,7 +124,7 @@ func NewServer() *Server {
 }
 
 func (server *Server) Init(context *core.Context) {
-	server.context.SetSchedule(server)
+	context.SetSchedule(server)
 	server.context = context
 }
 func (server *Server) Name() string {
@@ -146,7 +146,6 @@ func (server *Server) Start() {
 			server.cronManage.stop()
 		}
 		server.cronManage = newCronManage(server.context)
-		//server.init()
 		server.cronManage.Start()
 		server.context.GetLog().Info("start Schedule")
 	}
