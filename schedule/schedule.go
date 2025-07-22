@@ -50,6 +50,8 @@ func NewServer() *Server {
 
 func (server *Server) Init(context *core.Context) {
 	server.context = context
+	server.log = service.NewLog(context.GetDb())
+	server.token = service.NewToken(context.GetDb())
 	context.SetSchedule(server)
 }
 func (server *Server) Name() string {

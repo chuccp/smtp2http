@@ -185,6 +185,11 @@ func SendAPIMail(schedule *db.Schedule, smtp *db.SMTP, mails []*db.Mail) (string
 			return "", err
 		}
 	}
+	if len(schedule.Headers) > 0 {
+		for _, header := range schedule.Headers {
+			dataMap[header.Name] = header.Value
+		}
+	}
 	data, err := request.CallApi(url, dataMap, Method, []byte(schedule.Body))
 	if err != nil {
 		return "", err
