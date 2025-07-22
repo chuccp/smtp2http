@@ -55,10 +55,6 @@ func (schedule *Schedule) postOne(req *web.Request) (any, error) {
 	if err != nil {
 		return nil, err
 	}
-	err = schedule.context.GetSchedule().Run(&st)
-	if err != nil {
-		return nil, err
-	}
 	return "ok", nil
 }
 func (schedule *Schedule) putOne(req *web.Request) (any, error) {
