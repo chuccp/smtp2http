@@ -38,17 +38,20 @@ func newCronManage(context *core.Context) *cronManage {
 func (cronM *cronManage) Start() {
 	cronM.isStart = true
 	cronM.cron.Start()
-
 	if cronM.context.GetDb() == nil {
 		return
 	}
-
+	go cronM.run()
+}
+func (cronM *cronManage) run() {
 	for {
+		if cronM.isStop {
+			break
+		}
 		schedules, err := cronM.context.GetDb().GetScheduleModel().FindAllByUse()
 		if err != nil {
 			return
 		}
-
 		runIds := make([]uint, 0)
 		for _, schedule := range schedules {
 			_, ok := cronM.cronMap[schedule.GetId()]
@@ -71,6 +74,7 @@ func (cronM *cronManage) Start() {
 		time.Sleep(time.Second * 5)
 	}
 }
+
 func (cronM *cronManage) addSchedule(schedule *db.Schedule) {
 
 	entryID, err := cronM.cron.AddFunc(schedule.Cron, func() {
@@ -101,6 +105,7 @@ func (cronM *cronManage) stop() {
 	if !cronM.isStart {
 		return
 	}
+	cronM.isStop = true
 	cronM.cron.Stop()
 }
 
@@ -119,6 +124,7 @@ func NewServer() *Server {
 }
 
 func (server *Server) Init(context *core.Context) {
+	server.context.SetSchedule(server)
 	server.context = context
 }
 func (server *Server) Name() string {
@@ -141,7 +147,13 @@ func (server *Server) Name() string {
 //			}
 //		}
 //	}
-//func (server *Server) Run(schedule *db.Schedule) error {
+func (server *Server) Run(schedule *db.Schedule) error {
+	return nil
+}
+func (server *Server) Stop(Id uint) error {
+	return nil
+}
+
 //	entryID, err := server.cronManage.cron.AddFunc(schedule.Cron, func() {
 //		byToken, err := server.token.GetOneByToken(schedule.Token)
 //		if err == nil {
