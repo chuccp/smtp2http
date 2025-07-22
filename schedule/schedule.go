@@ -36,11 +36,11 @@ func newCronManage(context *core.Context) *cronManage {
 	}
 }
 func (cronM *cronManage) Start() {
-	cronM.isStart = true
-	cronM.cron.Start()
 	if cronM.context.GetDb() == nil {
 		return
 	}
+	cronM.isStart = true
+	cronM.cron.Start()
 	go cronM.run()
 }
 func (cronM *cronManage) run() {
@@ -71,7 +71,7 @@ func (cronM *cronManage) run() {
 		for _, key := range removeIds {
 			delete(cronM.cronMap, key)
 		}
-		time.Sleep(time.Second * 5)
+		time.Sleep(time.Second * 10)
 	}
 }
 
