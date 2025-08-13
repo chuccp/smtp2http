@@ -66,6 +66,14 @@ type Request struct {
 	client   *http.Client
 	netBreak *netBreak
 }
+type Response struct {
+	StatusCode int
+	Body       []byte
+}
+
+func createResponse(StatusCode int, body []byte) *Response {
+	return &Response{StatusCode: StatusCode, Body: body}
+}
 
 func NewRequest() *Request {
 	ct := http.Client{Timeout: time.Second * 2, Transport: http.DefaultTransport}
@@ -115,6 +123,29 @@ func (r *Request) Call(link string, jsonData []byte) ([]byte, error) {
 	}
 	return all, nil
 }
+
+func (r *Request) CallApiForResponse(link string, header map[string]string, method string, body []byte) (*Response, error) {
+	req, err := http.NewRequest(method, link, bytes.NewBuffer(body))
+	if err != nil {
+		return nil, err
+	}
+	for k, v := range header {
+		req.Header.Set(k, v)
+	}
+	resp, err := r.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer func(Body io.ReadCloser) {
+		_ = Body.Close()
+	}(resp.Body)
+	all, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	return createResponse(resp.StatusCode, all), nil
+}
+
 func (r *Request) CallApi(link string, header map[string]string, method string, body []byte) ([]byte, error) {
 	req, err := http.NewRequest(method, link, bytes.NewBuffer(body))
 	if err != nil {

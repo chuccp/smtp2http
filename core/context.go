@@ -18,7 +18,6 @@ type Context struct {
 	log        *zap.Logger
 	httpServer *web.HttpServer
 	digestAuth *login.DigestAuth
-	schedule   Schedule
 	IsDocker   bool
 	reStart    func()
 }
@@ -28,28 +27,6 @@ func (c *Context) GetDigestAuth() *login.DigestAuth {
 }
 func (c *Context) GetLog() *zap.Logger {
 	return c.log
-}
-func (c *Context) SetSchedule(schedule Schedule) {
-	c.schedule = schedule
-}
-
-func (c *Context) RunSchedule(schedule *db.Schedule) error {
-	if c.schedule != nil {
-		err := c.schedule.Run(schedule)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-func (c *Context) StopSchedule(id uint) error {
-	if c.schedule != nil {
-		err := c.schedule.Stop(id)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
 }
 
 func (c *Context) GetDb() *db.DB {

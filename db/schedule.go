@@ -1,6 +1,8 @@
 package db
 
 import (
+	"fmt"
+	"github.com/chuccp/smtp2http/util"
 	"github.com/chuccp/smtp2http/web"
 	"gorm.io/gorm"
 	"time"
@@ -15,6 +17,7 @@ type Schedule struct {
 	Id                uint      `gorm:"primaryKey;autoIncrement;column:id" json:"id"`
 	Name              string    `gorm:"column:name" json:"name"`
 	Token             string    `gorm:"column:token" json:"token"`
+	TokenId           uint      `gorm:"-" json:"tokenId"`
 	Cron              string    `gorm:"column:cron" json:"cron"`
 	Url               string    `gorm:"column:url" json:"url"`
 	Method            string    `gorm:"column:method" json:"method"`
@@ -24,9 +27,26 @@ type Schedule struct {
 	UseTemplate       bool      `gorm:"column:use_template" json:"useTemplate"`
 	Template          string    `gorm:"column:template" json:"template"`
 	IsUse             bool      `gorm:"column:is_use" json:"isUse"`
-	IsOnlySendByError bool      `gorm:"column:is_only_send_by_error" json:"isOnlySendByError"`
+	IsOnlySendByError bool      `gorm:"column:is_only_send_by_error" json:"isSendOnlyByError"`
 	CreateTime        time.Time `gorm:"column:create_time" json:"createTime"`
 	UpdateTime        time.Time `gorm:"column:update_time" json:"updateTime"`
+}
+
+func (schedule *Schedule) Key() string {
+
+	value := fmt.Sprintf("%s#%s#%s#%s#%s#%s#%s#%s#%t#%t#%t",
+		schedule.Name,
+		schedule.Token,
+		schedule.Cron,
+		schedule.Url,
+		schedule.Method,
+		schedule.HeaderStr,
+		schedule.Body,
+		schedule.Template,
+		schedule.UseTemplate,
+		schedule.IsUse,
+		schedule.IsOnlySendByError)
+	return util.MD5([]byte(value))
 }
 
 func (schedule *Schedule) SetCreateTime(createTime time.Time) {
@@ -76,6 +96,23 @@ func (a *ScheduleModel) FindAllByUse() ([]*Schedule, error) {
 		return nil, tx.Error
 	}
 	return schedules, nil
+}
+
+func (a *ScheduleModel) Edit(schedule *Schedule) error {
+	return a.Model.EditForMap(schedule.Id, map[string]interface{}{
+		"name":                  schedule.Name,
+		"token":                 schedule.Token,
+		"cron":                  schedule.Cron,
+		"url":                   schedule.Url,
+		"method":                schedule.Method,
+		"header_str":            schedule.HeaderStr,
+		"body":                  schedule.Body,
+		"use_template":          schedule.UseTemplate,
+		"template":              schedule.Template,
+		"is_use":                schedule.IsUse,
+		"is_only_send_by_error": schedule.IsOnlySendByError,
+		"update_time":           time.Now(),
+	})
 }
 
 func (a *ScheduleModel) DeleteOne(id uint) error {

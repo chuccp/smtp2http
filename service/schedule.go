@@ -1,9 +1,11 @@
 package service
 
 import (
+	"encoding/json"
 	"errors"
 	"github.com/chuccp/smtp2http/db"
 	"github.com/chuccp/smtp2http/smtp"
+	"github.com/chuccp/smtp2http/util"
 	"github.com/chuccp/smtp2http/web"
 )
 
@@ -19,6 +21,15 @@ func (schedule *Schedule) GetPage(page *web.Page) (any, error) {
 	return schedule.db.GetScheduleModel().Page(page)
 }
 func (schedule *Schedule) Edit(sd *db.Schedule) error {
+	if sd.Headers != nil && len(sd.Headers) > 0 {
+		jsonData, err := json.Marshal(sd.Headers)
+		if err != nil {
+			return err
+		} else {
+			sd.HeaderStr = string(jsonData)
+		}
+	}
+
 	v, err := schedule.db.GetTokenModel().GetOneByToken(sd.Token)
 	if err != nil {
 		return err
@@ -41,7 +52,28 @@ func (schedule *Schedule) Save(sd *db.Schedule) error {
 }
 
 func (schedule *Schedule) GetOne(id int) (*db.Schedule, error) {
-	return schedule.db.GetScheduleModel().GetOne(uint(id))
+
+	one, err := schedule.db.GetScheduleModel().GetOne(uint(id))
+	if err != nil {
+		return nil, err
+	}
+	headerStr := one.HeaderStr
+	if util.IsNotBlank(headerStr) {
+		err := json.Unmarshal([]byte(headerStr), &one.Headers)
+		if err != nil {
+			one.Headers = []*db.Header{}
+		}
+	} else {
+		one.Headers = []*db.Header{}
+	}
+
+	token := one.Token
+	byToken, err := schedule.db.GetTokenModel().GetOneByToken(token)
+	if err != nil {
+		return nil, err
+	}
+	one.TokenId = byToken.Id
+	return one, nil
 }
 
 func (schedule *Schedule) SendMail(sd *db.Schedule) error {

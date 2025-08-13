@@ -96,6 +96,16 @@ func SendContentMsg(smtp *db.SMTP, mails []*db.Mail, subject, bodyString string)
 	sendMsg.BodyString = bodyString
 	return SendMail(&sendMsg)
 }
+
+func SendContentTemplateMsg(smtp *db.SMTP, mails []*db.Mail, subject, bodyString string, useTemplate bool, template string) error {
+
+	if useTemplate {
+		
+	}
+
+	return SendContentMsg(smtp, mails, subject, bodyString)
+}
+
 func SendFilesMsg(smtp *db.SMTP, mails []*db.Mail, files []*File, subject, bodyString string) error {
 	SMTP := &SMTP{Username: smtp.Username, Mail: smtp.Mail, Password: smtp.Password, Host: smtp.Host, Port: smtp.Port}
 	receiveEmails := make([]*Mail, 0)
@@ -190,13 +200,28 @@ func SendAPIMail(schedule *db.Schedule, smtp *db.SMTP, mails []*db.Mail) (string
 			dataMap[header.Name] = header.Value
 		}
 	}
-	data, err := request.CallApi(url, dataMap, Method, []byte(schedule.Body))
+	response, err := request.CallApiForResponse(url, dataMap, Method, []byte(schedule.Body))
 	if err != nil {
-		return "", err
+		errSend := SendContentMsg(smtp, mails, schedule.Name, err.Error())
+		if errSend != nil {
+			return errSend.Error(), err
+		}
+		return err.Error(), nil
 	}
-	err = SendContentMsg(smtp, mails, schedule.Name, string(data))
-	if err != nil {
-		return string(data), err
+	if schedule.IsOnlySendByError {
+		if response.StatusCode >= 400 {
+			err = SendContentMsg(smtp, mails, schedule.Name, string(response.Body))
+			if err != nil {
+				return string(response.Body), err
+			}
+			return string(response.Body), nil
+		}
+		return string(response.Body), nil
+	} else {
+		err = SendContentMsg(smtp, mails, schedule.Name, string(response.Body))
+		if err != nil {
+			return string(response.Body), err
+		}
+		return string(response.Body), nil
 	}
-	return string(data), nil
 }

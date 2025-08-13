@@ -35,10 +35,6 @@ func (schedule *Schedule) deleteOne(req *web.Request) (any, error) {
 	if err != nil {
 		return nil, err
 	}
-	err = schedule.context.StopSchedule(uint(atoi))
-	if err != nil {
-		return nil, err
-	}
 	return "ok", nil
 }
 func (schedule *Schedule) getPage(req *web.Request) (any, error) {
@@ -59,10 +55,6 @@ func (schedule *Schedule) postOne(req *web.Request) (any, error) {
 	if err != nil {
 		return nil, err
 	}
-	err = schedule.context.RunSchedule(&st)
-	if err != nil {
-		return nil, err
-	}
 	return "ok", nil
 }
 func (schedule *Schedule) putOne(req *web.Request) (any, error) {
@@ -76,10 +68,6 @@ func (schedule *Schedule) putOne(req *web.Request) (any, error) {
 		return nil, err
 	}
 	err = schedule.schedule.Edit(&st)
-	if err != nil {
-		return nil, err
-	}
-	err = schedule.context.RunSchedule(&st)
 	if err != nil {
 		return nil, err
 	}

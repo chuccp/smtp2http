@@ -19,14 +19,15 @@ type Api struct {
 }
 
 type SetInfo struct {
-	HasInit   bool    `json:"hasInit"`
-	DbType    string  `json:"dbType"`
-	CachePath string  `json:"cachePath"`
-	Sqlite    *Sqlite `json:"sqlite"`
-	Mysql     *Mysql  `json:"mysql"`
-	Manage    *Manage `json:"manage"`
-	Api       *Api    `json:"api"`
-	IsDocker  bool    `json:"isDocker"`
+	HasInit   bool      `json:"hasInit"`
+	DbType    string    `json:"dbType"`
+	CachePath string    `json:"cachePath"`
+	Sqlite    *Sqlite   `json:"sqlite"`
+	Mysql     *Mysql    `json:"mysql"`
+	Manage    *Manage   `json:"manage"`
+	Api       *Api      `json:"api"`
+	IsDocker  bool      `json:"isDocker"`
+	Schedule  *Schedule `json:"schedule"`
 }
 
 var defaultSetInfo = &SetInfo{
@@ -37,6 +38,7 @@ var defaultSetInfo = &SetInfo{
 	Mysql:     &Mysql{Host: "", Port: 3306, Dbname: "d-main", Username: "", Password: "", Charset: "utf8"},
 	Manage:    &Manage{WebPath: "web", Port: 12566, Username: "", Password: "", ConfirmPassword: ""},
 	Api:       &Api{Port: 12567},
+	Schedule:  &Schedule{Start: true},
 }
 
 type Sqlite struct {
@@ -49,4 +51,7 @@ type Mysql struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 	Charset  string `json:"charset"`
+}
+type Schedule struct {
+	Start bool `json:"start"`
 }

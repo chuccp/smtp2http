@@ -143,3 +143,9 @@ func GetCachePath(rootPath, filename string) string {
 	}
 	return path.Join(rootPath, FormatDate(time.Now()), name)
 }
+func IsBlank(str string) bool {
+	return len(strings.TrimSpace(str)) == 0
+}
+func IsNotBlank(str string) bool {
+	return !IsBlank(str)
+}

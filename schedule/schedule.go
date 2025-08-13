@@ -8,12 +8,13 @@ import (
 	"github.com/chuccp/smtp2http/util"
 	"github.com/robfig/cron/v3"
 	"go.uber.org/zap"
+	"log"
 	"sync"
 	"time"
 )
 
 type cronManage struct {
-	cronMap map[uint]cron.EntryID
+	cronMap map[uint]*scheduleInfo
 	cron    *cron.Cron
 	lock    *sync.Mutex
 	context *core.Context
@@ -22,10 +23,25 @@ type cronManage struct {
 	isStart bool
 	isStop  bool
 }
+type scheduleInfo struct {
+	entryID    cron.EntryID
+	Id         uint
+	UpdateTime time.Time
+	Key        string
+}
+
+func NewScheduleInfo(entryID cron.EntryID, schedule *db.Schedule) *scheduleInfo {
+	return &scheduleInfo{
+		entryID:    entryID,
+		Id:         schedule.GetId(),
+		Key:        schedule.Key(),
+		UpdateTime: schedule.UpdateTime,
+	}
+}
 
 func newCronManage(context *core.Context) *cronManage {
 	return &cronManage{
-		cronMap: make(map[uint]cron.EntryID),
+		cronMap: make(map[uint]*scheduleInfo),
 		cron:    cron.New(cron.WithSeconds()),
 		lock:    new(sync.Mutex),
 		context: context,
@@ -50,33 +66,52 @@ func (cronM *cronManage) run() {
 		}
 		schedules, err := cronM.context.GetDb().GetScheduleModel().FindAllByUse()
 		if err != nil {
+			cronM.context.GetLog().Error("GetScheduleModel error", zap.Error(err))
 			return
 		}
-		runIds := make([]uint, 0)
-		for _, schedule := range schedules {
-			_, ok := cronM.cronMap[schedule.GetId()]
+		addSchedule := make([]*db.Schedule, 0)
+		updateSchedule := make([]*db.Schedule, 0)
+		deleteSchedule := make([]*scheduleInfo, 0)
+		ids := make([]uint, len(schedules))
+		for index, schedule := range schedules {
+			ids[index] = schedule.GetId()
+			info, ok := cronM.cronMap[schedule.GetId()]
 			if ok {
-				continue
+				if schedule.UpdateTime.After(info.UpdateTime) || schedule.Key() != info.Key {
+					updateSchedule = append(updateSchedule, schedule)
+				}
+			} else {
+				addSchedule = append(addSchedule, schedule)
 			}
-			runIds = append(runIds, schedule.GetId())
+		}
+		for id, info := range cronM.cronMap {
+			if !util.ContainsNumberAny(id, ids...) {
+				deleteSchedule = append(deleteSchedule, info)
+			}
+		}
+		log.Printf("schedule update %d add %d delete %d", len(updateSchedule), len(addSchedule), len(deleteSchedule))
+		for _, schedule := range addSchedule {
 			cronM.addSchedule(schedule)
 		}
-		removeIds := make([]uint, 0)
-		for key, value := range cronM.cronMap {
-			if !util.ContainsNumberAny(key, runIds...) {
-				cronM.cron.Remove(value)
-				removeIds = append(removeIds, key)
-			}
+		for _, schedule := range updateSchedule {
+			cronM.deleteSchedule(schedule.GetId())
+			cronM.addSchedule(schedule)
 		}
-		for _, key := range removeIds {
-			delete(cronM.cronMap, key)
+		for _, info := range deleteSchedule {
+			cronM.deleteSchedule(info.Id)
 		}
 		time.Sleep(time.Second * 10)
 	}
 }
+func (cronM *cronManage) deleteSchedule(id uint) {
+	info, ok := cronM.cronMap[id]
+	if ok {
+		delete(cronM.cronMap, id)
+		cronM.cron.Remove(info.entryID)
+	}
+}
 
 func (cronM *cronManage) addSchedule(schedule *db.Schedule) {
-
 	entryID, err := cronM.cron.AddFunc(schedule.Cron, func() {
 		byToken, err := cronM.token.GetOneByToken(schedule.Token)
 		if err == nil {
@@ -84,7 +119,7 @@ func (cronM *cronManage) addSchedule(schedule *db.Schedule) {
 			if err != nil {
 				err := cronM.log.ContentError(byToken.SMTP, byToken.ReceiveEmails, schedule.Token, schedule.Name, body, err)
 				if err != nil {
-
+					cronM.context.GetLog().Error("SendAPIMail log error", zap.Error(err))
 				}
 			} else {
 				err := cronM.context.GetLogService().ContentSuccess(byToken.SMTP, byToken.ReceiveEmails, schedule.Token, schedule.Name, body)
@@ -97,7 +132,8 @@ func (cronM *cronManage) addSchedule(schedule *db.Schedule) {
 	if err != nil {
 		cronM.context.GetLog().Error("cron start error", zap.String("cron", schedule.Cron), zap.Error(err))
 	} else {
-		cronM.cronMap[schedule.GetId()] = entryID
+		cronM.context.GetLog().Info("cron start add", zap.String("cron", schedule.Cron))
+		cronM.cronMap[schedule.GetId()] = NewScheduleInfo(entryID, schedule)
 	}
 }
 
@@ -124,22 +160,16 @@ func NewServer() *Server {
 }
 
 func (server *Server) Init(context *core.Context) {
-	context.SetSchedule(server)
 	server.context = context
 }
 func (server *Server) Name() string {
 	return "schedule"
 }
-func (server *Server) Run(schedule *db.Schedule) error {
-	return nil
-}
-func (server *Server) Stop(Id uint) error {
-	return nil
-}
-
 func (server *Server) Start() {
 	isInit := server.context.GetConfig().GetBooleanOrDefault("core", "init", false)
-	if isInit {
+	isStart := server.context.GetConfig().GetBooleanOrDefault("schedule", "start", true)
+	server.context.GetLog().Info("schedule_init", zap.Bool("isInit", isInit), zap.Bool("isStart", isStart))
+	if isInit && isStart {
 		server.lock.Lock()
 		defer server.lock.Unlock()
 		if server.cronManage != nil {
