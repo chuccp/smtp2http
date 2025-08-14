@@ -80,6 +80,7 @@ func (schedule *Schedule) sendMail(req *web.Request) (any, error) {
 	if err != nil {
 		return nil, err
 	}
+	st.IsOnlySendByError = false
 	err = schedule.schedule.SendMail(&st)
 	if err != nil {
 		return nil, err
