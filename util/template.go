@@ -1,15 +1,13 @@
-package smtp
+package util
 
 import (
 	"bytes"
 	"encoding/json"
-	"testing"
 	"text/template"
 )
 
-func TestSendAPIMail(t *testing.T) {
-	bodyString := `{"name":"aaaa"}`
-	parse, err := template.New("template").Parse("{{.name}}")
+func ParseTemplate(templateStr string, bodyString string) (string, error) {
+	parse, err := template.New("template").Parse(templateStr)
 	if err == nil {
 		buffer := new(bytes.Buffer)
 		data := make(map[string]interface{})
@@ -17,10 +15,9 @@ func TestSendAPIMail(t *testing.T) {
 		if err == nil {
 			err = parse.Execute(buffer, data)
 			if err == nil {
-				println(buffer.String())
+				return buffer.String(), nil
 			}
 		}
-
 	}
-
+	return "", err
 }
