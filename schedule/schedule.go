@@ -67,7 +67,7 @@ func (cronM *cronManage) run() {
 		schedules, err := cronM.context.GetDb().GetScheduleModel().FindAllByUse()
 		if err != nil {
 			cronM.context.GetLog().Error("GetScheduleModel error", zap.Error(err))
-			return
+			continue
 		}
 		addSchedule := make([]*db.Schedule, 0)
 		updateSchedule := make([]*db.Schedule, 0)
