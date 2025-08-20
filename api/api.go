@@ -9,7 +9,6 @@ import (
 	"github.com/chuccp/smtp2http/util"
 	"github.com/chuccp/smtp2http/web"
 	"os"
-	"strconv"
 )
 
 type Server struct {
@@ -31,92 +30,85 @@ func (s *Server) Name() string {
 func (s *Server) Start() {}
 
 func (s *Server) SendMail(req *web.Request) (any, error) {
+
 	var sendMailApi entity.SendMailApi
-	if util.ContainsAnyIgnoreCase(req.GetContext().ContentType(), "application/json") {
-		err := req.ShouldBindBodyWithJSON(&sendMailApi)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		sendMailApi.Token = req.FormValue("token")
-		sendMailApi.Content = req.FormValue("content")
-		sendMailApi.Subject = req.FormValue("subject")
-		sendMailApi.Recipients = util.SplitAndDeduplicate(req.FormValue("recipients"), ",")
-	}
-	byToken, err := s.token.GetOneByToken(sendMailApi.Token)
-	if err != nil {
-		return nil, err
-	}
-	for _, mail := range sendMailApi.Recipients {
-		byToken.ReceiveEmails = append(byToken.ReceiveEmails, &db.Mail{Mail: mail})
-	}
-	if req.IsMultipartForm() || len(sendMailApi.Files) > 0 {
-		cachePath := s.context.GetConfig().GetStringOrDefault("core", "cachePath", ".cache")
-		form, err := req.MultipartForm()
-		if err != nil {
-			return nil, err
-		}
-		files := make([]*smtp.File, 0)
-		fileHeaders, ok := form.File["files"]
-		if ok {
-			for _, fileHeader := range fileHeaders {
-				filePath := util.GetCachePath(cachePath, fileHeader.Filename)
-				err := web.SaveUploadedFile(fileHeader, filePath)
-				if err != nil {
-					return nil, err
-				}
-				file, err := os.Open(filePath)
-				if err != nil {
-					return nil, err
-				}
-				files = append(files, &smtp.File{File: file, Name: fileHeader.Filename, FilePath: filePath})
-			}
-		}
-		for index, file := range sendMailApi.Files {
-			if len(file.Name) == 0 {
-				file.Name = util.GenerateRandomString(8, "") + strconv.Itoa(index)
-			}
-			filePath := util.GetCachePath(cachePath, file.Name)
-			err := util.WriteBase64File(file.Data, filePath)
+	var byToken *db.Token
+	files := make([]*smtp.File, 0)
+	err := func() (err error) {
+		if util.ContainsAnyIgnoreCase(req.GetContext().ContentType(), "application/json") {
+			err = req.ShouldBindBodyWithJSON(&sendMailApi)
 			if err != nil {
-				return nil, err
+				return err
 			}
-			file, err := os.Open(filePath)
-			if err != nil {
-				return nil, err
-			}
-			files = append(files, &smtp.File{File: file, Name: file.Name(), FilePath: filePath})
-		}
-		err = smtp.SendFilesMsg(byToken.SMTP, byToken.ReceiveEmails, files, sendMailApi.Subject, sendMailApi.Content)
-		if err != nil {
-			err := s.log.FilesError(byToken.SMTP, byToken.ReceiveEmails, files, sendMailApi.Token, sendMailApi.Subject, sendMailApi.Content, err)
-			if err != nil {
-				return nil, err
-			}
-			return nil, err
 		} else {
-			err := s.log.FilesSuccess(byToken.SMTP, byToken.ReceiveEmails, files, sendMailApi.Token, sendMailApi.Subject, sendMailApi.Content)
-			if err != nil {
-				return nil, err
-			}
+			sendMailApi.Token = req.FormValue("token")
+			sendMailApi.Content = req.FormValue("content")
+			sendMailApi.Subject = req.FormValue("subject")
+			sendMailApi.Recipients = util.SplitAndDeduplicate(req.FormValue("recipients"), ",")
 		}
-	} else {
+		byToken, err = s.token.GetOneByToken(sendMailApi.Token)
+		if err != nil {
+			return err
+		}
+		for _, mail := range sendMailApi.Recipients {
+			byToken.ReceiveEmails = append(byToken.ReceiveEmails, &db.Mail{Mail: mail})
+		}
 		if len(sendMailApi.Subject) == 0 {
 			sendMailApi.Subject = byToken.Subject
 		}
-		err := smtp.SendContentMsg(byToken.SMTP, byToken.ReceiveEmails, sendMailApi.Subject, sendMailApi.Content)
-		if err != nil {
-			err := s.log.ContentError(byToken.SMTP, byToken.ReceiveEmails, sendMailApi.Token, sendMailApi.Subject, sendMailApi.Content, err)
+
+		if req.IsMultipartForm() || len(sendMailApi.Files) > 0 {
+			cachePath := s.context.GetConfig().GetStringOrDefault("core", "cachePath", ".cache")
+			form, err := req.MultipartForm()
 			if err != nil {
-				return nil, err
+				return err
 			}
-			return nil, err
-		} else {
-			err := s.log.ContentSuccess(byToken.SMTP, byToken.ReceiveEmails, sendMailApi.Token, sendMailApi.Subject, sendMailApi.Content)
-			if err != nil {
-				return nil, err
+			fileHeaders, ok := form.File["files"]
+			if ok {
+				for _, fileHeader := range fileHeaders {
+					filePath := util.GetCachePath(cachePath, fileHeader.Filename)
+					err := web.SaveUploadedFile(fileHeader, filePath)
+					if err != nil {
+						return err
+					}
+					file, err := os.Open(filePath)
+					if err != nil {
+						return err
+					}
+					files = append(files, &smtp.File{File: file, Name: fileHeader.Filename, FilePath: filePath})
+				}
+			}
+			for _, file := range sendMailApi.Files {
+				if len(file.Data) == 0 {
+					continue
+				}
+				base64, err := util.DecodeBase64(file.Data)
+				if err != nil {
+					return err
+				}
+				if len(file.Name) == 0 {
+					file.Name = util.MD5(base64)
+				}
+				filePath := util.GetCachePath(cachePath, file.Name)
+				err = util.WriteFile(base64, filePath)
+				if err != nil {
+					return err
+				}
+				file, err := os.Open(filePath)
+				if err != nil {
+					return err
+				}
+				files = append(files, &smtp.File{File: file, Name: file.Name(), FilePath: filePath})
 			}
 		}
+		return nil
+	}()
+	if err == nil {
+		err = smtp.SendAllMsg(byToken.SMTP, byToken.ReceiveEmails, files, sendMailApi.Subject, sendMailApi.Content)
+	}
+	err = s.log.Log(byToken.SMTP, byToken.ReceiveEmails, files, sendMailApi.Token, sendMailApi.Subject, sendMailApi.Content, err)
+	if err != nil {
+		return nil, err
 	}
 	return "ok", nil
 }

@@ -116,16 +116,9 @@ func (cronM *cronManage) addSchedule(schedule *db.Schedule) {
 		byToken, err := cronM.token.GetOneByToken(schedule.Token)
 		if err == nil {
 			body, err := smtp.SendAPIMail(schedule, byToken.SMTP, byToken.ReceiveEmails)
+			err = cronM.log.Log(byToken.SMTP, byToken.ReceiveEmails, nil, schedule.Token, schedule.Name, body, err)
 			if err != nil {
-				err := cronM.log.ContentError(byToken.SMTP, byToken.ReceiveEmails, schedule.Token, schedule.Name, body, err)
-				if err != nil {
-					cronM.context.GetLog().Error("SendAPIMail log error", zap.Error(err))
-				}
-			} else {
-				err := cronM.context.GetLogService().ContentSuccess(byToken.SMTP, byToken.ReceiveEmails, schedule.Token, schedule.Name, body)
-				if err != nil {
-					cronM.context.GetLog().Error("SendAPIMail log error", zap.Error(err))
-				}
+				cronM.context.GetLog().Error("SendAPIMail log error", zap.Error(err))
 			}
 		}
 	})

@@ -86,7 +86,9 @@ func SendContentTemplateMsg(smtp *db.SMTP, mails []*db.Mail, subject, bodyString
 	}
 	return bodyString, SendContentMsg(smtp, mails, subject, bodyString)
 }
-
+func SendAllMsg(smtp *db.SMTP, mails []*db.Mail, files []*File, subject, bodyString string) error {
+	return SendFilesMsg(smtp, mails, files, subject, bodyString)
+}
 func SendFilesMsg(smtp *db.SMTP, mails []*db.Mail, files []*File, subject, bodyString string) error {
 	SMTP := &SMTP{Username: smtp.Username, Mail: smtp.Mail, Password: smtp.Password, Host: smtp.Host, Port: smtp.Port}
 	receiveEmails := make([]*Mail, 0)

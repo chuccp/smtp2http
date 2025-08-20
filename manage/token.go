@@ -83,11 +83,9 @@ func (token *Token) sendMail(req *web.Request) (any, error) {
 		sendMail.Subject = byToken.Subject
 	}
 	err = smtp.SendContentMsgByRecipients(byToken.SMTP, sendMail.Recipients, sendMail.Subject, sendMail.Content)
+	err = token.log.Log(byToken.SMTP, byToken.ReceiveEmails, nil, byToken.Token, sendMail.Subject, sendMail.Content, err)
 	if err != nil {
-		token.log.ContentError(byToken.SMTP, byToken.ReceiveEmails, byToken.Token, sendMail.Subject, sendMail.Content, err)
 		return nil, err
-	} else {
-		token.log.ContentSuccess(byToken.SMTP, byToken.ReceiveEmails, byToken.Token, sendMail.Subject, sendMail.Content)
 	}
 	return "ok", nil
 }

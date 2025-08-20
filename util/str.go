@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"github.com/google/uuid"
 	"math/rand"
 	"path"
@@ -23,6 +24,40 @@ func MD5(data []byte) string {
 }
 func MD5Str(data string) string {
 	return MD5([]byte(data))
+}
+
+// DefaultChunkSize 常用分块大小：4KB，与大多数操作系统页大小一致
+const DefaultChunkSize = 4096 // 4KB
+
+// CalculateMD5 计算字节数组的MD5哈希值（自动分块处理）
+func CalculateMD5(data []byte) (string, error) {
+	return CalculateMD5WithChunkSize(data, DefaultChunkSize)
+}
+
+// CalculateMD5WithChunkSize 支持自定义分块大小的MD5计算
+// 适合处理超大字节数组，避免一次性加载全部数据
+func CalculateMD5WithChunkSize(data []byte, chunkSize int) (string, error) {
+	if chunkSize <= 0 {
+		return "", fmt.Errorf("无效的分块大小: %d", chunkSize)
+	}
+
+	hasher := md5.New()
+	length := len(data)
+
+	for i := 0; i < length; i += chunkSize {
+		end := i + chunkSize
+		if end > length {
+			end = length
+		}
+		// 分块写入数据
+		_, err := hasher.Write(data[i:end])
+		if err != nil {
+			return "", fmt.Errorf("分块写入失败: %w", err)
+		}
+	}
+
+	// 转换为16进制字符串
+	return hex.EncodeToString(hasher.Sum(nil)), nil
 }
 
 func SplitAndDeduplicate(text, sep string) []string {
