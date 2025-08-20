@@ -87,7 +87,10 @@ func (s *Server) SendMail(req *web.Request) (any, error) {
 					return err
 				}
 				if len(file.Name) == 0 {
-					file.Name = util.MD5(base64)
+					file.Name, err = util.CalculateMD5(base64)
+					if err != nil {
+						return err
+					}
 				}
 				filePath := util.GetCachePath(cachePath, file.Name)
 				err = util.WriteFile(base64, filePath)
