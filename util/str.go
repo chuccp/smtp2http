@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"github.com/google/uuid"
+	"math/rand"
 	"path"
 	"regexp"
 	"strconv"
@@ -159,4 +160,40 @@ func DecodeBase64(base64Str string) ([]byte, error) {
 		return nil, errors.New("base64解码失败: " + err.Error())
 	}
 	return data, nil
+}
+
+// 预设字符集
+const (
+	// Alphanumeric 包含大小写字母和数字
+	Alphanumeric = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	// Lowercase 仅包含小写字母
+	Lowercase = "abcdefghijklmnopqrstuvwxyz"
+	// Uppercase 仅包含大写字母
+	Uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	// Numeric 仅包含数字
+	Numeric = "0123456789"
+	// WithSpecialChars 包含字母、数字和常见特殊字符
+	WithSpecialChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()"
+)
+
+// GenerateRandomString 生成指定长度的随机字符串
+// length: 字符串长度
+// charset: 字符集，如果为空则使用默认的字母数字字符集
+func GenerateRandomString(length int, charset string) string {
+	// 如果未指定字符集，使用默认的字母数字字符集
+	if charset == "" {
+		charset = Alphanumeric
+	}
+	// 初始化随机数生成器
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+
+	// 创建结果切片
+	result := make([]byte, length)
+
+	// 生成随机字符串
+	for i := range result {
+		result[i] = charset[r.Intn(len(charset))]
+	}
+
+	return string(result)
 }

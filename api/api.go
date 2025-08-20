@@ -9,6 +9,7 @@ import (
 	"github.com/chuccp/smtp2http/util"
 	"github.com/chuccp/smtp2http/web"
 	"os"
+	"strconv"
 )
 
 type Server struct {
@@ -71,7 +72,10 @@ func (s *Server) SendMail(req *web.Request) (any, error) {
 				files = append(files, &smtp.File{File: file, Name: fileHeader.Filename, FilePath: filePath})
 			}
 		}
-		for _, file := range sendMailApi.Files {
+		for index, file := range sendMailApi.Files {
+			if len(file.Name) == 0 {
+				file.Name = util.GenerateRandomString(8, "") + strconv.Itoa(index)
+			}
 			filePath := util.GetCachePath(cachePath, file.Name)
 			err := util.WriteBase64File(file.Data, filePath)
 			if err != nil {
@@ -83,7 +87,6 @@ func (s *Server) SendMail(req *web.Request) (any, error) {
 			}
 			files = append(files, &smtp.File{File: file, Name: file.Name(), FilePath: filePath})
 		}
-
 		err = smtp.SendFilesMsg(byToken.SMTP, byToken.ReceiveEmails, files, sendMailApi.Subject, sendMailApi.Content)
 		if err != nil {
 			err := s.log.FilesError(byToken.SMTP, byToken.ReceiveEmails, files, sendMailApi.Token, sendMailApi.Subject, sendMailApi.Content, err)
