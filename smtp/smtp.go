@@ -60,41 +60,19 @@ func SendTestMsg(st *db.SMTP) error {
 }
 
 func SendContentMsgByRecipients(smtp *db.SMTP, recipients []string, subject, bodyString string) error {
-	SMTP := &SMTP{Username: smtp.Username, Mail: smtp.Mail, Password: smtp.Password, Host: smtp.Host, Port: smtp.Port}
-	receiveEmails := make([]*Mail, 0)
+	receiveEmails := make([]*db.Mail, 0)
 	for _, recipient := range recipients {
-		name, mail, err := util.ParseMail(recipient)
+		name, m, err := util.ParseMail(recipient)
 		if err != nil {
 			continue
 		}
-		receiveEmails = append(receiveEmails, &Mail{Name: name, Mail: mail})
+		receiveEmails = append(receiveEmails, &db.Mail{Name: name, Mail: m})
 	}
-	if len(receiveEmails) == 0 {
-		return errors.New("receiveEmails is empty")
-	}
-	var sendMsg SendMsg
-	sendMsg.SendMail = SMTP
-	sendMsg.ReceiveEmails = receiveEmails
-	sendMsg.Subject = subject
-	sendMsg.BodyString = bodyString
-	return SendMail(&sendMsg)
+	return SendContentMsg(smtp, receiveEmails, subject, bodyString)
 }
 
 func SendContentMsg(smtp *db.SMTP, mails []*db.Mail, subject, bodyString string) error {
-	SMTP := &SMTP{Username: smtp.Username, Mail: smtp.Mail, Password: smtp.Password, Host: smtp.Host, Port: smtp.Port}
-	receiveEmails := make([]*Mail, 0)
-	for _, d := range mails {
-		receiveEmails = append(receiveEmails, &Mail{Name: d.Name, Mail: d.Mail})
-	}
-	if len(receiveEmails) == 0 {
-		return errors.New("receiveEmails is empty")
-	}
-	var sendMsg SendMsg
-	sendMsg.SendMail = SMTP
-	sendMsg.ReceiveEmails = receiveEmails
-	sendMsg.Subject = subject
-	sendMsg.BodyString = bodyString
-	return SendMail(&sendMsg)
+	return SendFilesMsg(smtp, mails, nil, subject, bodyString)
 }
 
 func SendContentTemplateMsg(smtp *db.SMTP, mails []*db.Mail, subject, bodyString string, useTemplate bool, templateStr string) (string, error) {

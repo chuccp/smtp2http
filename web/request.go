@@ -151,22 +151,48 @@ func ToGinHandlerFunc(handler HandlerFunc, digestAuth *login.DigestAuth) gin.Han
 	return handlerFunc
 }
 
+// SaveUploadedFile 将上传的文件保存到指定路径
 func SaveUploadedFile(file *multipart.FileHeader, dst string) error {
+	// 打开上传的临时文件
 	src, err := file.Open()
 	if err != nil {
 		return err
 	}
-	defer src.Close()
+	defer func() {
+		// 确保临时文件关闭，并捕获可能的错误
+		closeErr := src.Close()
+		if err == nil {
+			err = closeErr
+		}
+	}()
 
+	// 创建目标目录
 	if err = os.MkdirAll(filepath.Dir(dst), 0750); err != nil {
 		return err
 	}
 
+	// 创建目标文件
 	out, err := os.Create(dst)
 	if err != nil {
 		return err
 	}
-	defer out.Close()
-	_, err = io.Copy(out, src)
-	return err
+	defer func() {
+		// 确保目标文件关闭，并捕获可能的错误
+		closeErr := out.Close()
+		if err == nil {
+			err = closeErr
+		}
+	}()
+
+	// 复制文件内容
+	if _, err = io.Copy(out, src); err != nil {
+		return err
+	}
+
+	// 强制将数据刷新到磁盘，确保数据写入完成
+	if err = out.Sync(); err != nil {
+		return err
+	}
+
+	return nil
 }

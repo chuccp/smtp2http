@@ -49,15 +49,15 @@ func (s *Server) SendMail(req *web.Request) (any, error) {
 	for _, mail := range sendMailApi.Recipients {
 		byToken.ReceiveEmails = append(byToken.ReceiveEmails, &db.Mail{Mail: mail})
 	}
-	if req.IsMultipartForm() {
+	if req.IsMultipartForm() || len(sendMailApi.Files) > 0 {
 		cachePath := s.context.GetConfig().GetStringOrDefault("core", "cachePath", ".cache")
 		form, err := req.MultipartForm()
 		if err != nil {
 			return nil, err
 		}
+		files := make([]*smtp.File, 0)
 		fileHeaders, ok := form.File["files"]
 		if ok {
-			files := make([]*smtp.File, 0)
 			for _, fileHeader := range fileHeaders {
 				filePath := util.GetCachePath(cachePath, fileHeader.Filename)
 				err := web.SaveUploadedFile(fileHeader, filePath)
@@ -70,14 +70,31 @@ func (s *Server) SendMail(req *web.Request) (any, error) {
 				}
 				files = append(files, &smtp.File{File: file, Name: fileHeader.Filename, FilePath: filePath})
 			}
-			if len(files) > 0 {
-				err := smtp.SendFilesMsg(byToken.SMTP, byToken.ReceiveEmails, files, sendMailApi.Subject, sendMailApi.Content)
-				if err != nil {
-					s.log.FilesError(byToken.SMTP, byToken.ReceiveEmails, files, sendMailApi.Token, sendMailApi.Subject, sendMailApi.Content, err)
-					return nil, err
-				} else {
-					s.log.FilesSuccess(byToken.SMTP, byToken.ReceiveEmails, files, sendMailApi.Token, sendMailApi.Subject, sendMailApi.Content)
-				}
+		}
+		for _, file := range sendMailApi.Files {
+			filePath := util.GetCachePath(cachePath, file.Name)
+			err := util.WriteBase64File(file.Data, filePath)
+			if err != nil {
+				return nil, err
+			}
+			file, err := os.Open(filePath)
+			if err != nil {
+				return nil, err
+			}
+			files = append(files, &smtp.File{File: file, Name: file.Name(), FilePath: filePath})
+		}
+
+		err = smtp.SendFilesMsg(byToken.SMTP, byToken.ReceiveEmails, files, sendMailApi.Subject, sendMailApi.Content)
+		if err != nil {
+			err := s.log.FilesError(byToken.SMTP, byToken.ReceiveEmails, files, sendMailApi.Token, sendMailApi.Subject, sendMailApi.Content, err)
+			if err != nil {
+				return nil, err
+			}
+			return nil, err
+		} else {
+			err := s.log.FilesSuccess(byToken.SMTP, byToken.ReceiveEmails, files, sendMailApi.Token, sendMailApi.Subject, sendMailApi.Content)
+			if err != nil {
+				return nil, err
 			}
 		}
 	} else {
@@ -86,10 +103,16 @@ func (s *Server) SendMail(req *web.Request) (any, error) {
 		}
 		err := smtp.SendContentMsg(byToken.SMTP, byToken.ReceiveEmails, sendMailApi.Subject, sendMailApi.Content)
 		if err != nil {
-			s.log.ContentError(byToken.SMTP, byToken.ReceiveEmails, sendMailApi.Token, sendMailApi.Subject, sendMailApi.Content, err)
+			err := s.log.ContentError(byToken.SMTP, byToken.ReceiveEmails, sendMailApi.Token, sendMailApi.Subject, sendMailApi.Content, err)
+			if err != nil {
+				return nil, err
+			}
 			return nil, err
 		} else {
-			s.log.ContentSuccess(byToken.SMTP, byToken.ReceiveEmails, sendMailApi.Token, sendMailApi.Subject, sendMailApi.Content)
+			err := s.log.ContentSuccess(byToken.SMTP, byToken.ReceiveEmails, sendMailApi.Token, sendMailApi.Subject, sendMailApi.Content)
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 	return "ok", nil

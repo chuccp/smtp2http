@@ -2,7 +2,9 @@ package util
 
 import (
 	"crypto/md5"
+	"encoding/base64"
 	"encoding/hex"
+	"errors"
 	"github.com/google/uuid"
 	"path"
 	"regexp"
@@ -148,4 +150,13 @@ func IsBlank(str string) bool {
 }
 func IsNotBlank(str string) bool {
 	return !IsBlank(str)
+}
+
+// DecodeBase64 解码base64字符串为字节数组
+func DecodeBase64(base64Str string) ([]byte, error) {
+	data, err := base64.StdEncoding.DecodeString(base64Str)
+	if err != nil {
+		return nil, errors.New("base64解码失败: " + err.Error())
+	}
+	return data, nil
 }

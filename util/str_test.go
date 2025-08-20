@@ -25,3 +25,8 @@ func TestFormatMail(t *testing.T) {
 	}
 
 }
+func TestFormatMail2(t *testing.T) {
+	strlist := []string{"chuccp@163.com", "chuccp@163.com"}
+	strlist = nil
+	println(len(strlist))
+}
