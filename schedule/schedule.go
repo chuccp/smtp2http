@@ -4,7 +4,6 @@ import (
 	"github.com/chuccp/smtp2http/core"
 	"github.com/chuccp/smtp2http/db"
 	"github.com/chuccp/smtp2http/service"
-	"github.com/chuccp/smtp2http/smtp"
 	"github.com/chuccp/smtp2http/util"
 	"github.com/robfig/cron/v3"
 	"go.uber.org/zap"
@@ -113,14 +112,7 @@ func (cronM *cronManage) deleteSchedule(id uint) {
 
 func (cronM *cronManage) addSchedule(schedule *db.Schedule) {
 	entryID, err := cronM.cron.AddFunc(schedule.Cron, func() {
-		byToken, err := cronM.token.GetOneByToken(schedule.Token)
-		if err == nil {
-			body, err := smtp.SendAPIMail(schedule, byToken.SMTP, byToken.ReceiveEmails)
-			err = cronM.log.Log(byToken.SMTP, byToken.ReceiveEmails, nil, schedule.Token, schedule.Name, body, err)
-			if err != nil {
-				cronM.context.GetLog().Error("SendAPIMail log error", zap.Error(err))
-			}
-		}
+		cronM.token.SendApiCallMail(schedule)
 	})
 	if err != nil {
 		cronM.context.GetLog().Error("cron start error", zap.String("cron", schedule.Cron), zap.Error(err))

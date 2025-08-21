@@ -6,17 +6,20 @@ import (
 	"github.com/chuccp/smtp2http/smtp"
 	"github.com/chuccp/smtp2http/util"
 	"github.com/chuccp/smtp2http/web"
+	"go.uber.org/zap"
 	"os"
+	"sync"
 )
 
 type Token struct {
 	db        *db.DB
 	log       *Log
+	zapLog    *zap.Logger
 	cachePath string
 }
 
-func NewToken(db *db.DB, cachePath string) *Token {
-	return &Token{db: db, log: NewLog(db), cachePath: cachePath}
+func NewToken(db *db.DB, zapLog *zap.Logger, cachePath string) *Token {
+	return &Token{db: db, log: NewLog(db), cachePath: cachePath, zapLog: zapLog}
 }
 func (token *Token) GetPage(page *web.Page) (any, error) {
 	p, err := token.db.GetTokenModel().Page(page)
@@ -54,7 +57,27 @@ func (token *Token) supplementToken(st ...*db.Token) {
 	}
 }
 
+var lock = new(sync.Mutex)
+
+func (token *Token) SendApiCallMail(schedule *db.Schedule) {
+	lock.Lock()
+	defer lock.Unlock()
+	byToken, err := token.GetOneByToken(schedule.Token)
+	if err == nil {
+		body, err := smtp.SendAPIMail(schedule, byToken.SMTP, byToken.ReceiveEmails)
+		if err != nil {
+			token.zapLog.Error("SendAPIMail log error", zap.Error(err))
+		}
+		err = token.log.Log(byToken.SMTP, byToken.ReceiveEmails, nil, schedule.Token, schedule.Name, body, err)
+		if err != nil {
+			token.zapLog.Error("SendAPIMail log error", zap.Error(err))
+		}
+	}
+}
+
 func (token *Token) SendMailByToken(req *web.Request) (any, error) {
+	lock.Lock()
+	defer lock.Unlock()
 	var sendMailApi entity.SendMailApi
 	var byToken *db.Token
 	files := make([]*smtp.File, 0)
@@ -129,11 +152,15 @@ func (token *Token) SendMailByToken(req *web.Request) (any, error) {
 		}
 		return nil
 	}()
+	if err != nil {
+		token.zapLog.Error("SendMailByToken log error", zap.Error(err))
+	}
 	if err == nil {
 		err = smtp.SendAllMsg(byToken.SMTP, byToken.ReceiveEmails, files, sendMailApi.Subject, sendMailApi.Content)
 	}
 	err = token.log.Log(byToken.SMTP, byToken.ReceiveEmails, files, sendMailApi.Token, sendMailApi.Subject, sendMailApi.Content, err)
 	if err != nil {
+		token.zapLog.Error("SendMailByToken log error", zap.Error(err))
 		return nil, err
 	}
 	return "ok", nil
