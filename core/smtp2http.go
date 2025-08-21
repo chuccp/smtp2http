@@ -5,7 +5,6 @@ import (
 	"github.com/chuccp/smtp2http/config"
 	"github.com/chuccp/smtp2http/login"
 	"github.com/chuccp/smtp2http/web"
-	"github.com/robfig/cron/v3"
 	"go.uber.org/zap"
 	"log"
 	"net/http"
@@ -39,15 +38,6 @@ func (m *SMTP2Http) startHttpServer() error {
 	err := m.httpServer.StartAutoTLS(port, certFile, keyFile)
 	if err != nil {
 		m.context.log.Error("服务启动失败", zap.String("name", "smtp2http"), zap.Int("port", port), zap.Error(err))
-		return err
-	}
-	return nil
-}
-
-func Parser(cronStr string) error {
-	parser := cron.NewParser(cron.SecondOptional)
-	_, err := parser.Parse(cronStr)
-	if err != nil {
 		return err
 	}
 	return nil

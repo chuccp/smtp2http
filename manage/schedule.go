@@ -93,6 +93,10 @@ func (schedule *Schedule) validate(st *db.Schedule) error {
 	if err != nil {
 		return err
 	}
+	err = util.ParserCron(st.Cron)
+	if err != nil {
+		return err
+	}
 	if len(st.Token) == 0 {
 		return errors.New(" token  cannot be empty")
 	}
