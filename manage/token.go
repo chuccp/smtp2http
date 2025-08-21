@@ -3,9 +3,7 @@ package manage
 import (
 	"github.com/chuccp/smtp2http/core"
 	"github.com/chuccp/smtp2http/db"
-	"github.com/chuccp/smtp2http/entity"
 	"github.com/chuccp/smtp2http/service"
-	"github.com/chuccp/smtp2http/smtp"
 	"github.com/chuccp/smtp2http/util"
 	"github.com/chuccp/smtp2http/web"
 	"strconv"
@@ -70,24 +68,7 @@ func (token *Token) putOne(req *web.Request) (any, error) {
 }
 
 func (token *Token) sendMail(req *web.Request) (any, error) {
-	var sendMail entity.SendMail
-	err := req.ShouldBindBodyWithJSON(&sendMail)
-	if err != nil {
-		return nil, err
-	}
-	byToken, err := token.token.GetOne(int(sendMail.SMTPId))
-	if err != nil {
-		return nil, err
-	}
-	if len(sendMail.Subject) == 0 {
-		sendMail.Subject = byToken.Subject
-	}
-	err = smtp.SendContentMsgByRecipients(byToken.SMTP, sendMail.Recipients, sendMail.Subject, sendMail.Content)
-	err = token.log.Log(byToken.SMTP, byToken.ReceiveEmails, nil, byToken.Token, sendMail.Subject, sendMail.Content, err)
-	if err != nil {
-		return nil, err
-	}
-	return "ok", nil
+	return token.token.SendMailByToken(req)
 }
 
 func (token *Token) Init(context *core.Context, server core.IHttpServer) {

@@ -47,8 +47,8 @@ func newCronManage(context *core.Context) *cronManage {
 		context: context,
 		isStart: false,
 		isStop:  false,
-		log:     service.NewLog(context.GetDb()),
-		token:   service.NewToken(context.GetDb()),
+		log:     context.GetLogService(),
+		token:   context.GetTokenService(),
 	}
 }
 func (cronM *cronManage) Start() {

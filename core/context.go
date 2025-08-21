@@ -55,7 +55,8 @@ func (c *Context) GetLogService() *service.Log {
 	return service.NewLog(c.db)
 }
 func (c *Context) GetTokenService() *service.Token {
-	return service.NewToken(c.db)
+	cachePath := c.GetConfig().GetStringOrDefault("core", "cachePath", ".cache")
+	return service.NewToken(c.db, cachePath)
 }
 func (c *Context) GetScheduleService() *service.Schedule {
 	return service.NewSchedule(c.db, c.GetTokenService())
