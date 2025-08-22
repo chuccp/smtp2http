@@ -136,20 +136,20 @@ func (token *Token) SendMailByToken(req *web.Request) (any, error) {
 				if len(file.Data) == 0 {
 					continue
 				}
-				base64, err := util.DecodeFileBase64(file.Data)
+				fileData, err := util.DecodeFileBase64(file.Data)
 				if err != nil {
 					token.zapLog.Error("SendMailByToken log error", zap.Error(err))
 					return err
 				}
 				if len(file.Name) == 0 {
-					file.Name, err = util.CalculateMD5(base64)
+					file.Name, err = util.CalculateMD5(fileData)
 					if err != nil {
 						token.zapLog.Error("SendMailByToken log error", zap.Error(err))
 						return err
 					}
 				}
 				filePath := util.GetCachePath(token.cachePath, file.Name)
-				err = util.WriteFile(base64, filePath)
+				err = util.WriteFile(fileData, filePath)
 				if err != nil {
 					token.zapLog.Error("SendMailByToken log error", zap.Error(err))
 					return err
