@@ -13,7 +13,7 @@ func FileExists(filePath string) bool {
 	return err == nil
 }
 func WriteBase64File(base64Str string, dst string) error {
-	base64, err := DecodeBase64(base64Str)
+	base64, err := DecodeFileBase64(base64Str)
 	if err != nil {
 		return err
 	}
