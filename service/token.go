@@ -105,7 +105,6 @@ func (token *Token) SendMailByToken(req *web.Request) (any, error) {
 		if len(sendMailApi.Subject) == 0 {
 			sendMailApi.Subject = byToken.Subject
 		}
-
 		if req.IsMultipartForm() {
 			form, err := req.MultipartForm()
 			if err != nil {
@@ -155,12 +154,12 @@ func (token *Token) SendMailByToken(req *web.Request) (any, error) {
 					token.zapLog.Error("SendMailByToken log error", zap.Error(err))
 					return err
 				}
-				file, err := os.Open(filePath)
+				vFile, err := os.Open(filePath)
 				if err != nil {
 					token.zapLog.Error("SendMailByToken log error", zap.Error(err))
 					return err
 				}
-				files = append(files, &smtp.File{File: file, Name: file.Name(), FilePath: filePath})
+				files = append(files, &smtp.File{File: vFile, Name: file.Name, FilePath: filePath})
 			}
 		}
 		return nil
