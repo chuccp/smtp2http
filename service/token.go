@@ -128,7 +128,7 @@ func (token *Token) SendMailByToken(req *web.Request) (any, error) {
 				if len(file.Data) == 0 {
 					continue
 				}
-				base64, err := util.DecodeBase64(file.Data)
+				base64, err := util.DecodeFileBase64(file.Data)
 				if err != nil {
 					return err
 				}

@@ -189,7 +189,10 @@ func IsNotBlank(str string) bool {
 }
 
 // DecodeBase64 解码base64字符串为字节数组
-func DecodeBase64(base64Str string) ([]byte, error) {
+func DecodeFileBase64(base64Str string) ([]byte, error) {
+	if strings.HasPrefix(base64Str, "data:") {
+		base64Str = strings.SplitN(base64Str, ",", 2)[1]
+	}
 	data, err := base64.StdEncoding.DecodeString(base64Str)
 	if err != nil {
 		return nil, errors.New("base64解码失败: " + err.Error())
