@@ -81,10 +81,11 @@ func (token *Token) SendMailByToken(req *web.Request) (any, error) {
 	var sendMailApi entity.SendMailApi
 	var byToken *db.Token
 	files := make([]*smtp.File, 0)
-	err := func() (err error) {
+	err2 := func() (err error) {
 		if util.ContainsAnyIgnoreCase(req.GetContext().ContentType(), "application/json") {
 			err = req.ShouldBindBodyWithJSON(&sendMailApi)
 			if err != nil {
+				token.zapLog.Error("SendMailByToken log error", zap.Error(err))
 				return err
 			}
 		} else {
@@ -95,6 +96,7 @@ func (token *Token) SendMailByToken(req *web.Request) (any, error) {
 		}
 		byToken, err = token.GetOneByToken(sendMailApi.Token)
 		if err != nil {
+			token.zapLog.Error("SendMailByToken log error", zap.Error(err))
 			return err
 		}
 		for _, mail := range sendMailApi.Recipients {
@@ -104,9 +106,10 @@ func (token *Token) SendMailByToken(req *web.Request) (any, error) {
 			sendMailApi.Subject = byToken.Subject
 		}
 
-		if req.IsMultipartForm() || len(sendMailApi.Files) > 0 {
+		if req.IsMultipartForm() {
 			form, err := req.MultipartForm()
 			if err != nil {
+				token.zapLog.Error("SendMailByToken log error", zap.Error(err))
 				return err
 			}
 			fileHeaders, ok := form.File["files"]
@@ -115,36 +118,46 @@ func (token *Token) SendMailByToken(req *web.Request) (any, error) {
 					filePath := util.GetCachePath(token.cachePath, fileHeader.Filename)
 					err := web.SaveUploadedFile(fileHeader, filePath)
 					if err != nil {
+						token.zapLog.Error("SendMailByToken log error", zap.Error(err))
 						return err
 					}
 					file, err := os.Open(filePath)
 					if err != nil {
+						token.zapLog.Error("SendMailByToken log error", zap.Error(err))
 						return err
 					}
 					files = append(files, &smtp.File{File: file, Name: fileHeader.Filename, FilePath: filePath})
 				}
 			}
+
+		}
+
+		if len(sendMailApi.Files) > 0 {
 			for _, file := range sendMailApi.Files {
 				if len(file.Data) == 0 {
 					continue
 				}
 				base64, err := util.DecodeFileBase64(file.Data)
 				if err != nil {
+					token.zapLog.Error("SendMailByToken log error", zap.Error(err))
 					return err
 				}
 				if len(file.Name) == 0 {
 					file.Name, err = util.CalculateMD5(base64)
 					if err != nil {
+						token.zapLog.Error("SendMailByToken log error", zap.Error(err))
 						return err
 					}
 				}
 				filePath := util.GetCachePath(token.cachePath, file.Name)
 				err = util.WriteFile(base64, filePath)
 				if err != nil {
+					token.zapLog.Error("SendMailByToken log error", zap.Error(err))
 					return err
 				}
 				file, err := os.Open(filePath)
 				if err != nil {
+					token.zapLog.Error("SendMailByToken log error", zap.Error(err))
 					return err
 				}
 				files = append(files, &smtp.File{File: file, Name: file.Name(), FilePath: filePath})
@@ -152,18 +165,17 @@ func (token *Token) SendMailByToken(req *web.Request) (any, error) {
 		}
 		return nil
 	}()
+	if err2 == nil {
+		err2 = smtp.SendAllMsg(byToken.SMTP, byToken.ReceiveEmails, files, sendMailApi.Subject, sendMailApi.Content)
+	}
+	err := token.log.Log(byToken.SMTP, byToken.ReceiveEmails, files, sendMailApi.Token, sendMailApi.Subject, sendMailApi.Content, err2)
 	if err != nil {
 		token.zapLog.Error("SendMailByToken log error", zap.Error(err))
 	}
-	if err == nil {
-		err = smtp.SendAllMsg(byToken.SMTP, byToken.ReceiveEmails, files, sendMailApi.Subject, sendMailApi.Content)
+	if err2 == nil {
+		return "ok", nil
 	}
-	err = token.log.Log(byToken.SMTP, byToken.ReceiveEmails, files, sendMailApi.Token, sendMailApi.Subject, sendMailApi.Content, err)
-	if err != nil {
-		token.zapLog.Error("SendMailByToken log error", zap.Error(err))
-		return nil, err
-	}
-	return "ok", nil
+	return "error", err2
 
 }
 
