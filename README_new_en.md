@@ -1,4 +1,4 @@
-# SMTP2HTTP - SMTP to HTTP Gateway Tool
+# SMTP2HTTP - SMTP to HTTP  Tool
 
 **[English](README.md)** 🌎 | **简体中文** 🀄
 

@@ -1,4 +1,4 @@
-# SMTP2HTTP - SMTP转HTTP网关工具
+# SMTP2HTTP - SMTP转HTTP 工具
 
 **English**🌎 | [**简体中文**🀄](./README_zh.md)
 
