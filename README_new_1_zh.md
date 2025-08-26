@@ -4,7 +4,7 @@
 
 ## 重要更新
 
-增加定时任务功能，可定时读取其它api或链接发送邮件 。并支持模板配置，将json数据转换成文本，作为邮件发送 。
+增加定时任务功能，可定时读取其它api或链接发送邮件 。并支持模板配置，将json数据转换成文本，作为邮件内容发送 。
 
 ## 项目描述
 
@@ -25,6 +25,17 @@
 - 📊 发送记录查询与统计
 - 📅 支持定时任务，请求链接，发送邮件
 - 📧 支持邮件模板
+
+## 社区
+欢迎加入微信群或者telegram，提供更多意见。
+
+微信群：
+
+<img src="https://github.com/chuccp/smtp2http/blob/main/image/WeChat.png?raw=true" alt="WebChat" width="200">
+
+telegram：
+
+https://t.me/+JClG9_DojaM0ZGE1
 
 ## 快速开始
 
@@ -56,7 +67,7 @@ docker run -d \
 
 ```ini
 [core]
-init      = true   ##初始化开关，首次启动后自动变为true 
+init      = true   ##初始化开关，初始化配置完成后变为true 
 cachePath = .cache  ##邮件附件缓存目录
 dbType    = sqlite  ##数据库类型，支持sqlite和mysql
 
