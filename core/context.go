@@ -13,13 +13,14 @@ import (
 )
 
 type Context struct {
-	db         *db.DB
-	config     *config.Config
-	log        *zap.Logger
-	httpServer *web.HttpServer
-	digestAuth *login.DigestAuth
-	IsDocker   bool
-	reStart    func()
+	db          *db.DB
+	config      *config.Config
+	log         *zap.Logger
+	httpServer  *web.HttpServer
+	digestAuth  *login.DigestAuth
+	IsDocker    bool
+	reStart     func()
+	startServer func(name string)
 }
 
 func (c *Context) GetDigestAuth() *login.DigestAuth {
@@ -104,6 +105,7 @@ func (c *Context) UpdateSetInfo(setInfo *config.SetInfo) error {
 	if err != nil {
 		return err
 	}
+	c.startSchedule()
 	return nil
 }
 func (c *Context) initDbBySetInfo(setInfo *config.SetInfo) error {
@@ -113,6 +115,9 @@ func (c *Context) initDbBySetInfo(setInfo *config.SetInfo) error {
 		return err
 	}
 	return c.creatDB(_db_)
+}
+func (c *Context) startSchedule() {
+	c.startServer("schedule")
 }
 func (c *Context) initDb() error {
 	if c.IsInit() {

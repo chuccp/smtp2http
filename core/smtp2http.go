@@ -57,8 +57,18 @@ func (m *SMTP2Http) ReStart() {
 	for _, server := range m.iHttpServer {
 		server.Stop()
 	}
-	time.Sleep(2 * time.Second)
+	time.Sleep(1 * time.Second)
 	m.httpServer.Stop()
+	time.Sleep(1 * time.Second)
+	m.reStart()
+}
+func (m *SMTP2Http) StartServer(name string) {
+	for _, server := range m.servers {
+		if server.Name() == name {
+			server.Init(m.context)
+			server.Start()
+		}
+	}
 }
 func (m *SMTP2Http) reStart() {
 	m.iHttpServer = make([]IHttpServer, 0)
@@ -74,7 +84,7 @@ func (m *SMTP2Http) reStart() {
 		return
 	}
 	m.log = logger
-	m.context = &Context{log: m.log, config: m.config, reStart: m.ReStart, IsDocker: m.IsDocker}
+	m.context = &Context{log: m.log, config: m.config, reStart: m.ReStart, IsDocker: m.IsDocker, startServer: m.StartServer}
 	digestAuth := login.NewDigestAuth(m.context.SecretProvider)
 	m.context.digestAuth = digestAuth
 	m.httpServer = web.NewServer(digestAuth)
