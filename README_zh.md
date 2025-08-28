@@ -48,7 +48,7 @@ https://t.me/+JClG9_DojaM0ZGE1
 Invoke-WebRequest -Uri "https://github.com/chuccp/smtp2http/releases/latest/download/smtp2http-windows-amd64.tar.gz" -OutFile "smtp2http-windows-amd64.tar.gz"
 # 解压文件
 tar -zxvf smtp2http-windows-amd64.tar.gz
-# 运行程序
+# 运行程序 
 .\smtp2http.exe
 # Linux 系统
 # 下载程序包（使用wget确保兼容性）
@@ -69,6 +69,7 @@ docker pull cooge123/smtp2http
 docker run -p 12566:12566 -p 12567:12567 -it --rm cooge123/smtp2http
 
 ```
+启动后，使用默认端口号访问管理页面：http://127.0.0.1:12566
 
 ## 配置说明
 
@@ -90,7 +91,7 @@ password = 111111     ##管理密码
 webPath  = web        ##管理页面路径
 
 [api]
-port = 12566          ##API端口    
+port = 12567          ##API端口    
 
 [mysql]
 host     = 127.0.0.1   ##数据库地址
