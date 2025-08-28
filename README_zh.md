@@ -1,136 +1,183 @@
-[**English**🌎 ](./README.md)| **简体中文**🀄
+# SMTP2HTTP - SMTP转HTTP 工具
 
-在项目中，经常使用邮件来通知异常日志。然而，这通常需要在项目中配置SMTP，并提供接收邮件的邮箱地址。当邮件地址发生变化时，就需要修改项目的配置文件。此外，由于网络限制，可能无法配置SMTP。
+[**English**🌎](./README.md) | **简体中文**🀄
 
-本程序可以用HTTP接口替代SMTP，简化了邮件发送流程。您只需在管理页面配置SMTP和接收邮件的电子邮箱地址，即可实现HTTP发送邮件。
+## 重要更新
 
-支持GET和POST请求。
+增加定时任务功能，可以使用cron表达式来定时读取某一个接口或者链接结果发送邮件。支持对json响应的接口配置一个模板，将json数据转换成文本，作为邮件内容发送。
 
-**GET请求示例**：
+## 项目描述
 
-```powershell
-curl 'http://127.0.0.1:12567/sendMail?token={{token}}&content=this%20is%20a%20test&recipients=aaa@mail.com,bbb@mail.com'
+将SMTP协议转换为HTTP接口的网关服务，帮助开发者：
+
+- 无需在代码中硬编码SMTP配置
+- 通过REST API动态发送邮件
+- 可视化配置多个SMTP服务商
+- 使用定时任务，减少项目中邮件配置
+
+## 主要特性
+
+- 🚀 通过Web UI配置SMTP服务器和接收邮箱
+- 📦 支持GET/POST/JSON多种请求格式
+- 🔒 基于Token的API访问控制
+- 📎 多文件附件支持（Base64编码/表单上传）
+- 🐳 开箱即用的Docker镜像
+- 📊 发送记录查询与统计
+- 📅 支持定时任务，请求链接，发送邮件
+- 📧 支持邮件模板
+
+## 社区
+欢迎加入微信群或者telegram，提供更多意见。
+
+微信群：
+
+<img src="https://github.com/chuccp/smtp2http/blob/main/image/WeChat.png?raw=true" alt="WebChat" width="200">
+
+telegram：
+
+https://t.me/+JClG9_DojaM0ZGE1
+
+## 快速开始
+
+### 直接运行
+
+```bash
+
+# Windows 系统（PowerShell 环境）
+# 下载程序包
+Invoke-WebRequest -Uri "https://github.com/chuccp/smtp2http/releases/latest/download/smtp2http-windows-amd64.tar.gz" -OutFile "smtp2http-windows-amd64.tar.gz"
+# 解压文件
+tar -zxvf smtp2http-windows-amd64.tar.gz
+# 运行程序
+.\smtp2http.exe
+# Linux 系统
+# 下载程序包（使用wget确保兼容性）
+wget https://github.com/chuccp/smtp2http/releases/latest/download/smtp2http-linux-amd64.tar.gz
+# 解压文件
+tar -zxvf smtp2http-linux-amd64.tar.gz
+# 添加执行权限并运行
+chmod +x smtp2http
+./smtp2http
 ```
 
-**POST请求示例**：
+### Docker运行
 
-```powershell
-curl -X POST 'http://127.0.0.1:12567/sendMail' \
---header 'Content-Type: application/x-www-form-urlencoded' \
---data-urlencode 'token={{token}}' \
---data-urlencode 'content=this%20is%20a%20test'
-```
+```bash
 
-**发送带附件的邮件示例**：
-
-```powershell
-curl -X POST 'http://127.0.0.1:12567/sendMail' \
---form 'files=@"/111111.txt"' \
---form 'files=@"/22222222222222.txt"' \
---form 'token={{token}}"' \
---form 'content=1212'
-```
-
-这种方式本质上是简单的表单提交，不同语言和平台都能方便地使用本项目。
-
-**POST提交json格式例子**:
-
-```powershell
-curl -X POST 'http://127.0.0.1:12567/sendMail' \
---header 'Content-Type: application/json' \
---data '{
-"token": "{{token}}",
-"content":"this is a test",
-"recipients":["aaa@mail.com","bbb@mail.com"]
-}'
-```
-
-**参数说明**：
-
-- `token`：在管理界面中手动添加获得，是与SMTP和接收邮箱绑定的唯一值。
-- `content`：邮件内容。
-- `subject`：邮件主题。如果在生成token时已设置主题，当此参数为空时将使用预设主题。
-- `files`：需要发送的附件，支持多个文件。
-- `recipients`:补充的邮箱地址，选填
-
-**安装方法**：
-
-您可以直接从以下链接下载编译好的版本：
-
-[Download from GitHub](https://github.com/chuccp/smtp2http/releases)
-
-or
-
-```
-curl -uri "https://github.com/chuccp/smtp2http/releases/latest/download/smtp2http-windows-amd64.tar.gz" -o smtp2http-windows-amd64.tar.gz
-```
-
-docker 镜像
-```
 docker pull cooge123/smtp2http
 
 docker run -p 12566:12566 -p 12567:12567 -it --rm cooge123/smtp2http
-```
-下载并解压后，直接运行即可。默认端口号为12566。程序运行后会生成配置文件，您可以在其中修改端口号，修改后重启程序即可使用新的端口号。
-
-启动后，使用浏览器打开 `http://127.0.0.1:12566` 即可进入管理管理。
-
-**配置文件说明**：
-
-程序运行后自动生成配置文件，包含以下部分：
 
 ```
+
+## 配置说明
+
+首次启动后生成配置文件 `config.ini`：
+
+```ini
 [core]
-init      = true   # 是否已经完成初始化，默认为false
-cachePath = .cache  # 邮件发送文件的临时缓存路径
-dbType    = sqlite  # 数据库类型，目前支持sqlite和mysql
+init      = true   ##初始化开关，初始化配置完成后变为true 
+cachePath = .cache  ##邮件附件缓存目录
+dbType    = sqlite  ##数据库类型，支持sqlite和mysql
 
 [sqlite]
-filename = d-mail.db  # SQLite文件路径
+filename = d-mail.db  ##数据库路径
 
 [manage]
-port     = 12566      # 后台管理的端口号
-username = 111111     # 后台管理的账号
-password = 111111     # 后台管理的密码
-webPath  = web        # web静态文件路径
+port     = 12566      ##管理端口   
+username = 111111     ##管理用户名    
+password = 111111     ##管理密码
+webPath  = web        ##管理页面路径
 
 [api]
-port = 12566          # 发送邮件的端口号，如果不想与管理后台共用端口号，可以改成其它端口号
+port = 12566          ##API端口    
 
 [mysql]
-host     = 127.0.0.1  # MySQL主机地址
-port     = 3306       # MySQL端口号
-dbname   = d_mail     # MySQL数据库名称
-charset  = utf8       # 编码格式，默认为utf8
-username = root       # MySQL账号
-password = 123456     # MySQL密码
+host     = 127.0.0.1   ##数据库地址
+port     = 3306         ##数据库端口
+dbname   = d_mail      ##数据库名称
+charset  = utf8        ##数据库字符集
+username = root        ##数据库用户名
+password = 123456      ##数据库密码
 ```
 
----
+## API文档
 
-**编译说明**：
+### 发送邮件接口
 
-如果想自行编译，除了需要编译本项目的外，还需要编译web页面 https://github.com/chuccp/d-mail-view
+`POST /sendMail`
 
-**软件操作**：
+**参数**：
 
-首次进入管理后台时，需要配置数据库和后台管理账号。目前支持SQLite和MySQL数据库。
+| 参数名        | 类型       | 必填 | 说明      |
+|------------|----------|----|---------|
+| token      | string   | 是  | 授权令牌    |
+| subject    | string   | 否  | 邮件主题    |
+| content    | string   | 是  | 邮件内容    |
+| recipients | []string | 否  | 额外收件人列表 |
+| files      | []File   | 否  | 附件文件列表  |
 
-![initial](https://github.com/chuccp/smtp2http/blob/main/image/0001.png?raw=true "Initial Configuration")
+**成功响应**：
 
-添加SMTP地址：
+```json
+ok
+```
 
-![SMTP Configuration](https://github.com/chuccp/smtp2http/blob/main/image/0002.png?raw=true "SMTP Configuration")
+### 完整请求示例
 
-添加接收邮件的邮箱地址：
+**JSON格式（含附件）**
 
-![Mail Configuration](https://github.com/chuccp/smtp2http/blob/main/image/0003.png?raw=true "Mail Configuration")
+```bash
+curl -X POST 'http://127.0.0.1:12567/sendMail' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+  "token": "{{token}}",
+  "subject": "test",
+  "content": "this is a test",
+  "recipients": ["ops@example.com"],
+  "files": [
+    {
+      "name": "alert.log",
+      "data": "{{base64_content}}"
+    }
+  ]
+}'
+```
 
-添加Token：
+**表单提交（含多个附件）**
 
-![Token Configuration](https://github.com/chuccp/smtp2http/blob/main/image/0004.png?raw=true "Token Configuration")
+```bash
+curl -X POST 'http://127.0.0.1:12567/sendMail' \
+--form 'token={{token}}' \
+--form 'subject=test' \
+--form 'content=this is a test' \
+--form 'recipients=finance@example.com,sales@example.com' \
+--form 'files=@"/data/reports/sales.pdf"' \
+--form 'files=@"/data/reports/expenses.xlsx"'
+```
 
-配置完成后，即可使用Token给邮箱发送信息。
+**GET请求示例**
+
+```bash
+curl 'http://127.0.0.1:12567/sendMail?token={{token}}&subject=test&content=this%20is%20a%20test&recipients=aaa@mail.com,bbb@mail.com'
+```
 
 
 
+
+
+## 构建说明
+
+编译需先构建前端界面 [d-mail-view](https://github.com/chuccp/d-mail-view)
+
+
+
+
+
+
+
+
+
+
+
+        

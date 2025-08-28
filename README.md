@@ -1,136 +1,148 @@
+# SMTP2HTTP - SMTP to HTTP Gateway
+
 **English**🌎 | [**简体中文**🀄](./README_zh.md)
 
-In the project, emails are often used to notify exception logs. However, this usually requires configuring SMTP within the project and providing the email address for receiving emails. When the email address changes, it necessitates modifying the project's configuration file. Additionally, due to network restrictions, it may be impossible to configure SMTP.
+## Major Update
 
-This program can replace SMTP with an HTTP interface, simplifying the process of sending emails. You only need to configure SMTP and the email address for receiving emails on the management page to achieve email sending via HTTP.
+Added scheduled task functionality supporting cron expressions to periodically fetch API responses and send emails. Supports JSON response parsing with customizable templates.
 
-Supports GET and POST requests.
+## Project Description
 
-**GET Request Example**:
+An SMTP-to-HTTP gateway service that helps developers:
+- Eliminate hard-coded SMTP configurations
+- Send emails dynamically via REST API
+- Visually configure multiple SMTP providers
+- Utilize scheduled tasks to reduce email-related code
 
-```powershell
-curl 'http://127.0.0.1:12567/sendMail?token={{token}}&content=this%20is%20a%20test&recipients=aaa@mail.com,bbb@mail.com'
+## Key Features
+- 🚀 Web UI for SMTP server configuration
+- 📦 Supports GET/POST/JSON request formats
+- 🔒 Token-based API authentication
+- 📎 Multi-file attachment support (Base64/Form-data)
+- 🐳 Ready-to-use Docker image
+- 📊 Email sending history & statistics
+- 📅 Cron-based scheduled tasks
+- 📧 Email templating support
+
+## Community
+Join our WeChat group or Telegram channel for discussions:
+
+WeChat Group:
+
+<img src="https://github.com/chuccp/smtp2http/blob/main/image/WeChat.png?raw=true" alt="WebChat" width="200">
+
+Telegram:
+
+https://t.me/+JClG9_DojaM0ZGE1
+
+## Quick Start
+
+### Direct Execution
+
+```bash
+# Windows (PowerShell)
+Invoke-WebRequest -Uri "https://github.com/chuccp/smtp2http/releases/latest/download/smtp2http-windows-amd64.tar.gz" -OutFile "smtp2http-windows-amd64.tar.gz"
+tar -zxvf smtp2http-windows-amd64.tar.gz
+.\smtp2http.exe
+
+# Linux
+wget https://github.com/chuccp/smtp2http/releases/latest/download/smtp2http-linux-amd64.tar.gz
+tar -zxvf smtp2http-linux-amd64.tar.gz
+chmod +x smtp2http
+./smtp2http
 ```
 
-**POST Request Example**:
+### Docker
+```bash
 
-```powershell
-curl -X POST 'http://127.0.0.1:12567/sendMail' \
---header 'Content-Type: application/x-www-form-urlencoded' \
---data-urlencode 'token={{token}}' \
---data-urlencode 'content=this%20is%20a%20test'
-```
-
-**Example of Sending an Email with Attachments**:
-
-```powershell
-curl -X POST 'http://127.0.0.1:12567/sendMail' \
---form 'files=@"/111111.txt"' \
---form 'files=@"/22222222222222.txt"' \
---form 'token={{token}}"' \
---form 'content=1212'
-```
-This method is essentially a simple form submission, making it easy for different languages and platforms to use this project.
-
-**POST submission json format example**:
-```powershell
-curl -X POST 'http://127.0.0.1:12567/sendMail' \
---header 'Content-Type: application/json' \
---data '{
-"token": "{{token}}",
-"content":"this is a test",
-"recipients":["aaa@mail.com","bbb@mail.com"]
-}'
-```
-
-
-**Parameter Description**:
-
-- `token`: Manually added in the management interface, it is the unique value bound with SMTP and the receiving email address.
-- `content`: The content of the email.
-- `subject`: The subject of the email. If a subject is set when the token is generated, it will be used as the default subject if this parameter is empty.
-- `files`: The attachments to be sent, supports multiple files.
-- `recipients`: Supplementary email address, optional.
-
-**Install Method**:
-
-You can directly download the compiled version from the following link:
-
-[Download from GitHub](https://github.com/chuccp/smtp2http/releases)
-
-or
-
-```
-curl -uri "https://github.com/chuccp/smtp2http/releases/latest/download/smtp2http-windows-amd64.tar.gz" -o smtp2http-windows-amd64.tar.gz
-```
-
-docker Images
-```
 docker pull cooge123/smtp2http
 
 docker run -p 12566:12566 -p 12567:12567 -it --rm cooge123/smtp2http
-```
-
-
-After downloading and extracting, you can run it directly. The default port number is 12566. After the program runs, it will generate a configuration file where you can modify the port number. After modification, restart the program to use the new port number.
-
-After starting, you can enter the management interface by opening a browser to `http://127.0.0.1:12566`.
-
-**Configuration File Description**:
-
-After the program runs, it automatically generates a configuration file, including the following sections:
 
 ```
+
+## Configuration
+Initial startup generates `config.ini`:
+
+```ini
 [core]
-init      = true   # Whether initialization is complete, default is false
-cachePath = .cache  # Temporary cache path for email sending files
-dbType    = sqlite  # Database type, currently supports sqlite and mysql
+init = true
+cachePath = .cache
+dbType = sqlite
 
 [sqlite]
-filename = d-mail.db  # SQLite file path
+filename = d-mail.db
 
 [manage]
-port     = 12566      # Port number for backend management
-username = 111111     # Backend management account
-password = 111111     # Backend management password
-webPath  = web        # Static file path
+port = 12566
+username = 111111
+password = 111111
+webPath = web
 
 [api]
-port = 12566          # Port number for sending emails, if you do not want to share the port number with the management backend, you can change it to another port number
+port = 12566
 
 [mysql]
-host     = 127.0.0.1  # MySQL host address
-port     = 3306       # MySQL port number
-dbname   = d_mail     # MySQL database name
-charset  = utf8       # Encoding format, default is utf8
-username = root       # MySQL account
-password = 123456     # MySQL password
+host = 127.0.0.1
+port = 3306
+dbname = d_mail
+charset = utf8
+username = root
+password = 123456
 ```
 
----
+## API Documentation
 
-**Compilation Instructions**:
+### Send Email
+`POST /sendMail`
 
-If you wish to compile the project yourself, you will need to compile not only this project but also the web page found at https://github.com/chuccp/d-mail-view.
+**Parameters**:
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| token | string | Yes | Auth token |
+| subject | string | No | Email subject |
+| content | string | Yes | Email body |
+| recipients | []string | No | CC recipients |
+| files | []File | No | Attachments |
 
+**Success Response**:
+```json
+ok
+```
 
-**Software Operation**:
+### Examples
+**JSON with Attachment**
+```bash
+curl -X POST 'http://127.0.0.1:12567/sendMail' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+  "token": "{{token}}",
+  "subject": "test",
+  "content": "this is a test",
+  "recipients": ["ops@example.com"],
+  "files": [{
+    "name": "alert.log",
+    "data": "{{base64_content}}"
+  }]
+}'
+```
 
-When you first enter the management backend, you need to configure the database and the backend management account. Currently, SQLite and MySQL databases are supported.
+**Form-data with Multiple Files**
+```bash
+curl -X POST 'http://127.0.0.1:12567/sendMail' \
+--form 'token={{token}}' \
+--form 'subject=test' \
+--form 'content=this is a test' \
+--form 'recipients=finance@example.com,sales@example.com' \
+--form 'files=@"/data/reports/sales.pdf"' \
+--form 'files=@"/data/reports/expenses.xlsx"'
+```
 
-![initial](https://github.com/chuccp/smtp2http/blob/main/image/0001.png?raw=true "Initial Configuration")
+**GET Request**
+```bash
+curl 'http://127.0.0.1:12567/sendMail?token={{token}}&subject=test&content=this%20is%20a%20test&recipients=aaa@mail.com,bbb@mail.com'
+```
 
-Add SMTP address:
-
-![SMTP Configuration](https://github.com/chuccp/smtp2http/blob/main/image/0002.png?raw=true "SMTP Configuration")
-
-Add the email address for receiving emails:
-
-![Mail Configuration](https://github.com/chuccp/smtp2http/blob/main/image/0003.png?raw=true "Mail Configuration")
-
-Add Token:
-
-![Token Configuration](https://github.com/chuccp/smtp2http/blob/main/image/0004.png?raw=true "Token Configuration")
-
-After the configuration is complete, you can use the Token to send messages to the email.
-
+## Building
+Requires building the frontend [d-mail-view](https://github.com/chuccp/d-mail-view) first.
+```
