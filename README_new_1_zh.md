@@ -42,12 +42,20 @@ https://t.me/+JClG9_DojaM0ZGE1
 ### 直接运行
 
 ```bash
-# Windows
-curl -LO https://github.com/chuccp/smtp2http/releases/latest/download/smtp2http-windows-amd64.tar.gz
-./smtp2http.exe
 
-# Linux
-curl -LO https://github.com/chuccp/smtp2http/releases/latest/download/smtp2http-linux-amd64.tar.gz
+# Windows 系统（PowerShell 环境）
+# 下载程序包
+Invoke-WebRequest -Uri "https://github.com/chuccp/smtp2http/releases/latest/download/smtp2http-windows-amd64.tar.gz" -OutFile "smtp2http-windows-amd64.tar.gz"
+# 解压文件
+tar -zxvf smtp2http-windows-amd64.tar.gz
+# 运行程序
+.\smtp2http.exe
+# Linux 系统
+# 下载程序包（使用wget确保兼容性）
+wget https://github.com/chuccp/smtp2http/releases/latest/download/smtp2http-linux-amd64.tar.gz
+# 解压文件
+tar -zxvf smtp2http-linux-amd64.tar.gz
+# 添加执行权限并运行
 chmod +x smtp2http
 ./smtp2http
 ```
@@ -55,10 +63,7 @@ chmod +x smtp2http
 ### Docker运行
 
 ```bash
-docker run -d \
-  -p 12566:12566 \
-  -p 12567:12567 \
-  cooge123/smtp2http:latest
+docker run -d  -p 12566:12566  -p 12567:12567  cooge123/smtp2http:latest
 ```
 
 ## 配置说明
@@ -123,8 +128,8 @@ curl -X POST 'http://127.0.0.1:12567/sendMail' \
 --header 'Content-Type: application/json' \
 --data-raw '{
   "token": "{{token}}",
-  "subject": "紧急系统通知",
-  "content": "test",
+  "subject": "test",
+  "content": "this is a test",
   "recipients": ["ops@example.com"],
   "files": [
     {
@@ -140,18 +145,26 @@ curl -X POST 'http://127.0.0.1:12567/sendMail' \
 ```bash
 curl -X POST 'http://127.0.0.1:12567/sendMail' \
 --form 'token={{token}}' \
---form 'subject=紧急系统通知' \
---form 'content=test' \
+--form 'subject=test' \
+--form 'content=this is a test' \
 --form 'recipients=finance@example.com,sales@example.com' \
 --form 'files=@"/data/reports/sales.pdf"' \
 --form 'files=@"/data/reports/expenses.xlsx"'
 ```
 
+**GET请求示例**
+
+```bash
+curl 'http://127.0.0.1:12567/sendMail?token={{token}}&subject=test&content=this%20is%20a%20test&recipients=aaa@mail.com,bbb@mail.com'
+```
 ## 构建说明
 
-1. 克隆仓库：
-2. 编译前端界面（需先构建[d-mail-view](https://github.com/chuccp/d-mail-view)）：
-3. 编译二进制文件：
+编译需先构建前端界面 [d-mail-view](https://github.com/chuccp/d-mail-view)
+
+
+
+
+
 
 
 
