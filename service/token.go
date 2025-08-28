@@ -64,7 +64,7 @@ func (token *Token) SendApiCallMail(schedule *db.Schedule) {
 	lock.Lock()
 	defer lock.Unlock()
 	byToken, err := token.GetOneByToken(schedule.Token)
-	if err == nil {
+	if err == nil && byToken.IsUse {
 		body, err := smtp.SendAPIMail(schedule, byToken.SMTP, byToken.ReceiveEmails)
 		if err != nil {
 			token.zapLog.Error("SendAPIMail log error", zap.Error(err))
