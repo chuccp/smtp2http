@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"github.com/chuccp/smtp2http/db"
 	"github.com/chuccp/smtp2http/entity"
 	"github.com/chuccp/smtp2http/smtp"
@@ -99,6 +100,10 @@ func (token *Token) SendMailByToken(req *web.Request) (any, error) {
 			token.zapLog.Error("SendMailByToken log error", zap.Error(err))
 			return err
 		}
+		if !byToken.IsUse {
+			return errors.New("token is not use")
+		}
+
 		for _, mail := range sendMailApi.Recipients {
 			byToken.ReceiveEmails = append(byToken.ReceiveEmails, &db.Mail{Mail: mail})
 		}

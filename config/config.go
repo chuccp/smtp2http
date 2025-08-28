@@ -34,6 +34,7 @@ func (config *Config) UpdateSetInfo(setInfo *SetInfo) error {
 	config.config.SetString("manage", "password", setInfo.Manage.Password)
 	config.config.SetString("manage", "webPath", setInfo.Manage.WebPath)
 	config.config.SetInt("api", "port", setInfo.Api.Port)
+	//config.config.SetBoolean("schedule", "start", setInfo.Schedule.Start)
 
 	//Manage
 	err := config.config.Save()
