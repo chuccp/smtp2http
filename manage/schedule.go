@@ -4,7 +4,6 @@ import (
 	"errors"
 	"github.com/chuccp/smtp2http/core"
 	"github.com/chuccp/smtp2http/db"
-	"github.com/chuccp/smtp2http/service"
 	"github.com/chuccp/smtp2http/util"
 	"github.com/chuccp/smtp2http/web"
 	"go.uber.org/zap"
@@ -13,8 +12,7 @@ import (
 )
 
 type Schedule struct {
-	context  *core.Context
-	schedule *service.Schedule
+	context *core.Context
 }
 
 func (schedule *Schedule) getOne(req *web.Request) (any, error) {
@@ -23,7 +21,7 @@ func (schedule *Schedule) getOne(req *web.Request) (any, error) {
 	if err != nil {
 		return nil, err
 	}
-	return schedule.schedule.GetOne(atoi)
+	return schedule.context.GetScheduleService().GetOne(atoi)
 }
 func (schedule *Schedule) deleteOne(req *web.Request) (any, error) {
 	id := req.Param("id")
@@ -39,7 +37,7 @@ func (schedule *Schedule) deleteOne(req *web.Request) (any, error) {
 }
 func (schedule *Schedule) getPage(req *web.Request) (any, error) {
 	page := req.GetPage()
-	return schedule.schedule.GetPage(page)
+	return schedule.context.GetScheduleService().GetPage(page)
 }
 func (schedule *Schedule) postOne(req *web.Request) (any, error) {
 	var st db.Schedule
@@ -51,7 +49,7 @@ func (schedule *Schedule) postOne(req *web.Request) (any, error) {
 	if err != nil {
 		return nil, err
 	}
-	err = schedule.schedule.Save(&st)
+	err = schedule.context.GetScheduleService().Save(&st)
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +65,7 @@ func (schedule *Schedule) putOne(req *web.Request) (any, error) {
 	if err != nil {
 		return nil, err
 	}
-	err = schedule.schedule.Edit(&st)
+	err = schedule.context.GetScheduleService().Edit(&st)
 	if err != nil {
 		return nil, err
 	}
@@ -81,7 +79,7 @@ func (schedule *Schedule) sendMail(req *web.Request) (any, error) {
 		return nil, err
 	}
 	st.IsOnlySendByError = false
-	err = schedule.schedule.SendMail(&st)
+	err = schedule.context.GetScheduleService().SendMail(&st)
 	if err != nil {
 		return nil, err
 	}
@@ -116,7 +114,6 @@ func (schedule *Schedule) scheduleTestApi(req *web.Request) (any, error) {
 
 func (schedule *Schedule) Init(context *core.Context, server core.IHttpServer) {
 	schedule.context = context
-	schedule.schedule = context.GetScheduleService()
 	server.GETAuth("/schedule/:id", schedule.getOne)
 	server.DELETEAuth("/schedule/:id", schedule.deleteOne)
 	server.GETAuth("/schedule", schedule.getPage)

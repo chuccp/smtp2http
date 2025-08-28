@@ -3,7 +3,6 @@ package manage
 import (
 	"github.com/chuccp/smtp2http/core"
 	"github.com/chuccp/smtp2http/db"
-	"github.com/chuccp/smtp2http/service"
 	"github.com/chuccp/smtp2http/util"
 	"github.com/chuccp/smtp2http/web"
 	"strconv"
@@ -11,8 +10,6 @@ import (
 
 type Token struct {
 	context *core.Context
-	token   *service.Token
-	log     *service.Log
 }
 
 func (token *Token) getOne(req *web.Request) (any, error) {
@@ -21,7 +18,7 @@ func (token *Token) getOne(req *web.Request) (any, error) {
 	if err != nil {
 		return nil, err
 	}
-	return token.token.GetOne(atoi)
+	return token.context.GetTokenService().GetOne(atoi)
 }
 
 func (token *Token) deleteOne(req *web.Request) (any, error) {
@@ -38,7 +35,7 @@ func (token *Token) deleteOne(req *web.Request) (any, error) {
 }
 func (token *Token) getPage(req *web.Request) (any, error) {
 	page := req.GetPage()
-	return token.token.GetPage(page)
+	return token.context.GetTokenService().GetPage(page)
 }
 
 func (token *Token) postOne(req *web.Request) (any, error) {
@@ -68,13 +65,11 @@ func (token *Token) putOne(req *web.Request) (any, error) {
 }
 
 func (token *Token) sendMail(req *web.Request) (any, error) {
-	return token.token.SendMailByToken(req)
+	return token.context.GetTokenService().SendMailByToken(req)
 }
 
 func (token *Token) Init(context *core.Context, server core.IHttpServer) {
 	token.context = context
-	token.token = context.GetTokenService()
-	token.log = context.GetLogService()
 	server.GETAuth("/token/:id", token.getOne)
 	server.DELETEAuth("/token/:id", token.deleteOne)
 	server.GETAuth("/token", token.getPage)
