@@ -3,7 +3,6 @@ package schedule
 import (
 	"github.com/chuccp/smtp2http/core"
 	"github.com/chuccp/smtp2http/db"
-	"github.com/chuccp/smtp2http/service"
 	"github.com/chuccp/smtp2http/util"
 	"github.com/robfig/cron/v3"
 	"go.uber.org/zap"
@@ -13,24 +12,22 @@ import (
 )
 
 type cronManage struct {
-	cronMap map[uint]*scheduleInfo
+	cronMap map[uint]*Info
 	cron    *cron.Cron
 	lock    *sync.Mutex
 	context *core.Context
-	log     *service.Log
-	token   *service.Token
 	isStart bool
 	isStop  bool
 }
-type scheduleInfo struct {
+type Info struct {
 	entryID    cron.EntryID
 	Id         uint
 	UpdateTime time.Time
 	Key        string
 }
 
-func NewScheduleInfo(entryID cron.EntryID, schedule *db.Schedule) *scheduleInfo {
-	return &scheduleInfo{
+func NewScheduleInfo(entryID cron.EntryID, schedule *db.Schedule) *Info {
+	return &Info{
 		entryID:    entryID,
 		Id:         schedule.GetId(),
 		Key:        schedule.Key(),
@@ -40,14 +37,12 @@ func NewScheduleInfo(entryID cron.EntryID, schedule *db.Schedule) *scheduleInfo 
 
 func newCronManage(context *core.Context) *cronManage {
 	return &cronManage{
-		cronMap: make(map[uint]*scheduleInfo),
+		cronMap: make(map[uint]*Info),
 		cron:    cron.New(cron.WithSeconds()),
 		lock:    new(sync.Mutex),
 		context: context,
 		isStart: false,
 		isStop:  false,
-		log:     context.GetLogService(),
-		token:   context.GetTokenService(),
 	}
 }
 func (cronM *cronManage) Start() {
@@ -70,7 +65,7 @@ func (cronM *cronManage) run() {
 		}
 		addSchedule := make([]*db.Schedule, 0)
 		updateSchedule := make([]*db.Schedule, 0)
-		deleteSchedule := make([]*scheduleInfo, 0)
+		deleteSchedule := make([]*Info, 0)
 		ids := make([]uint, len(schedules))
 		for index, schedule := range schedules {
 			ids[index] = schedule.GetId()
@@ -112,7 +107,7 @@ func (cronM *cronManage) deleteSchedule(id uint) {
 
 func (cronM *cronManage) addSchedule(schedule *db.Schedule) {
 	entryID, err := cronM.cron.AddFunc(schedule.Cron, func() {
-		cronM.token.SendApiCallMail(schedule)
+		cronM.context.GetTokenService().SendApiCallMail(schedule)
 	})
 	if err != nil {
 		cronM.context.GetLog().Error("cron start error", zap.String("cron", schedule.Cron), zap.Error(err))
