@@ -178,6 +178,6 @@ Compilation requires first building the frontend interface [d-mail-view](https:/
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/chuccp/smtp2http/blob/main/LICENSE)
 
-This project is licensed under the Apache License 2.0. Apache License 2.0 is an open-source license that allows free use, modification, and distribution while providing patent grants and trademark protection.
+This project is licensed under the Apache License 2.0. 
 
 See the [LICENSE](./LICENSE) file for the full license text.

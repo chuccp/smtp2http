@@ -177,7 +177,7 @@ curl 'http://127.0.0.1:12567/sendMail?token={{token}}&subject=test&content=this%
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/chuccp/smtp2http/blob/main/LICENSE)
 
-本项目基于 Apache License 2.0 许可证发行。Apache License 2.0 是一个允许自由使用、修改和分发的开源许可证，同时提供了专利授权和商标保护。
+本项目基于 Apache License 2.0 许可证发行。
 
 您可以在 [LICENSE](./LICENSE) 文件中查看完整的许可证文本。
 
