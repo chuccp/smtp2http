@@ -1,3 +1,5 @@
+
+
 # SMTP2HTTP - SMTP to HTTP Tool
 
 **English**🌎 | [**简体中文**🀄](./README_zh.md)
@@ -171,3 +173,11 @@ curl 'http://127.0.0.1:12567/sendMail?token={{token}}&subject=test&content=this%
 ## Build Instructions
 
 Compilation requires first building the frontend interface [d-mail-view](https://github.com/chuccp/d-mail-view)
+
+## License
+
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/chuccp/smtp2http/blob/main/LICENSE)
+
+This project is licensed under the Apache License 2.0. Apache License 2.0 is an open-source license that allows free use, modification, and distribution while providing patent grants and trademark protection.
+
+See the [LICENSE](./LICENSE) file for the full license text.
