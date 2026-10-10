@@ -210,6 +210,11 @@ export default {
   log: {
     systemLogs: 'Mail Logs',
     adminCreated: 'Admin created only',
+    deleteConfirm: 'Delete this entry? Its attachments are removed as well',
+    cleanup: 'Clean up',
+    cleanupDays: 'Keep days',
+    cleanupDaysHint: 'Entries older than this many days are deleted; 0 clears every entry. Attachments go with them.',
+    cleanupDone: 'Cleaned up {count} entries',
     searchKeyword: 'Search keyword...',
     token: 'Token',
     subject: 'Subject',

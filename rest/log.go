@@ -5,6 +5,7 @@ import (
 	"errors"
 	"os"
 	"strconv"
+	"time"
 
 	wf "github.com/chuccp/go-web-frame"
 	auth2 "github.com/chuccp/go-web-frame/component/auth"
@@ -103,6 +104,93 @@ func (l *Log) getPage(req *web.Request) (any, error) {
 	return result, nil
 }
 
+// deleteOne removes one entry and the attachments it recorded. Deleting one entry is a
+// deliberate act on a row the list already showed, so an admin may delete any of them.
+func (l *Log) deleteOne(req *web.Request) (any, error) {
+	id, err := strconv.Atoi(req.Param("id"))
+	if err != nil {
+		return nil, err
+	}
+	user, err := auth.User(req, l.context)
+	if user == nil {
+		return nil, err
+	}
+	query := l.logModel.Query().Where("id = ?", uint(id))
+	if !user.IsAdmin {
+		query = query.Where("user_id = ?", user.Id)
+	}
+	one, err := query.One()
+	if err != nil {
+		return nil, err
+	}
+	if one == nil {
+		return nil, errors.New("log not found")
+	}
+	if err := l.logModel.DeleteByPK(uint(id)); err != nil {
+		return nil, err
+	}
+	removeAttachments(one.Files)
+	return web.Ok("ok"), nil
+}
+
+// cleanUp deletes the caller's own entries — all of them when days is 0 — together with
+// their attachments, and reports how many went. The scope stays the caller's own entries
+// even for an admin: wiping the instance's whole send record should be a decision, not a
+// button, and cleaning up after yourself is the thing that actually needs doing.
+func (l *Log) cleanUp(req *web.Request) (any, error) {
+	user, err := auth.User(req, l.context)
+	if user == nil {
+		return nil, err
+	}
+	days := req.GetJsonIntValueOrDefault("days", 0)
+	query := l.logModel.Query().Where("user_id = ?", user.Id)
+	if days > 0 {
+		query = query.Where("create_time < ?", time.Now().AddDate(0, 0, -days))
+	}
+	rows, err := query.All()
+	if err != nil {
+		return nil, err
+	}
+	ids := make([]uint, 0, len(rows))
+	files := make([]string, 0, len(rows))
+	for _, one := range rows {
+		if one == nil {
+			continue
+		}
+		ids = append(ids, one.Id)
+		files = append(files, one.Files)
+	}
+	if len(ids) == 0 {
+		return web.Data(map[string]any{"deleted": 0}), nil
+	}
+	// Rows first: if that fails nothing has been touched yet, and the files of a row that
+	// is still listed must stay on disk.
+	if err := l.logModel.Delete().Where("id IN (?)", ids).Delete(); err != nil {
+		return nil, err
+	}
+	for _, one := range files {
+		removeAttachments(one)
+	}
+	return web.Data(map[string]any{"deleted": len(ids)}), nil
+}
+
+// removeAttachments deletes the files a log recorded. Best effort: a file that is already
+// gone, or one another entry still points at, must not stop the cleanup.
+func removeAttachments(filesJSON string) {
+	if filesJSON == "" {
+		return
+	}
+	var files []*smtp.File
+	if err := json.Unmarshal([]byte(filesJSON), &files); err != nil {
+		return
+	}
+	for _, file := range files {
+		if file != nil && file.FilePath != "" {
+			_ = os.Remove(file.FilePath)
+		}
+	}
+}
+
 // downLoad serves an attachment recorded on a log the caller may read: their own, or any
 // entry when they are an admin. The path is resolved from the log record, never from
 // client input.
@@ -164,6 +252,8 @@ func (l *Log) Init(context *core.Context) error {
 	l.userService = wf.GetService[*service.UserService](context)
 	context.Get("/log/:id", l.getOne).WithMeta(auth2.WithLogin())
 	context.Get("/log", l.getPage).WithMeta(auth2.WithLogin())
+	context.Delete("/log/:id", l.deleteOne).WithMeta(auth2.WithLogin())
+	context.Post("/log/cleanup", l.cleanUp).WithMeta(auth2.WithLogin())
 	context.Get("/download", l.downLoad).WithMeta(auth2.WithLogin())
 	return nil
 

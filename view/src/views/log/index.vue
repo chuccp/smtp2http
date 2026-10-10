@@ -21,6 +21,9 @@
           <el-button @click="handleReset">
             {{ t('common.reset') }}
           </el-button>
+          <el-button @click="cleanupDialogVisible = true">
+            {{ t('log.cleanup') }}
+          </el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -54,10 +57,13 @@
             {{ formatTime(row.createTime) }}
           </template>
         </el-table-column>
-        <el-table-column :label="t('common.action')" width="100" align="center" class="full-width-on-mobile">
+        <el-table-column :label="t('common.action')" width="160" align="center" class="full-width-on-mobile">
           <template #default="{ row }">
             <el-button size="small" @click.stop="handleDetail(row)">
               {{ t('log.logDetail') }}
+            </el-button>
+            <el-button size="small" type="danger" @click.stop="handleDelete(row)">
+              {{ t('common.delete') }}
             </el-button>
           </template>
         </el-table-column>
@@ -117,16 +123,38 @@
         </el-descriptions-item>
       </el-descriptions>
     </el-dialog>
+
+    <!-- Cleanup Dialog -->
+    <el-dialog
+      v-model="cleanupDialogVisible"
+      :title="t('log.cleanup')"
+      width="420px"
+    >
+      <el-form label-width="110px">
+        <el-form-item :label="t('log.cleanupDays')">
+          <el-input-number v-model="cleanupDays" :min="0" :max="3650" />
+        </el-form-item>
+      </el-form>
+      <div class="cleanup-hint">{{ t('log.cleanupDaysHint') }}</div>
+      <template #footer>
+        <el-button @click="cleanupDialogVisible = false">
+          {{ t('common.cancel') }}
+        </el-button>
+        <el-button type="danger" :loading="cleaningUp" @click="handleCleanup">
+          {{ t('common.confirm') }}
+        </el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { Download } from '@element-plus/icons-vue'
 import { formatTime } from '@/utils/time'
-import { getLogs, downloadAttachment } from '@/api/log'
+import { getLogs, downloadAttachment, deleteLog, cleanupLogs } from '@/api/log'
 import { useAuthStore } from '@/store/auth'
 
 const { t } = useI18n()
@@ -141,6 +169,9 @@ const searchKey = ref('')
 const adminOnly = ref(false)
 const detailDialogVisible = ref(false)
 const currentDetail = ref<LogEntry | null>(null)
+const cleanupDialogVisible = ref(false)
+const cleanupDays = ref(30)
+const cleaningUp = ref(false)
 
 const loadData = async () => {
   loading.value = true
@@ -193,6 +224,37 @@ const attachmentsOf = (row: LogEntry | null): Array<{ name: string }> => {
   }
 }
 
+const handleDelete = (row: LogEntry) => {
+  ElMessageBox.confirm(t('log.deleteConfirm'), t('common.confirm'), {
+    confirmButtonText: t('common.confirm'),
+    cancelButtonText: t('common.cancel'),
+    type: 'warning'
+  }).then(async () => {
+    await deleteLog(row.id)
+    ElMessage.success(t('common.success'))
+    // Deleting the last row of a page would leave it empty otherwise
+    if (tableData.value.length === 1 && page.value > 1) {
+      page.value -= 1
+    }
+    loadData()
+  }).catch(() => {})
+}
+
+const handleCleanup = async () => {
+  cleaningUp.value = true
+  try {
+    const res = await cleanupLogs(cleanupDays.value)
+    if (res.code === 0 || res.code === 200) {
+      cleanupDialogVisible.value = false
+      ElMessage.success(t('log.cleanupDone', { count: res.data?.deleted ?? 0 }))
+      page.value = 1
+      loadData()
+    }
+  } finally {
+    cleaningUp.value = false
+  }
+}
+
 const handleDownload = async (logId: number, fileName: string) => {
   try {
     const blob = await downloadAttachment(logId, fileName)
@@ -229,5 +291,11 @@ pre {
   flex-direction: column;
   align-items: flex-start;
   gap: 4px;
+}
+
+.cleanup-hint {
+  font-size: 12px;
+  color: var(--el-text-color-secondary);
+  line-height: 1.5;
 }
 </style>

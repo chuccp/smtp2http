@@ -210,6 +210,11 @@ export default {
   log: {
     systemLogs: 'メールログ',
     adminCreated: '管理者作成のみ',
+    deleteConfirm: 'このログを削除しますか？添付ファイルも削除されます',
+    cleanup: 'ログの整理',
+    cleanupDays: '保持日数',
+    cleanupDaysHint: 'この日数より古いログを削除します。0 で全件削除。添付ファイルも削除されます。',
+    cleanupDone: '{count} 件のログを削除しました',
     searchKeyword: 'キーワードで検索...',
     token: 'トークン',
     subject: '件名',

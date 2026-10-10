@@ -210,6 +210,11 @@ export default {
   log: {
     systemLogs: '邮件日志',
     adminCreated: '仅管理员创建',
+    deleteConfirm: '确定删除这条日志吗？它的附件也会一并删除',
+    cleanup: '清理日志',
+    cleanupDays: '保留天数',
+    cleanupDaysHint: '删除早于该天数的日志；填 0 表示清空全部日志。附件会一并删除。',
+    cleanupDone: '已清理 {count} 条日志',
     searchKeyword: '搜索关键词...',
     token: '令牌',
     subject: '主题',

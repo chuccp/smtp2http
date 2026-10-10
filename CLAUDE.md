@@ -174,6 +174,12 @@ page is the instance's send record, so an admin reads every user's entries (the 
 carries the same `adminOnly` filter as the other lists, and fills the owner name) and can
 fetch their attachments; everyone else gets `data: null` on a row that is not theirs.
 
+Nothing prunes `t_log` or the attachment cache on its own — cleanup is manual
+(`DELETE /log/:id` and `POST /log/cleanup`, which takes `days`: 0 clears everything).
+Both remove the attachments a deleted entry recorded, which is the only thing that keeps
+the cache from growing forever. The bulk cleanup is scoped to the caller's own entries
+even for an admin; deleting a single row is not, since that row was on screen.
+
 ### Restart
 
 `POST /api/restart` (login + `IsAdmin`) restarts in place through `WebFrame.ReStart`, which

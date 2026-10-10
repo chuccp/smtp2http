@@ -210,6 +210,11 @@ export default {
   log: {
     systemLogs: '郵件日誌',
     adminCreated: '僅管理員建立',
+    deleteConfirm: '確定刪除這筆日誌嗎？它的附件也會一併刪除',
+    cleanup: '清理日誌',
+    cleanupDays: '保留天數',
+    cleanupDaysHint: '刪除早於該天數的日誌；填 0 表示清空全部日誌。附件會一併刪除。',
+    cleanupDone: '已清理 {count} 筆日誌',
     searchKeyword: '搜尋關鍵字...',
     token: '權杖',
     subject: '主題',
