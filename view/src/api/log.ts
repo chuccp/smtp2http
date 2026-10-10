@@ -1,13 +1,15 @@
 import request from './request'
 
-export function getLogs(page: number = 1, pageSize: number = 10, searchKey: string = ''): Promise<ApiResponse<PageResponse<LogEntry>>> {
-  return request.get('/log', {
-    params: {
-      pageNo: page,
-      pageSize,
-      searchKey
-    }
-  })
+export function getLogs(
+  page: number = 1,
+  pageSize: number = 10,
+  searchKey: string = '',
+  adminOnly: boolean = false
+): Promise<ApiResponse<PageResponse<LogEntry>>> {
+  const params: Record<string, any> = { pageNo: page, pageSize, searchKey }
+  // Ignored by the backend for a non-admin, who only ever sees their own entries
+  if (adminOnly) params.adminOnly = true
+  return request.get('/log', { params })
 }
 
 export function getLog(id: number): Promise<ApiResponse<LogEntry>> {

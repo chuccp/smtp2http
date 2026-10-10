@@ -209,6 +209,7 @@ export default {
   // Log
   log: {
     systemLogs: '郵件日誌',
+    adminCreated: '僅管理員建立',
     searchKeyword: '搜尋關鍵字...',
     token: '權杖',
     subject: '主題',

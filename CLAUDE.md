@@ -169,7 +169,10 @@ sets one, and any signed-in user can change their own password through `POST /ch
 
 Mail logs are per-owner: `LogService.Log` records the `user_id` it is given (the token
 owner for a token send, the schedule owner for a scheduled call), because the log list
-and the attachment download both filter on it.
+and the attachment download both filter on it. The admin case is the exception — the log
+page is the instance's send record, so an admin reads every user's entries (the list
+carries the same `adminOnly` filter as the other lists, and fills the owner name) and can
+fetch their attachments; everyone else gets `data: null` on a row that is not theirs.
 
 ### Restart
 

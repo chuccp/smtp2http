@@ -14,14 +14,21 @@ import (
 	"github.com/chuccp/http2smtp/auth"
 	"github.com/chuccp/http2smtp/entity"
 	"github.com/chuccp/http2smtp/model"
+	"github.com/chuccp/http2smtp/service"
 	"github.com/chuccp/http2smtp/smtp"
 	"go.uber.org/zap"
 )
 
 type Log struct {
-	context  *core.Context
-	logModel *model.LogModel
+	context     *core.Context
+	logModel    *model.LogModel
+	userService *service.UserService
 }
+
+// The log page is the instance's whole send record for an admin and the caller's own
+// entries for everyone else, matching the other lists: every query below adds the owner
+// filter only for a non-admin, and only then is a miss reported as "not found" rather
+// than "forbidden" so existence does not leak.
 
 func (l *Log) getOne(req *web.Request) (any, error) {
 	id := req.Param("id")
@@ -33,7 +40,11 @@ func (l *Log) getOne(req *web.Request) (any, error) {
 	if user == nil {
 		return nil, err
 	}
-	one, err := l.logModel.Query().Where("id = ? AND user_id = ?", uint(atoi), user.Id).One()
+	query := l.logModel.Query().Where("id = ?", uint(atoi))
+	if !user.IsAdmin {
+		query = query.Where("user_id = ?", user.Id)
+	}
+	one, err := query.One()
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +64,15 @@ func (l *Log) getPage(req *web.Request) (any, error) {
 		return nil, err
 	}
 	searchKey := req.GetFormParam("searchKey")
-	query := l.logModel.Query().Where("user_id = ?", user.Id)
+	adminOnly := req.Query("adminOnly") == "true"
+	query := l.logModel.Query()
+	if user.IsAdmin {
+		if adminOnly {
+			query = query.Where("user_id IN (SELECT id FROM t_user WHERE is_admin = ?)", true)
+		}
+	} else {
+		query = query.Where("user_id = ?", user.Id)
+	}
 	if searchKey != "" {
 		query = query.Where("(name LIKE ? OR mail LIKE ? OR subject LIKE ?)", "%"+searchKey+"%", "%"+searchKey+"%", "%"+searchKey+"%")
 	}
@@ -66,11 +85,27 @@ func (l *Log) getPage(req *web.Request) (any, error) {
 			one.StatusStr = entity.StatusText(one.Status)
 		}
 	}
+	if user.IsAdmin {
+		userIds := make([]uint, 0)
+		for _, one := range result.List {
+			if one != nil && one.UserId > 0 {
+				userIds = append(userIds, one.UserId)
+			}
+		}
+		l.userService.FillUserNames(userIds, func(uid uint, name string) {
+			for _, one := range result.List {
+				if one != nil && one.UserId == uid {
+					one.UserName = name
+				}
+			}
+		})
+	}
 	return result, nil
 }
 
-// downLoad serves an attachment belonging to one of the caller's own mail logs.
-// The path is resolved from the log record, never from client input.
+// downLoad serves an attachment recorded on a log the caller may read: their own, or any
+// entry when they are an admin. The path is resolved from the log record, never from
+// client input.
 func (l *Log) downLoad(req *web.Request) (any, error) {
 	logId, err := strconv.Atoi(req.GetFormParam("logId"))
 	if err != nil {
@@ -84,7 +119,11 @@ func (l *Log) downLoad(req *web.Request) (any, error) {
 	if user == nil {
 		return nil, err
 	}
-	one, err := l.logModel.Query().Where("id = ? AND user_id = ?", uint(logId), user.Id).One()
+	query := l.logModel.Query().Where("id = ?", uint(logId))
+	if !user.IsAdmin {
+		query = query.Where("user_id = ?", user.Id)
+	}
+	one, err := query.One()
 	if err != nil {
 		return nil, err
 	}
@@ -122,6 +161,7 @@ func FilePathOf(filesJSON string, name string) (string, error) {
 func (l *Log) Init(context *core.Context) error {
 	l.context = context
 	l.logModel = wf.GetModel[*model.LogModel](context)
+	l.userService = wf.GetService[*service.UserService](context)
 	context.Get("/log/:id", l.getOne).WithMeta(auth2.WithLogin())
 	context.Get("/log", l.getPage).WithMeta(auth2.WithLogin())
 	context.Get("/download", l.downLoad).WithMeta(auth2.WithLogin())

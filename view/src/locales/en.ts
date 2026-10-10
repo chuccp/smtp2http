@@ -209,6 +209,7 @@ export default {
   // Log
   log: {
     systemLogs: 'Mail Logs',
+    adminCreated: 'Admin created only',
     searchKeyword: 'Search keyword...',
     token: 'Token',
     subject: 'Subject',

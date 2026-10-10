@@ -86,6 +86,8 @@ interface ScheduleConfig {
 interface LogEntry {
   id: number
   userId: number
+  /** Owner's name, filled in for admins (the list shows every user's entries there) */
+  userName?: string
   name: string
   mail: string
   token: string

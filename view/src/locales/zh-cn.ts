@@ -209,6 +209,7 @@ export default {
   // Log
   log: {
     systemLogs: '邮件日志',
+    adminCreated: '仅管理员创建',
     searchKeyword: '搜索关键词...',
     token: '令牌',
     subject: '主题',

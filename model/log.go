@@ -10,9 +10,12 @@ import (
 	"github.com/chuccp/go-web-frame/web"
 )
 
+// Log is one send attempt. UserName is not a column — it carries the owner's name for
+// admin views, where the list spans every user's entries (t_log only stores the id).
 type Log struct {
 	Id         uint      `gorm:"primaryKey;autoIncrement;column:id" json:"id"`
 	UserId     uint      `gorm:"column:user_id" json:"userId"`
+	UserName   string    `gorm:"-" json:"userName"`
 	Name       string    `gorm:"column:name" json:"name"`
 	Mail       string    `gorm:"column:mail" json:"mail"`
 	Token      string    `gorm:"column:token" json:"token"`

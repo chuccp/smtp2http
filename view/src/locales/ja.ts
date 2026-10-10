@@ -209,6 +209,7 @@ export default {
   // Log
   log: {
     systemLogs: 'メールログ',
+    adminCreated: '管理者作成のみ',
     searchKeyword: 'キーワードで検索...',
     token: 'トークン',
     subject: '件名',

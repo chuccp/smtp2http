@@ -11,6 +11,9 @@
             @keyup.enter="handleSearch"
           />
         </el-form-item>
+        <el-form-item v-if="authStore.getIsAdmin">
+          <el-checkbox v-model="adminOnly" :label="t('log.adminCreated')" @change="handleSearch" />
+        </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleSearch">
             {{ t('common.search') }}
@@ -35,6 +38,7 @@
             {{ row.token.slice(0, 12) }}...
           </template>
         </el-table-column>
+        <el-table-column v-if="authStore.getIsAdmin" prop="userName" :label="t('common.creator')" width="120" />
         <el-table-column prop="smtp" :label="t('log.smtpServer')" min-width="150" show-overflow-tooltip />
         <el-table-column prop="mail" :label="t('log.recipients')" min-width="150" show-overflow-tooltip />
         <el-table-column prop="subject" :label="t('log.subject')" min-width="150" />
@@ -123,8 +127,10 @@ import { ElMessage } from 'element-plus'
 import { Download } from '@element-plus/icons-vue'
 import { formatTime } from '@/utils/time'
 import { getLogs, downloadAttachment } from '@/api/log'
+import { useAuthStore } from '@/store/auth'
 
 const { t } = useI18n()
+const authStore = useAuthStore()
 
 const loading = ref(false)
 const tableData = ref<LogEntry[]>([])
@@ -132,13 +138,14 @@ const page = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
 const searchKey = ref('')
+const adminOnly = ref(false)
 const detailDialogVisible = ref(false)
 const currentDetail = ref<LogEntry | null>(null)
 
 const loadData = async () => {
   loading.value = true
   try {
-    const res = await getLogs(page.value, pageSize.value, searchKey.value)
+    const res = await getLogs(page.value, pageSize.value, searchKey.value, adminOnly.value)
     if (res.code === 0 || res.code === 200) {
       tableData.value = res.data.list
       total.value = res.data.total
@@ -155,6 +162,7 @@ const handleSearch = () => {
 
 const handleReset = () => {
   searchKey.value = ''
+  adminOnly.value = false
   page.value = 1
   loadData()
 }
