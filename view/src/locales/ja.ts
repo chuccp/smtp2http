@@ -42,7 +42,10 @@ export default {
     pleaseEnterUsername: 'ユーザー名を入力してください',
     pleaseEnterPassword: 'パスワードを入力してください',
     noPermission: 'このページにアクセスする権限がありません',
-    sessionExpired: 'セッションが切れました。再度ログインしてください'
+    sessionExpired: 'セッションが切れました。再度ログインしてください',
+    currentPassword: '現在のパスワード',
+    passwordMinLength: 'パスワードは8文字以上で入力してください',
+    passwordChanged: 'パスワードを変更しました。再度ログインしてください'
   },
 
   // Setup

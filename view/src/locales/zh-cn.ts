@@ -42,7 +42,10 @@ export default {
     pleaseEnterUsername: '请输入用户名',
     pleaseEnterPassword: '请输入密码',
     noPermission: '没有访问权限',
-    sessionExpired: '登录已过期，请重新登录'
+    sessionExpired: '登录已过期，请重新登录',
+    currentPassword: '当前密码',
+    passwordMinLength: '密码长度至少 8 位',
+    passwordChanged: '密码已修改，请重新登录'
   },
 
   // Setup

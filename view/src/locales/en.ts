@@ -42,7 +42,10 @@ export default {
     pleaseEnterUsername: 'Please enter username',
     pleaseEnterPassword: 'Please enter password',
     noPermission: 'You do not have permission to access this page',
-    sessionExpired: 'Your session has expired, please sign in again'
+    sessionExpired: 'Your session has expired, please sign in again',
+    currentPassword: 'Current password',
+    passwordMinLength: 'Password must be at least 8 characters',
+    passwordChanged: 'Password changed, please sign in again'
   },
 
   // Setup

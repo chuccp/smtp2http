@@ -91,12 +91,11 @@ After startup, access the management page using the default port number: http://
 
 ## Configuration Instructions
 
-After first startup, the configuration file [config.ini](file://C:\Users\cao\Documents\GitHub\http2smtp\config.ini) is generated:
+After first startup, the configuration file [config.ini](./config.ini) is generated:
 
 ```ini
 [core]
 init      = true   ## Initialization switch, becomes true after initial configuration
-cachePath = .cache  ## Email attachment cache directory
 dbType    = sqlite  ## Database type, supports sqlite and mysql
 
 [sqlite]
@@ -118,6 +117,14 @@ username = root        ## Database username
 password = 123456      ## Database password
 ```
 
+The attachment cache directory is not a `config.ini` setting: it comes from `-storage_root`
+(or the `storage_root` environment variable) and defaults to `./`, i.e. dates appear as
+subdirectories beside the binary. The value is written back to `config.ini` on every start,
+so editing `core.cachepath` by hand has no effect.
+
+The ports may also be given as `-web_port` / `-api_port` (or `web_port` / `api_port` in the
+environment). A port passed that way is treated as fixed, which is how the Docker image
+keeps the settings page from moving it.
 
 ## API Documentation
 

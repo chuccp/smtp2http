@@ -13,6 +13,7 @@ import (
 	"github.com/chuccp/http2smtp/entity"
 	"github.com/chuccp/http2smtp/model"
 	"github.com/chuccp/http2smtp/service"
+	"github.com/chuccp/http2smtp/util"
 	"go.uber.org/zap"
 )
 
@@ -59,6 +60,38 @@ func (l *User) logout(request *web.Request) (any, error) {
 		}
 	}
 	return l.authenticationFilter.SignOut(request)
+}
+
+// changePassword lets a signed-in user replace their own password; the account page's
+// reset is admin-only and asks for no old password, so without this a normal user had no
+// way at all to change theirs. The old password is required so a stolen session cannot
+// lock the owner out, and the salt rotation that follows ends every session of that user
+// — the caller's included, which is why the client signs out afterwards.
+func (l *User) changePassword(request *web.Request) (any, error) {
+	user, err := auth.User(request, l.context)
+	if user == nil {
+		return nil, err
+	}
+	var req struct {
+		OldPassword string `json:"oldPassword"`
+		NewPassword string `json:"newPassword"`
+	}
+	if err := request.BindJSON(&req); err != nil {
+		return nil, err
+	}
+	if req.OldPassword == "" || req.NewPassword == "" {
+		return nil, errors.New("the current password and the new password are required")
+	}
+	if err := util.ValidatePassword(req.NewPassword); err != nil {
+		return nil, err
+	}
+	if !util.CheckPasswordHash(req.OldPassword, user.Password) {
+		return nil, errors.New("the current password is incorrect")
+	}
+	if err := l.userService.ChangeOwnPassword(user.Id, req.NewPassword); err != nil {
+		return nil, err
+	}
+	return web.Ok("ok"), nil
 }
 
 func (l *User) getUserPage(request *web.Request) (any, error) {
@@ -111,6 +144,9 @@ func (l *User) createUser(request *web.Request) (any, error) {
 	if req.Name == "" || req.Password == "" {
 		return nil, errors.New("name and password are required")
 	}
+	if err := util.ValidatePassword(req.Password); err != nil {
+		return nil, err
+	}
 	return web.Ok("ok"), l.userService.CreateUser(req.Name, req.Password, req.IsAdmin, req.IsUse)
 }
 
@@ -134,6 +170,12 @@ func (l *User) updateUser(request *web.Request) (any, error) {
 	}
 	if req.Name == "" {
 		return nil, errors.New("name is required")
+	}
+	// A blank password means "keep the current one"
+	if req.Password != "" {
+		if err := util.ValidatePassword(req.Password); err != nil {
+			return nil, err
+		}
 	}
 	return web.Ok("ok"), l.userService.UpdateUser(req.Id, req.Name, req.Password, req.IsAdmin, req.IsUse)
 }
@@ -159,6 +201,7 @@ func (l *User) Init(context *core.Context) error {
 	l.userService = wf.GetService[*service.UserService](context)
 	context.Post("/signIn", l.signIn)
 	context.Post("/logout", l.logout)
+	context.Post("/changePassword", l.changePassword).WithMeta(auth2.WithLogin())
 	context.Get("/user", l.getUserPage).WithMeta(auth2.WithLogin())
 	context.Get("/user/:id", l.getUserOne).WithMeta(auth2.WithLogin())
 	context.Post("/user", l.createUser).WithMeta(auth2.WithLogin())

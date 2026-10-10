@@ -42,7 +42,10 @@ export default {
     pleaseEnterUsername: '請輸入使用者名稱',
     pleaseEnterPassword: '請輸入密碼',
     noPermission: '沒有存取權限',
-    sessionExpired: '登入已過期，請重新登入'
+    sessionExpired: '登入已過期，請重新登入',
+    currentPassword: '目前密碼',
+    passwordMinLength: '密碼長度至少 8 位',
+    passwordChanged: '密碼已修改，請重新登入'
   },
 
   // Setup

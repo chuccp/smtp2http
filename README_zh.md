@@ -96,7 +96,6 @@ docker run -p 12566:12566 -p 12567:12567 -it --rm cooge123/http2smtp
 ```ini
 [core]
 init      = true   ##初始化开关，初始化配置完成后变为true 
-cachePath = .cache  ##邮件附件缓存目录
 dbType    = sqlite  ##数据库类型，支持sqlite和mysql
 
 [sqlite]
@@ -117,6 +116,13 @@ charset  = utf8        ##数据库字符集
 username = root        ##数据库用户名
 password = 123456      ##数据库密码
 ```
+
+邮件附件缓存目录不是 `config.ini` 的配置项：它来自 `-storage_root` 参数（或 `storage_root`
+环境变量），默认是 `./`，即附件按日期作为子目录落在程序旁边。每次启动都会把这个值写回
+`config.ini`，所以手工修改 `core.cachepath` 不会生效。
+
+端口也可以用 `-web_port` / `-api_port`（或环境变量 `web_port` / `api_port`）指定；用这种方式
+给出的端口会被视为固定端口——Docker 镜像正是靠这一点防止设置页改动端口。
 
 ## API文档
 

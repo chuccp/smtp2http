@@ -73,6 +73,10 @@
           <div class="user-avatar">{{ authStore.getUsername?.charAt(0)?.toUpperCase() }}</div>
           <span class="username" v-show="!isCollapse">{{ authStore.getUsername }}</span>
         </div>
+        <div class="sidebar-logout" @click="changePasswordVisible = true" :title="t('user.changePassword')">
+          <el-icon><Lock /></el-icon>
+          <span v-show="!isCollapse">{{ t('user.changePassword') }}</span>
+        </div>
         <div class="sidebar-logout" @click="logout" :title="t('auth.logout')">
           <el-icon><SwitchButton /></el-icon>
           <span v-show="!isCollapse">{{ t('auth.logout') }}</span>
@@ -172,6 +176,8 @@
         </router-view>
       </div>
     </div>
+
+    <ChangeOwnPasswordDialog v-model:open="changePasswordVisible" />
   </div>
 </template>
 
@@ -197,8 +203,10 @@ import {
   ArrowDown,
   Menu,
   ChatDotRound,
-  SwitchButton
+  SwitchButton,
+  Lock
 } from '@element-plus/icons-vue'
+import ChangeOwnPasswordDialog from '@/components/ChangeOwnPasswordDialog.vue'
 
 const { t } = useI18n()
 
@@ -210,6 +218,7 @@ const tabsStore = useTabsStore()
 const isCollapse = ref(false)
 const componentKey = ref(0)
 const isMobile = ref(false)
+const changePasswordVisible = ref(false)
 
 // 断点检测
 const checkMobile = () => {

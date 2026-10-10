@@ -268,9 +268,21 @@ const dbRules = computed<FormRules<SetInfo>>(() => ({
   ]
 }))
 
+// The backend rejects anything shorter, so the wizard has to say so before the round trip
+const validatePasswordLength = (_rule: any, value: string, callback: (error?: Error) => void) => {
+  if (!value || value.length >= 8) {
+    callback()
+  } else {
+    callback(new Error(t('auth.passwordMinLength')))
+  }
+}
+
 const adminRules = computed<FormRules>(() => ({
   adminUser: adminExists.value ? [] : [{ required: true, message: () => t('setup.adminUsernameRequired'), trigger: 'blur' }],
-  adminPass: [{ required: true, message: () => t('setup.adminPasswordRequired'), trigger: 'blur' }],
+  adminPass: [
+    { required: true, message: () => t('setup.adminPasswordRequired'), trigger: 'blur' },
+    { validator: validatePasswordLength, trigger: 'blur' }
+  ],
   confirmPassword: [
     { required: true, message: () => t('setup.confirmPasswordRequired'), trigger: 'blur' },
     {

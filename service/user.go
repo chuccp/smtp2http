@@ -146,6 +146,26 @@ func (s *UserService) UpdateUser(id uint, name string, password string, isAdmin,
 	return s.userModel.Save(user)
 }
 
+// ChangeOwnPassword replaces the signed-in user's password. The salt rotates with it, so
+// every session that user had open ends — including the one that asked for the change.
+func (s *UserService) ChangeOwnPassword(id uint, password string) error {
+	user, err := s.userModel.FindByPK(id)
+	if err != nil {
+		return err
+	}
+	if user == nil {
+		return errors.New("user not found")
+	}
+	hashed, err := localutil.HashPassword(password)
+	if err != nil {
+		return err
+	}
+	user.Password = hashed
+	user.Salt = newSessionSalt()
+	user.UpdateTime = time.Now()
+	return s.userModel.Save(user)
+}
+
 // HasAdminUser checks if any admin user exists in the database.
 func (s *UserService) HasAdminUser() (bool, error) {
 	if !s.dbReady() {

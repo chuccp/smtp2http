@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"os"
+	"strings"
 	"sync"
 
 	wf "github.com/chuccp/go-web-frame"
@@ -139,9 +140,9 @@ func (l *TokenService) sendMailWithToken(byToken *model.Token, recipients []stri
 	if byToken.SMTP == nil {
 		return nil, errors.New("SMTP not found")
 	}
-	byToken.ReceiveEmails = make([]*model.Mail, 0)
-	for _, mail := range recipients {
-		byToken.ReceiveEmails = append(byToken.ReceiveEmails, &model.Mail{Mail: mail})
+	byToken.ReceiveEmails = MergeRecipients(byToken.ReceiveEmails, recipients)
+	if len(byToken.ReceiveEmails) == 0 {
+		return nil, errors.New("no recipients: the token has none configured and the request carried none")
 	}
 	if subject == "" {
 		subject = byToken.Subject
@@ -164,6 +165,16 @@ func (l *TokenService) SendMailByToken(req *web.Request, user *model.User) (any,
 	defer l.lock.Unlock()
 	var sendMailApi entity.SendMailApi
 	files := make([]*smtp.File, 0)
+	// go-mail reads these readers but never closes them, and the handles below are
+	// *os.File: without this they stay open until the GC finalizer gets around to them,
+	// which is how a busy instance runs out of file descriptors.
+	defer func() {
+		for _, file := range files {
+			if file != nil && file.File != nil {
+				_ = file.File.Close()
+			}
+		}
+	}()
 	if util.ContainsAnyIgnoreCase(req.ContentType(), "application/json") {
 		if err := req.BindJSON(&sendMailApi); err != nil {
 			return nil, err
@@ -311,6 +322,36 @@ func (l *TokenService) Init(context *core.Context) error {
 	l.tokenModel = core.GetModel[*model.TokenModel](l.context)
 	l.logService = core.GetService[*LogService](l.context)
 	return nil
+}
+
+// MergeRecipients combines the recipients configured on the token with the ones the
+// caller sent: the configured list is the default, the request adds to it, and an
+// address present in both is sent to once. Addresses are compared case-insensitively,
+// since the mailbox is the same either way.
+func MergeRecipients(configured []*model.Mail, requested []string) []*model.Mail {
+	merged := make([]*model.Mail, 0, len(configured)+len(requested))
+	seen := make(map[string]bool, len(configured)+len(requested))
+	for _, mail := range configured {
+		if mail == nil {
+			continue
+		}
+		key := strings.ToLower(strings.TrimSpace(mail.Mail))
+		if key == "" || seen[key] {
+			continue
+		}
+		seen[key] = true
+		merged = append(merged, mail)
+	}
+	for _, address := range requested {
+		address = strings.TrimSpace(address)
+		key := strings.ToLower(address)
+		if key == "" || seen[key] {
+			continue
+		}
+		seen[key] = true
+		merged = append(merged, &model.Mail{Mail: address})
+	}
+	return merged
 }
 
 func GetMails(ids []uint, mailMap map[uint]*model.Mail) []*model.Mail {

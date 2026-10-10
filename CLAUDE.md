@@ -152,6 +152,20 @@ Two references are checked as well, because resolving them by id alone would han
 another account's credentials: a token may only point at the owner's own SMTP server and
 its own contacts. And a token stops sending once its owner is disabled — the public API
 has no session, so `TokenService` re-reads the owner (`t_user.is_use`) on every send.
+Rows with `user_id = 0` predate token ownership; they are left alone rather than broken.
+
+Recipients work the other way round from what the token form's "Allowed Recipients" label
+suggests: the token's list is the *default* and the request's `recipients` are added to it
+(`MergeRecipients`), so a request without recipients still sends to the configured list and
+an address in both is sent to once. Making the list a hard whitelist would be a deliberate
+change of semantics, not a bug fix.
+
+Two routes are open until `core.init` is set and admin-only afterwards, because the setup
+wizard needs them before any account exists: `/adminExists` (it returns the administrator's
+username) and `/readSet` (the database settings). `/reSet` and `/restart` are admin-only
+throughout. Passwords go through `util.ValidatePassword` (8 characters) on every path that
+sets one, and any signed-in user can change their own password through `POST /changePassword`
+— the salt rotation ends their other sessions, this browser's included.
 
 Mail logs are per-owner: `LogService.Log` records the `user_id` it is given (the token
 owner for a token send, the schedule owner for a scheduled call), because the log list

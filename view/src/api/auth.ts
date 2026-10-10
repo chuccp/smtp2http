@@ -30,3 +30,10 @@ export function login(username: string, password: string): Promise<ApiResponse<a
 export function logout(): Promise<ApiResponse<any>> {
   return request.post('/logout')
 }
+
+// Self-service password change: the account page's reset is admin-only, so this is the
+// only route a normal user has. Rotates the session salt like any other change, so the
+// caller has to sign in again afterwards.
+export function changePassword(oldPassword: string, newPassword: string): Promise<ApiResponse<any>> {
+  return request.post('/changePassword', { oldPassword, newPassword })
+}

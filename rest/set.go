@@ -15,6 +15,7 @@ import (
 	"github.com/chuccp/http2smtp/auth"
 	"github.com/chuccp/http2smtp/model"
 	"github.com/chuccp/http2smtp/service"
+	"github.com/chuccp/http2smtp/util"
 	"go.uber.org/zap"
 )
 
@@ -141,6 +142,9 @@ func (set *Set) putAdminInit(req *web.Request) (any, error) {
 	if len(u.Username) == 0 || len(u.Password) == 0 {
 		return nil, errors.New("username or password is blank")
 	}
+	if err := util.ValidatePassword(u.Password); err != nil {
+		return nil, err
+	}
 
 	userService := wf.GetService[*service.UserService](set.context)
 
@@ -214,8 +218,29 @@ func (set *Set) postRestart(req *web.Request) (any, error) {
 	return web.Data(map[string]any{"managePort": managePort, "apiPort": apiPort}), nil
 }
 
+// requireAdminOnceInitialised guards the two setup endpoints the wizard calls before an
+// account exists. Until core.init is set they must stay open; afterwards the same
+// information is nobody else's business — /adminExists hands out the administrator's
+// username and /readSet the database settings.
+func (set *Set) requireAdminOnceInitialised(req *web.Request) error {
+	if !model.CoreState(set.context.GetConfig()).Init {
+		return nil
+	}
+	user, err := auth.User(req, set.context)
+	if user == nil {
+		return err
+	}
+	if !user.IsAdmin {
+		return errors.New("admin access required")
+	}
+	return nil
+}
+
 // getAdminExists checks if an admin user already exists in the database.
 func (set *Set) getAdminExists(req *web.Request) (any, error) {
+	if err := set.requireAdminOnceInitialised(req); err != nil {
+		return nil, err
+	}
 	userService := wf.GetService[*service.UserService](set.context)
 	hasAdmin, err := userService.HasAdminUser()
 	if err != nil {
@@ -310,6 +335,9 @@ func openProbeDB(setInfo *model.Config) (*framedb.DB, error) {
 	return nil, nil
 }
 func (set *Set) readSet(req *web.Request) (any, error) {
+	if err := set.requireAdminOnceInitialised(req); err != nil {
+		return nil, err
+	}
 	cfg, err := model.GetConfig(set.context.GetConfig())
 	if err != nil {
 		return nil, err

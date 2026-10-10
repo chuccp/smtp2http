@@ -68,13 +68,26 @@ const defaultForm = {
 
 const form = ref({ ...defaultForm })
 
+// Length is checked only when a password is typed: on edit a blank field means
+// "keep the current password" and must stay valid.
+const validatePasswordLength = (_rule: any, value: string, callback: (error?: Error) => void) => {
+  if (!value || value.length >= 8) {
+    callback()
+  } else {
+    callback(new Error(t('auth.passwordMinLength')))
+  }
+}
+
 const rules = computed<FormRules>(() => ({
   name: [{ required: true, message: t('user.username'), trigger: 'blur' }],
-  password: [{
-    required: !props.editing,
-    message: t('auth.pleaseEnterPassword'),
-    trigger: 'blur'
-  }]
+  password: [
+    {
+      required: !props.editing,
+      message: t('auth.pleaseEnterPassword'),
+      trigger: 'blur'
+    },
+    { validator: validatePasswordLength, trigger: 'blur' }
+  ]
 }))
 
 watch(() => props.editing, () => {

@@ -80,8 +80,19 @@ const validateConfirmPassword = (_rule: any, value: string, callback: any) => {
   }
 }
 
+const validatePasswordLength = (_rule: any, value: string, callback: (error?: Error) => void) => {
+  if (!value || value.length >= 8) {
+    callback()
+  } else {
+    callback(new Error(t('auth.passwordMinLength')))
+  }
+}
+
 const rules = computed<FormRules>(() => ({
-  password: [{ required: true, message: t('user.newPassword'), trigger: 'blur' }],
+  password: [
+    { required: true, message: t('user.newPassword'), trigger: 'blur' },
+    { validator: validatePasswordLength, trigger: 'blur' }
+  ],
   confirmPassword: [
     { required: true, message: t('settings.confirmPassword'), trigger: 'blur' },
     { validator: validateConfirmPassword, trigger: 'blur' }
@@ -109,7 +120,11 @@ const handleSubmit = async () => {
         })
         ElMessage.success(t('common.success'))
         emit('update:open', false)
-        if (props.user!.isAdmin) {
+        // Changing a password rotates that user's session salt, so the edited account is
+        // signed out everywhere. That only means this browser has to sign in again when
+        // the edited row is the caller's own; resetting somebody else's password must
+        // not log the admin out.
+        if (props.user!.name === authStore.getUsername) {
           authStore.logoutAction()
         } else {
           emit('success')
