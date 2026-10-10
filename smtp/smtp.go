@@ -156,7 +156,26 @@ func SendMail(sendMsg *SendMsg, invalidMails ...string) error {
 			continue
 		}
 	}
-	c, err := mail.NewClient(sendMsg.SendMail.Host, mail.WithTLSConfig(&tls.Config{InsecureSkipVerify: true}), mail.WithPort(sendMsg.SendMail.Port), mail.WithSMTPAuth(mail.SMTPAuthPlain), mail.WithUsername(sendMsg.SendMail.Username), mail.WithPassword(sendMsg.SendMail.Password))
+	options := []mail.Option{
+		mail.WithTLSConfig(&tls.Config{InsecureSkipVerify: true}),
+		mail.WithPort(sendMsg.SendMail.Port),
+		mail.WithSMTPAuth(mail.SMTPAuthPlain),
+		mail.WithUsername(sendMsg.SendMail.Username),
+		mail.WithPassword(sendMsg.SendMail.Password),
+	}
+	switch sendMsg.SendMail.Port {
+	case mail.DefaultPortSSL:
+		// 465 is implicit TLS ("smtps"): the session is encrypted from the first byte.
+		// Without this option the port is dialled in the clear and the handshake fails,
+		// which is why the usual Gmail/QQ/163 SSL setting could not be used at all.
+		options = append(options, mail.WithSSL())
+	default:
+		// go-mail defaults to TLSMandatory, which refuses every server that does not
+		// advertise STARTTLS — plain relays included. Opportunistic still upgrades when
+		// the server offers STARTTLS.
+		options = append(options, mail.WithTLSPolicy(mail.TLSOpportunistic))
+	}
+	c, err := mail.NewClient(sendMsg.SendMail.Host, options...)
 	if err != nil {
 		return err
 	}

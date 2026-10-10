@@ -146,8 +146,25 @@ const handleEdit = (row: TokenConfig) => {
 }
 
 const copyToken = async (token: string) => {
-  await navigator.clipboard.writeText(token)
-  ElMessage.success(t('common.copied'))
+  // navigator.clipboard only exists in a secure context; the UI is normally reached over
+  // plain http on a LAN address, where the call would throw with no toast at all.
+  try {
+    if (navigator.clipboard) {
+      await navigator.clipboard.writeText(token)
+    } else {
+      const input = document.createElement('textarea')
+      input.value = token
+      input.style.position = 'fixed'
+      input.style.opacity = '0'
+      document.body.appendChild(input)
+      input.select()
+      document.execCommand('copy')
+      document.body.removeChild(input)
+    }
+    ElMessage.success(t('common.copied'))
+  } catch {
+    ElMessage.error(t('common.copyFailed'))
+  }
 }
 
 const handleDialogSuccess = () => {

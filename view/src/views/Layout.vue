@@ -319,8 +319,7 @@ const handleTabClick = (tab: any) => {
   if (tab.path !== route.path) {
     tabsStore.setActiveTab(tab.fullPath)
     router.push(tab.fullPath)
-    // 切换tab时刷新组件
-    componentKey.value++
+    // 组件刷新交给 route.fullPath 的 watcher：这里再 ++ 一次会重建两遍、接口请求两次
   }
 }
 

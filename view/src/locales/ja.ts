@@ -20,6 +20,7 @@ export default {
     success: '成功',
     failed: '失敗',
     copied: 'クリップボードにコピーしました',
+    copyFailed: 'コピーに失敗しました。手動でコピーしてください',
     enable: '有効',
     disable: '無効',
     status: 'ステータス',
@@ -40,7 +41,8 @@ export default {
     loginFailed: 'ログインに失敗しました',
     pleaseEnterUsername: 'ユーザー名を入力してください',
     pleaseEnterPassword: 'パスワードを入力してください',
-    noPermission: 'このページにアクセスする権限がありません'
+    noPermission: 'このページにアクセスする権限がありません',
+    sessionExpired: 'セッションが切れました。再度ログインしてください'
   },
 
   // Setup

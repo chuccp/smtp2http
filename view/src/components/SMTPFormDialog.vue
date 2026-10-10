@@ -103,7 +103,10 @@ watch(() => props.open, (newVal) => {
 })
 
 const handleTest = async () => {
-  await formRef.value?.validate().catch(() => {})
+  // A failed validation must not fall through to the connection attempt: the request
+  // would go out with whatever the form holds and report a confusing failure.
+  const valid = await formRef.value?.validate().catch(() => false)
+  if (!valid) return
   testLoading.value = true
   try {
     await testSMTPConnection(form.value)

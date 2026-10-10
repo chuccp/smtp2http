@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/mail"
 	"strconv"
+	"time"
 
 	auth2 "github.com/chuccp/go-web-frame/component/auth"
 	"github.com/chuccp/go-web-frame/core"
@@ -110,8 +111,14 @@ func (smtp *Smtp) putOne(req *web.Request) (any, error) {
 		return nil, errors.New("smtp not found")
 	}
 	// Keep the original owner: an admin editing someone else's row must not take it over
-	st.UserId = exist.UserId
-	err = smtp.smtpModel.UpdateByPK(&st)
+	exist.Host = st.Host
+	exist.Port = st.Port
+	exist.Mail = st.Mail
+	exist.Username = st.Username
+	exist.Name = st.Name
+	exist.Password = st.Password
+	exist.UpdateTime = time.Now()
+	err = smtp.smtpModel.Save(exist)
 	if err != nil {
 		return nil, err
 	}

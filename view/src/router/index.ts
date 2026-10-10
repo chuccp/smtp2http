@@ -107,7 +107,7 @@ router.beforeEach((to, from) => {
   const requiresAuth = to.meta.requiresAuth as boolean
   if (requiresAuth) {
     if (!authStore.isLoggedIn) {
-      ElMessage.error(t('auth.pleaseEnterUsername'))
+      ElMessage.error(t('auth.sessionExpired'))
       return '/'
     }
     if (to.meta.requiresAdmin && !authStore.getIsAdmin) {

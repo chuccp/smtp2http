@@ -1,9 +1,11 @@
 import request from './request'
 
 export function getUsers(page: number = 1, pageSize: number = 10): Promise<ApiResponse<PageResponse<UserConfig>>> {
+  // The backend reads pageNo/pageSize (util.Page); a "page" param is ignored and every
+  // request would come back as page 1.
   return request.get('/user', {
     params: {
-      page,
+      pageNo: page,
       pageSize
     }
   })

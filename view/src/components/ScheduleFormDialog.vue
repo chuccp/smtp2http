@@ -128,7 +128,7 @@ const defaultForm: Partial<ScheduleConfig> = {
   name: '',
   tokenId: 0,
   cron: '',
-  url: `${window.location.origin}/api/scheduleTestApi`,
+  url: `${window.location.origin}/api/set`,
   method: 'GET',
   headers: [] as any,
   body: '',
@@ -137,8 +137,12 @@ const defaultForm: Partial<ScheduleConfig> = {
   isSendOnlyByError: false
 }
 
+// A schedule is called by the server, without the browser session, so the default target
+// has to be a route that answers unauthenticated requests: /api/set reports the instance
+// status and is reachable without a cookie. /api/scheduleTestApi echoes the request back
+// but requires login, so a schedule pointed at it would only ever mail the 403 body.
 const form = ref<Partial<ScheduleConfig>>({ ...defaultForm })
-const urlPlaceholder = `${window.location.origin}/api/scheduleTestApi`
+const urlPlaceholder = `${window.location.origin}/api/set`
 
 const rules = computed<FormRules<Partial<ScheduleConfig>>>(() => ({
   name: [{ required: true, message: t('schedule.taskName'), trigger: 'blur' }],
@@ -241,7 +245,8 @@ const handleTest = async () => {
     await testSchedule(payload)
     ElMessage.success(t('schedule.testSuccess'))
   } catch (e: any) {
-    ElMessage.error(e?.response?.data?.message || e?.message || 'Test failed')
+    // The error envelope carries `msg`, not `message`
+    ElMessage.error(e?.response?.data?.msg || e?.message || 'Test failed')
   } finally {
     testing.value = false
   }

@@ -3,7 +3,7 @@ import request from './request'
 export function getLogs(page: number = 1, pageSize: number = 10, searchKey: string = ''): Promise<ApiResponse<PageResponse<LogEntry>>> {
   return request.get('/log', {
     params: {
-      page,
+      pageNo: page,
       pageSize,
       searchKey
     }

@@ -94,8 +94,10 @@ const loadTokenInfo = async () => {
     const res = await getToken(props.tokenId)
     if (res.code === 0 || res.code === 200) {
       const token = res.data
-      smtpInfo.value = token.SMTP || null
-      recipientList.value = token.receiveEmails || []
+      // Defensive: the detail endpoint answers with a null payload for a row the caller
+      // may not read, and dereferencing that used to break the whole dialog.
+      smtpInfo.value = token?.SMTP || null
+      recipientList.value = token?.receiveEmails || []
     }
   } finally {
     infoLoading.value = false

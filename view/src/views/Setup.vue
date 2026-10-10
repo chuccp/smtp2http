@@ -248,7 +248,10 @@ const adminForm = reactive({
   confirmPassword: ''
 })
 
-const dbRules = reactive<FormRules<SetInfo>>({
+// computed, not reactive: the rules depend on the selected dbType, and a plain reactive
+// object would freeze `required` at whatever dbType was when the wizard mounted (sqlite),
+// so an empty MySQL host or database name would pass validation.
+const dbRules = computed<FormRules<SetInfo>>(() => ({
   dbHost: [
     {
       required: setupForm.dbType === 'mysql',
@@ -263,7 +266,7 @@ const dbRules = reactive<FormRules<SetInfo>>({
       trigger: 'blur'
     }
   ]
-})
+}))
 
 const adminRules = computed<FormRules>(() => ({
   adminUser: adminExists.value ? [] : [{ required: true, message: () => t('setup.adminUsernameRequired'), trigger: 'blur' }],

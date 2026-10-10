@@ -20,6 +20,7 @@ export default {
     success: '成功',
     failed: '失败',
     copied: '已复制到剪贴板',
+    copyFailed: '复制失败，请手动复制',
     enable: '启用',
     disable: '禁用',
     status: '状态',
@@ -40,7 +41,8 @@ export default {
     loginFailed: '登录失败',
     pleaseEnterUsername: '请输入用户名',
     pleaseEnterPassword: '请输入密码',
-    noPermission: '没有访问权限'
+    noPermission: '没有访问权限',
+    sessionExpired: '登录已过期，请重新登录'
   },
 
   // Setup

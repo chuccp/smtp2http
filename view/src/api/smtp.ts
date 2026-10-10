@@ -1,7 +1,7 @@
 import request from './request'
 
 export function getSMTPServers(page: number = 1, pageSize: number = 10, filters?: { adminOnly?: boolean; name?: string; host?: string; username?: string }): Promise<ApiResponse<PageResponse<SMTPConfig>>> {
-  const params: Record<string, any> = { page, pageSize }
+  const params: Record<string, any> = { pageNo: page, pageSize }
   if (filters) {
     if (filters.adminOnly) params.adminOnly = true
     if (filters.name) params.name = filters.name

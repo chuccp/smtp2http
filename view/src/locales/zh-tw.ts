@@ -20,6 +20,7 @@ export default {
     success: '成功',
     failed: '失敗',
     copied: '已複製到剪貼簿',
+    copyFailed: '複製失敗，請手動複製',
     enable: '啟用',
     disable: '停用',
     status: '狀態',
@@ -40,7 +41,8 @@ export default {
     loginFailed: '登入失敗',
     pleaseEnterUsername: '請輸入使用者名稱',
     pleaseEnterPassword: '請輸入密碼',
-    noPermission: '沒有存取權限'
+    noPermission: '沒有存取權限',
+    sessionExpired: '登入已過期，請重新登入'
   },
 
   // Setup

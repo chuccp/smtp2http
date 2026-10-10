@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/mail"
 	"strconv"
+	"time"
 
 	wf "github.com/chuccp/go-web-frame"
 	auth2 "github.com/chuccp/go-web-frame/component/auth"
@@ -160,9 +161,10 @@ func (m *Mail) putOne(req *web.Request) (any, error) {
 		return nil, errors.New("mail not found")
 	}
 	// Keep the original owner: an admin editing someone else's row must not take it over
-	st.UserId = exist.UserId
-
-	err = m.mailModel.UpdateByPK(&st)
+	exist.Name = st.Name
+	exist.Mail = st.Mail
+	exist.UpdateTime = time.Now()
+	err = m.mailModel.Save(exist)
 	if err != nil {
 		return nil, err
 	}

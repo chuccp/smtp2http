@@ -52,6 +52,12 @@ func (l *ScheduleService) GetPage(page *web.Page, userId uint, isAdmin bool, nam
 	if err != nil {
 		return nil, err
 	}
+	// The row is what the edit dialog loads, so it must carry the header list the same way
+	// the detail endpoint does — otherwise the dialog shows no headers and saving would
+	// drop the stored ones.
+	for _, item := range result.List {
+		expandHeaders(item)
+	}
 	if isAdmin {
 		userIds := make([]uint, 0)
 		for _, item := range result.List {
@@ -71,12 +77,8 @@ func (l *ScheduleService) GetPage(page *web.Page, userId uint, isAdmin bool, nam
 	return result, nil
 }
 func (l *ScheduleService) Edit(sd *model.Schedule) error {
-	if sd.Headers != nil && len(sd.Headers) > 0 {
-		jsonData, err := json.Marshal(sd.Headers)
-		if err != nil {
-			return err
-		}
-		sd.HeaderStr = string(jsonData)
+	if err := applyHeaders(sd); err != nil {
+		return err
 	}
 
 	v, err := l.tokenModel.FindByPK(sd.TokenId)
@@ -86,9 +88,15 @@ func (l *ScheduleService) Edit(sd *model.Schedule) error {
 	if v == nil {
 		return errors.New("token not found")
 	}
-	return l.scheduleModel.UpdateByPK(sd)
+	// Save, not UpdateByPK: the update path skips zero values, so turning a switch off
+	// (is_use, use_template, is_only_send_by_error) or clearing the body would be
+	// silently ignored while the request still reported success.
+	return l.scheduleModel.Save(sd)
 }
 func (l *ScheduleService) Save(sd *model.Schedule) error {
+	if err := applyHeaders(sd); err != nil {
+		return err
+	}
 	v, err := l.tokenModel.FindByPK(sd.TokenId)
 	if err != nil {
 		return err
@@ -100,23 +108,61 @@ func (l *ScheduleService) Save(sd *model.Schedule) error {
 
 }
 
+// expandHeaders decodes the stored header JSON into the transient Headers field, which is
+// what clients read and write. A malformed column yields an empty list rather than an error.
+func expandHeaders(one *model.Schedule) {
+	if util.IsNotBlank(one.HeaderStr) {
+		if err := json.Unmarshal([]byte(one.HeaderStr), &one.Headers); err != nil {
+			one.Headers = []*model.Header{}
+		}
+		return
+	}
+	one.Headers = []*model.Header{}
+}
+
+// applyHeaders mirrors the header list into the column that is actually stored; the two
+// are separate fields, and only HeaderStr survives a round trip through the database.
+// A nil list means the caller did not send one and the stored value is left alone.
+func applyHeaders(sd *model.Schedule) error {
+	if sd.Headers == nil {
+		return nil
+	}
+	if len(sd.Headers) == 0 {
+		sd.HeaderStr = ""
+		return nil
+	}
+	jsonData, err := json.Marshal(sd.Headers)
+	if err != nil {
+		return err
+	}
+	sd.HeaderStr = string(jsonData)
+	return nil
+}
+
 func (l *ScheduleService) GetOne(id int, userId uint) (*model.Schedule, error) {
 	one, err := l.scheduleModel.Query().Where("id = ? AND user_id = ?", uint(id), userId).One()
 	if err != nil {
 		return nil, err
 	}
+	return l.prepare(one)
+}
+
+// GetOneAny loads a schedule without the owner filter, for admin views: the list already
+// shows admins every user's schedules, so the row-level read must not refuse them.
+func (l *ScheduleService) GetOneAny(id int) (*model.Schedule, error) {
+	one, err := l.scheduleModel.Query().Where("id = ?", uint(id)).One()
+	if err != nil {
+		return nil, err
+	}
+	return l.prepare(one)
+}
+
+// prepare expands the stored header JSON and checks that the referenced token still exists.
+func (l *ScheduleService) prepare(one *model.Schedule) (*model.Schedule, error) {
 	if one == nil {
 		return nil, errors.New("schedule not found")
 	}
-	headerStr := one.HeaderStr
-	if util.IsNotBlank(headerStr) {
-		err := json.Unmarshal([]byte(headerStr), &one.Headers)
-		if err != nil {
-			one.Headers = []*model.Header{}
-		}
-	} else {
-		one.Headers = []*model.Header{}
-	}
+	expandHeaders(one)
 
 	byToken, err := l.tokenModel.FindByPK(one.TokenId)
 	if err != nil {

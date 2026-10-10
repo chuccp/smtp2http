@@ -3,6 +3,7 @@ package rest
 import (
 	"io"
 	"strconv"
+	"time"
 
 	"emperror.dev/errors"
 	wf "github.com/chuccp/go-web-frame"
@@ -33,6 +34,10 @@ func (schedule *Schedule) getOne(req *web.Request) (any, error) {
 	user, err := auth.User(req, schedule.context)
 	if user == nil {
 		return nil, err
+	}
+	// The list shows admins every user's schedules, so the detail read must not refuse them
+	if user.IsAdmin {
+		return schedule.scheduleService.GetOneAny(atoi)
 	}
 	return schedule.scheduleService.GetOne(atoi, user.Id)
 }
@@ -115,15 +120,29 @@ func (schedule *Schedule) putOne(req *web.Request) (any, error) {
 		return nil, errors.New("schedule not found")
 	}
 	// Keep the original owner: an admin editing someone else's row must not take it over
-	st.UserId = exist.UserId
-	err = schedule.validate(&st)
+	exist.Name = st.Name
+	exist.TokenId = st.TokenId
+	exist.Cron = st.Cron
+	exist.Url = st.Url
+	exist.Method = st.Method
+	exist.Body = st.Body
+	exist.UseTemplate = st.UseTemplate
+	exist.Template = st.Template
+	exist.IsUse = st.IsUse
+	exist.IsOnlySendByError = st.IsOnlySendByError
+	// Headers omitted (nil) means "leave the stored list alone"; an empty array clears it
+	if st.Headers != nil {
+		exist.Headers = st.Headers
+	}
+	exist.UpdateTime = time.Now()
+	err = schedule.validate(exist)
 	if err != nil {
 		return nil, err
 	}
-	if err = schedule.ensureTokenOwnedBy(st.TokenId, st.UserId); err != nil {
+	if err = schedule.ensureTokenOwnedBy(exist.TokenId, exist.UserId); err != nil {
 		return nil, err
 	}
-	err = schedule.scheduleService.Edit(&st)
+	err = schedule.scheduleService.Edit(exist)
 	if err != nil {
 		return nil, err
 	}
@@ -206,7 +225,12 @@ func (schedule *Schedule) triggerById(req *web.Request) (any, error) {
 	if user == nil {
 		return nil, err
 	}
-	st, err := schedule.scheduleService.GetOne(atoi, user.Id)
+	var st *model.Schedule
+	if user.IsAdmin {
+		st, err = schedule.scheduleService.GetOneAny(atoi)
+	} else {
+		st, err = schedule.scheduleService.GetOne(atoi, user.Id)
+	}
 	if err != nil {
 		return nil, err
 	}

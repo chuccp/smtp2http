@@ -33,9 +33,19 @@ func (s *UserService) Init(context *core.Context) error {
 	return nil
 }
 
+// dbReady reports whether the database has been attached. Sign-in and the setup probes
+// are reachable before the wizard has run, where a query would dereference the model's
+// nil connection instead of answering.
+func (s *UserService) dbReady() bool {
+	return model.CoreState(s.context.GetConfig()).DbInit
+}
+
 // ValidateLogin verifies username and password against the database.
 // Returns the user record if successful, or an error if authentication fails.
 func (s *UserService) ValidateLogin(username, password string) (*model.User, error) {
+	if !s.dbReady() {
+		return nil, errors.New("database is not initialized, please complete setup first")
+	}
 	user, err := s.userModel.FindOneByName(username)
 	if err != nil {
 		return nil, err
@@ -130,11 +140,17 @@ func (s *UserService) UpdateUser(id uint, name string, password string, isAdmin,
 	user.IsUse = isUse
 	user.UpdateTime = time.Now()
 
-	return s.userModel.UpdateByPK(user)
+	// Save, not UpdateByPK: the update path goes through gorm's Updates(struct), which
+	// drops zero values — a false IsAdmin/IsUse would be silently ignored and the
+	// demote/disable would look like it succeeded. Save writes every column.
+	return s.userModel.Save(user)
 }
 
 // HasAdminUser checks if any admin user exists in the database.
 func (s *UserService) HasAdminUser() (bool, error) {
+	if !s.dbReady() {
+		return false, errors.New("database is not initialized")
+	}
 	count, err := s.userModel.Query().Where("is_admin = ?", true).Count()
 	if err != nil {
 		return false, err
@@ -221,7 +237,9 @@ func (s *UserService) DeleteUser(id uint) error {
 	// account must also end the sessions it already had open.
 	user.Salt = newSessionSalt()
 	user.UpdateTime = time.Now()
-	return s.userModel.UpdateByPK(user)
+	// Save for the same reason as UpdateUser: a struct update would skip the false
+	// IsUse and leave the account able to sign in.
+	return s.userModel.Save(user)
 }
 
 // FillUserNames fills the UserName field for a list of records that have UserId.

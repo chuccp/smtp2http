@@ -22,12 +22,29 @@ type Set struct {
 	context *core.Context
 }
 
-// putSet is the original one-step init (now blocked if already init).
+// putSet is the original one-step init (now blocked if already init). It runs before any
+// account exists, so it cannot ask for a session.
 func (set *Set) putSet(req *web.Request) (any, error) {
 	if model.CoreState(set.context.GetConfig()).Init {
 		return nil, web.NewErrorCode(web.CodeMethodNotAllowed, "has init")
 	}
-	return set.putReSet(req)
+	return set.applyReSet(req)
+}
+
+// writeWebPathIfSent stores manage.webPath only when the request body actually carried
+// one. The caller binds the body onto model.DefaultConfig(), so an omitted field arrives
+// as the default "web" — writing that back would reset a custom webPath from config.ini
+// every time the wizard or the settings page saves.
+func (set *Set) writeWebPathIfSent(req *web.Request) {
+	body, err := req.Json()
+	if err != nil {
+		return
+	}
+	v := body.LookupByPath("manage.webPath")
+	if v == nil || v.IsNull() || v.String() == "" {
+		return
+	}
+	set.context.GetConfig().Put("manage.webpath", v.String())
 }
 
 // putDbInit handles Step 1 of setup: save database config and test connection.
@@ -73,14 +90,10 @@ func (set *Set) putDbInit(req *web.Request) (any, error) {
 	}
 
 	// Save manage port config
-	if setInfo.Manage != nil {
-		if setInfo.Manage.Port > 0 {
-			set.context.GetConfig().Put("manage.port", setInfo.Manage.Port)
-		}
-		if setInfo.Manage.WebPath != "" {
-			set.context.GetConfig().Put("manage.webPath", setInfo.Manage.WebPath)
-		}
+	if setInfo.Manage != nil && setInfo.Manage.Port > 0 {
+		set.context.GetConfig().Put("manage.port", setInfo.Manage.Port)
 	}
+	set.writeWebPathIfSent(req)
 
 	// Save API port
 	if setInfo.Api != nil && setInfo.Api.Port > 0 {
@@ -320,8 +333,23 @@ func (set *Set) Init(context *core.Context) error {
 	return nil
 }
 
-// putReSet handles re-configuration of the system (requires login).
+// putReSet reconfigures a running instance: database, web path and ports. It swaps the
+// database connection under the running models and rewrites config.ini, so it is admin
+// only — the settings page is the only caller and the UI already hides it.
 func (set *Set) putReSet(req *web.Request) (any, error) {
+	user, err := auth.User(req, set.context)
+	if user == nil {
+		return nil, err
+	}
+	if !user.IsAdmin {
+		return nil, errors.New("admin access required")
+	}
+	return set.applyReSet(req)
+}
+
+// applyReSet is the shared body of putSet (the legacy one-step init, before any account
+// exists) and putReSet (the authenticated reconfiguration).
+func (set *Set) applyReSet(req *web.Request) (any, error) {
 	setInfo := model.DefaultConfig()
 	setInfo.Core.Init = true
 	err := req.BindJSON(&setInfo)
@@ -362,14 +390,10 @@ func (set *Set) putReSet(req *web.Request) (any, error) {
 	}
 
 	// Update manage configuration
-	if setInfo.Manage != nil {
-		if setInfo.Manage.Port > 0 {
-			set.context.GetConfig().Put("manage.port", setInfo.Manage.Port)
-		}
-		if setInfo.Manage.WebPath != "" {
-			set.context.GetConfig().Put("manage.webpath", setInfo.Manage.WebPath)
-		}
+	if setInfo.Manage != nil && setInfo.Manage.Port > 0 {
+		set.context.GetConfig().Put("manage.port", setInfo.Manage.Port)
 	}
+	set.writeWebPathIfSent(req)
 
 	// Update API port
 	if setInfo.Api != nil && setInfo.Api.Port > 0 {

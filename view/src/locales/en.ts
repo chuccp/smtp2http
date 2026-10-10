@@ -20,6 +20,7 @@ export default {
     success: 'Success',
     failed: 'Failed',
     copied: 'Copied to clipboard',
+    copyFailed: 'Copy failed, please copy it manually',
     enable: 'Enable',
     disable: 'Disable',
     status: 'Status',
@@ -40,7 +41,8 @@ export default {
     loginFailed: 'Login failed',
     pleaseEnterUsername: 'Please enter username',
     pleaseEnterPassword: 'Please enter password',
-    noPermission: 'You do not have permission to access this page'
+    noPermission: 'You do not have permission to access this page',
+    sessionExpired: 'Your session has expired, please sign in again'
   },
 
   // Setup

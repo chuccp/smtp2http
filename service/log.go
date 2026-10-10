@@ -17,8 +17,11 @@ type LogService struct {
 	logModel *model.LogModel
 }
 
-func (l *LogService) log(st *model.SMTP, mails []*model.Mail, tokenName string, token string, subject, bodyString string, files []*smtp.File, err error) error {
+func (l *LogService) log(userId uint, st *model.SMTP, mails []*model.Mail, tokenName string, token string, subject, bodyString string, files []*smtp.File, err error) error {
 	var lg model.Log
+	// The log list and the attachment download are both filtered by user_id, so the
+	// owner must be recorded here — nothing fills it in later.
+	lg.UserId = userId
 	lg.Token = token
 	lg.Name = tokenName
 	// st may be nil when the referenced SMTP server was deleted
@@ -62,8 +65,11 @@ func (l *LogService) log(st *model.SMTP, mails []*model.Mail, tokenName string, 
 
 	return l.logModel.Save(&lg)
 }
-func (l *LogService) Log(smtp *model.SMTP, mails []*model.Mail, files []*smtp.File, tokenName string, token string, subject, bodyString string, err error) error {
-	return l.log(smtp, mails, tokenName, token, subject, bodyString, files, err)
+
+// Log records one send attempt. userId is the owner the entry belongs to: the token
+// owner for a token send, the schedule owner for a scheduled call.
+func (l *LogService) Log(userId uint, smtp *model.SMTP, mails []*model.Mail, files []*smtp.File, tokenName string, token string, subject, bodyString string, err error) error {
+	return l.log(userId, smtp, mails, tokenName, token, subject, bodyString, files, err)
 }
 
 func (l *LogService) Name() string {

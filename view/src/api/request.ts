@@ -13,6 +13,7 @@ declare module 'axios' {
   }
 }
 import { ElMessage } from 'element-plus'
+import i18n from '@/locales'
 
 // The session is an HttpOnly cookie, so requests must carry credentials and stay
 // same-origin (in dev the Vite proxy forwards /api to the backend).
@@ -30,7 +31,7 @@ const handleUnauthorized = () => {
   localStorage.removeItem('http2smtp-username')
   localStorage.removeItem('http2smtp-isAdmin')
   localStorage.removeItem('http2smtp-logged-in')
-  ElMessage.error('登录已过期，请重新登录')
+  ElMessage.error(i18n.global.t('auth.sessionExpired'))
   window.location.href = '/login'
 }
 
@@ -69,10 +70,12 @@ request.interceptors.response.use(
       // 尝试获取后端返回的错误消息
       const errorMsg = data?.msg || data?.message || `请求失败(${status})`
 
-      if (status === 401) {
+      // The auth filter answers an expired or missing session with 403 "Not logged in"
+      // (the framework's NoLogin), never 401 — handling only 401 left the app on the
+      // protected page showing the raw English message. Handler-level failures such as
+      // "admin access required" come back as 500, so 403 here always means no session.
+      if (status === 401 || status === 403) {
         handleUnauthorized()
-      } else if (status >= 500) {
-        ElMessage.error(errorMsg)
       } else {
         ElMessage.error(errorMsg)
       }

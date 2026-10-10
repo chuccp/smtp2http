@@ -38,6 +38,20 @@ func (l *TokenService) GetOne(id uint, userId uint) (*model.Token, error) {
 	}
 	return token, nil
 }
+
+// GetOneAny loads a token without the owner filter, for admin views. The list endpoint
+// already shows admins every user's tokens, so this exposes nothing extra.
+func (l *TokenService) GetOneAny(id uint) (*model.Token, error) {
+	tokenModel := core.GetModel[*model.TokenModel](l.context)
+	token, err := tokenModel.Query().Where("id = ?", id).One()
+	if err != nil {
+		return nil, err
+	}
+	if token != nil {
+		l.supplementToken(token)
+	}
+	return token, nil
+}
 func (l *TokenService) GetPage(page *web.Page, userId uint, isAdmin bool, name string, adminOnly bool) (any, error) {
 	var tokens []*model.Token
 	var i int
@@ -91,6 +105,9 @@ func (l *TokenService) SendApiCallMail(schedule *model.Schedule) error {
 	if byToken == nil {
 		return errors.New("token not found")
 	}
+	if !l.ownerEnabled(byToken) {
+		return errors.New("token owner is disabled")
+	}
 	if byToken.IsUse() {
 		l.supplementToken(byToken)
 		var body string
@@ -103,7 +120,9 @@ func (l *TokenService) SendApiCallMail(schedule *model.Schedule) error {
 		if err0 != nil {
 			log.Error("SendAPIMail log error", zap.Error(err0))
 		}
-		err2 := l.logService.Log(byToken.SMTP, byToken.ReceiveEmails, nil, byToken.Name, byToken.Token, schedule.Name, body, err0)
+		// The scheduled call belongs to whoever owns the schedule, so that owner is who
+		// sees it in their log list.
+		err2 := l.logService.Log(schedule.UserId, byToken.SMTP, byToken.ReceiveEmails, nil, byToken.Name, byToken.Token, schedule.Name, body, err0)
 		if err2 != nil {
 			log.Error("SendAPIMail log error", zap.Error(err2))
 		}
@@ -113,6 +132,9 @@ func (l *TokenService) SendApiCallMail(schedule *model.Schedule) error {
 }
 
 func (l *TokenService) sendMailWithToken(byToken *model.Token, recipients []string, subject string, content string, files []*smtp.File) (any, error) {
+	if !l.ownerEnabled(byToken) {
+		return nil, errors.New("token owner is disabled")
+	}
 	l.supplementToken(byToken)
 	if byToken.SMTP == nil {
 		return nil, errors.New("SMTP not found")
@@ -125,7 +147,7 @@ func (l *TokenService) sendMailWithToken(byToken *model.Token, recipients []stri
 		subject = byToken.Subject
 	}
 	err2 := smtp.SendAllMsg2(byToken.SMTP, byToken.ReceiveEmails, files, subject, content)
-	err := l.logService.Log(byToken.SMTP, byToken.ReceiveEmails, files, byToken.Name, byToken.Token, subject, content, err2)
+	err := l.logService.Log(byToken.UserId, byToken.SMTP, byToken.ReceiveEmails, files, byToken.Name, byToken.Token, subject, content, err2)
 	if err != nil {
 		log.Error("sendMailWithToken log error", zap.Error(err))
 	}
@@ -213,20 +235,45 @@ func (l *TokenService) SendMailByToken(req *web.Request, user *model.User) (any,
 	return l.sendMailWithToken(byToken, sendMailApi.Recipients, sendMailApi.Subject, sendMailApi.Content, files)
 }
 
-func (l *TokenService) SendMailByTokenId(userId uint, req *entity.SendMailByTokenId) (any, error) {
+// SendMailByTokenId sends through one of the caller's own tokens. An admin may use any
+// token: the token list already shows admins every user's tokens together with the SMTP
+// credentials behind them, so refusing the send would restrict nothing they cannot do by
+// copying that SMTP configuration into a record of their own.
+func (l *TokenService) SendMailByTokenId(user *model.User, req *entity.SendMailByTokenId) (any, error) {
 	l.lock.Lock()
 	defer l.lock.Unlock()
 	byToken, err := l.tokenModel.FindByPK(req.TokenId)
 	if err != nil {
 		return nil, err
 	}
-	if byToken == nil || byToken.UserId != userId {
+	if byToken == nil || (byToken.UserId != user.Id && !user.IsAdmin) {
 		return nil, errors.New("token not found")
 	}
 	if !byToken.IsUse() {
 		return nil, errors.New("token is not use")
 	}
 	return l.sendMailWithToken(byToken, req.Recipients, req.Subject, req.Content, nil)
+}
+
+// ownerEnabled reports whether the account a token belongs to may still send. A token is
+// a credential of its own — the public API carries no session — so it outlives the account
+// it was minted for: without this check, disabling or deleting a user would leave every
+// token they hold sending mail. A lookup failure fails closed.
+//
+// user_id = 0 means the row predates token ownership (it was assigned by hand and is
+// invisible to every list, which filters on user_id); there is no account to consult, so
+// it is left alone rather than silently broken.
+func (l *TokenService) ownerEnabled(byToken *model.Token) bool {
+	if byToken.UserId == 0 {
+		return true
+	}
+	userModel := core.GetModel[*model.UserModel](l.context)
+	owner, err := userModel.FindByPK(byToken.UserId)
+	if err != nil {
+		log.Error("token owner lookup failed", zap.Uint("userId", byToken.UserId), zap.Error(err))
+		return false
+	}
+	return owner != nil && owner.IsUse
 }
 
 func (l *TokenService) supplementToken(st ...*model.Token) {

@@ -1,7 +1,7 @@
 import request from './request'
 
 export function getTokens(page: number = 1, pageSize: number = 10, filters?: { name?: string; adminOnly?: boolean }): Promise<ApiResponse<PageResponse<TokenConfig>>> {
-  const params: Record<string, any> = { page, pageSize }
+  const params: Record<string, any> = { pageNo: page, pageSize }
   if (filters) {
     if (filters.name) params.name = filters.name
     if (filters.adminOnly) params.adminOnly = true

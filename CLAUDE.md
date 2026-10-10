@@ -139,8 +139,23 @@ user disable**. That means signing out ends every session for that user, on ever
 uses but external callers can.
 
 Ownership: non-admin users only see their own rows, filtered by `user_id`. Admin-only
-endpoints re-check `IsAdmin` in the handler. `PUT` handlers verify ownership and preserve
-the original owner, so an admin editing someone else's row does not take it over.
+endpoints re-check `IsAdmin` in the handler — `/reSet` included, since it rewrites the
+database and port configuration and hot-swaps the live connection under the running
+models. `PUT` handlers verify ownership and preserve the original owner, so an admin
+editing someone else's row does not take it over. Row-level reads (`GET /smtp/:id`,
+`/mail/:id`, …) answer `data: null` for a row the caller does not own rather than
+reporting a permission error, so existence does not leak; the list endpoints are what
+admins use to reach other users' rows, and those exclude nothing by default
+(`adminOnly=true` narrows them to admin-owned rows).
+
+Two references are checked as well, because resolving them by id alone would hand out
+another account's credentials: a token may only point at the owner's own SMTP server and
+its own contacts. And a token stops sending once its owner is disabled — the public API
+has no session, so `TokenService` re-reads the owner (`t_user.is_use`) on every send.
+
+Mail logs are per-owner: `LogService.Log` records the `user_id` it is given (the token
+owner for a token send, the schedule owner for a scheduled call), because the log list
+and the attachment download both filter on it.
 
 ### Restart
 
